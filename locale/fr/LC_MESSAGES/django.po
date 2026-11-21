@@ -1300,3 +1300,129 @@ msgstr[1] "%(n)d réservations n'ont pas de tarif pour leur client et ont été 
 #, python-format
 msgid "Reference: %(ref)s"
 msgstr "Référence : %(ref)s"
+
+msgid "Line added."
+msgstr "Ligne ajoutée."
+
+msgid "Line removed."
+msgstr "Ligne supprimée."
+
+msgid "Order updated."
+msgstr "Commande mise à jour."
+
+msgid "This order is closed."
+msgstr "Cette commande est close."
+
+msgid "This service is not available on this platform."
+msgstr "Cette prestation n'est pas disponible sur cette plateforme."
+
+msgid "The quantity must be positive."
+msgstr "La quantité doit être positive."
+
+msgid "This line is already invoiced."
+msgstr "Cette ligne est déjà facturée."
+
+msgid "Unknown status."
+msgstr "Statut inconnu."
+
+msgid "An order with invoiced lines cannot be cancelled."
+msgstr "Une commande dont des lignes sont facturées ne peut pas être annulée."
+
+msgid "sample, hour, slide..."
+msgstr "échantillon, heure, lame…"
+
+msgid "service"
+msgstr "prestation"
+
+msgid "services"
+msgstr "prestations"
+
+msgid "Open"
+msgstr "En cours"
+
+msgid "Completed"
+msgstr "Terminée"
+
+msgid "requested by"
+msgstr "demandée par"
+
+msgid "status"
+msgstr "statut"
+
+msgid "order"
+msgstr "commande"
+
+msgid "orders"
+msgstr "commandes"
+
+msgid "performed on"
+msgstr "réalisée le"
+
+msgid "Service"
+msgstr "Prestation"
+
+msgid "Performed on"
+msgstr "Réalisée le"
+
+msgid "Comment"
+msgstr "Commentaire"
+
+msgid "Services"
+msgstr "Prestations"
+
+msgid "Services & orders"
+msgstr "Prestations et commandes"
+
+msgid "Orders"
+msgstr "Commandes"
+
+msgid "New service"
+msgstr "Nouvelle prestation"
+
+msgid "Edit service"
+msgstr "Modifier la prestation"
+
+msgid "No service yet."
+msgstr "Aucune prestation pour le moment."
+
+msgid "What the platform sells besides equipment time. Prices per grid are set on the Prices page."
+msgstr "Ce que la plateforme vend en plus du temps machine. Les prix par grille se règlent sur la page Tarifs."
+
+msgid "Service catalogue"
+msgstr "Catalogue des prestations"
+
+msgid "New order"
+msgstr "Nouvelle commande"
+
+msgid "Lines"
+msgstr "Lignes"
+
+msgid "Created"
+msgstr "Créée le"
+
+msgid "Order status"
+msgstr "Statut des commandes"
+
+msgid "No order"
+msgstr "Aucune commande"
+
+msgid "no price"
+msgstr "sans tarif"
+
+msgid "No line yet."
+msgstr "Aucune ligne pour le moment."
+
+msgid "Record a service"
+msgstr "Saisir une prestation"
+
+msgid "Open and completed orders are billed with the platform's invoicing run."
+msgstr "Les commandes en cours et terminées sont facturées lors de la facturation de la période."
+
+msgid "Service prices"
+msgstr "Prix des prestations"
+
+#, python-format
+msgid "%(n)d booking or service has no price for its client and was left out."
+msgid_plural "%(n)d bookings or services have no price for their client and were left out."
+msgstr[0] "%(n)d réservation ou prestation n'a pas de tarif pour son client et a été écartée."
+msgstr[1] "%(n)d réservations ou prestations n'ont pas de tarif pour leur client et ont été écartées."

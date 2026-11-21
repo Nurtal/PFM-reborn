@@ -81,6 +81,33 @@
           </table>
         </div>
       {% endif %}
+      {% if service_rows %}
+        <div class="card overflow-x-auto p-0">
+          <table class="w-full text-left text-sm">
+            <caption class="sr-only">{% translate "Service prices" %}</caption>
+            <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+              <tr>
+                <th scope="col" class="px-4 py-3">{% translate "Service" %}</th>
+                {% for g in grids %}<th scope="col" class="px-4 py-3">{{ g.name }}</th>{% endfor %}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              {% for item, cells in service_rows %}
+                <tr>
+                  <th scope="row" class="px-4 py-3 font-medium">{{ item.name }} <span class="font-normal text-zinc-500">/ {{ item.unit }}</span></th>
+                  {% for grid, price in cells %}
+                    <td class="px-4 py-2">
+                      {% localize off %}
+                        <input name="service-{{ item.pk }}-{{ grid.pk }}" value="{{ price.price|default_if_none:'' }}" inputmode="decimal" class="w-28" aria-label="{{ item.name }}, {{ grid.name }}">
+                      {% endlocalize %}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
       <button type="submit" class="btn-primary">{% translate "Save prices" %}</button>
     </form>
   {% endif %}

@@ -117,6 +117,15 @@ class PriceMatrixView(SpaceViewMixin, TemplateView):
         package_prices = {
             (p.package_id, p.grid_id): p for p in PackagePrice.objects.for_space(self.space)
         }
+        from apps.services.models import ServiceItem, ServicePrice
+
+        items = list(ServiceItem.objects.for_space(self.space).filter(is_active=True))
+        service_prices = {
+            (p.item_id, p.grid_id): p for p in ServicePrice.objects.for_space(self.space)
+        }
+        ctx["service_rows"] = [
+            (item, [(g, service_prices.get((item.pk, g.pk))) for g in grids]) for item in items
+        ]
         ctx.update(
             grids=grids,
             rows=[(r, [(g, prices.get((r.pk, g.pk))) for g in grids]) for r in resources],
@@ -146,6 +155,9 @@ class PriceMatrixView(SpaceViewMixin, TemplateView):
         grids = {g.pk: g for g in PricingGrid.objects.for_space(self.space)}
         resources = {r.pk: r for r in Resource.objects.for_space(self.space)}
         packages = {p.pk: p for p in Package.objects.for_space(self.space)}
+        from apps.services.models import ServiceItem
+
+        items = {i.pk: i for i in ServiceItem.objects.for_space(self.space)}
         errors: list[str] = []
         for key, raw in data.items():
             parts = key.split("-")
@@ -153,6 +165,9 @@ class PriceMatrixView(SpaceViewMixin, TemplateView):
                 if parts[0] == "rate" and len(parts) == 4 and parts[3] in RATE_FIELDS:
                     resource, grid = resources[int(parts[1])], grids[int(parts[2])]
                     self._save_rate(resource, grid, parts[3], _decimal(raw))
+                elif parts[0] == "service" and len(parts) == 3:
+                    item, grid = items[int(parts[1])], grids[int(parts[2])]
+                    self._save_service(item, grid, _decimal(raw))
                 elif parts[0] == "package" and len(parts) == 3:
                     package, grid = packages[int(parts[1])], grids[int(parts[2])]
                     self._save_package(package, grid, _decimal(raw))
@@ -176,6 +191,16 @@ class PriceMatrixView(SpaceViewMixin, TemplateView):
             price = ResourcePrice(space=self.space, resource=resource, grid=grid)
         setattr(price, f"{field}_rate", value)
         price.save()
+
+    def _save_service(self, item: Any, grid: PricingGrid, value: Decimal | None) -> None:
+        from apps.services.models import ServicePrice
+
+        if value is None:
+            ServicePrice.objects.filter(item=item, grid=grid).delete()
+        else:
+            ServicePrice.objects.update_or_create(
+                item=item, grid=grid, defaults={"price": value, "space": self.space}
+            )
 
     def _save_package(self, package: Package, grid: PricingGrid, value: Decimal | None) -> None:
         if value is None:

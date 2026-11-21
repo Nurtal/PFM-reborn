@@ -1,0 +1,78 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{{ order.title }}{% endblock title %}
+{% block content %}
+  <c-page-header :title="order.title" subtitle="{{ order.client }}{% if order.requester %} · {{ order.requester }}{% endif %} · {{ order.get_status_display }}">
+    <a href="{% url 'services:orders' current_space.slug %}" class="btn-ghost">{% translate "Back" %}</a>
+  </c-page-header>
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="space-y-6 lg:col-span-2">
+      <div class="card overflow-x-auto p-0">
+        <table class="w-full text-left text-sm">
+          <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+            <tr>
+              <th scope="col" class="px-4 py-3">{% translate "Date" %}</th>
+              <th scope="col" class="px-4 py-3">{% translate "Service" %}</th>
+              <th scope="col" class="px-4 py-3 text-right">{% translate "Qty" %}</th>
+              <th scope="col" class="px-4 py-3 text-right">{% translate "Amount" %}</th>
+              <th scope="col" class="px-2 py-3"><span class="sr-only">{% translate "Actions" %}</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {% for line, amount in lines %}
+              <tr>
+                <td class="px-4 py-2 whitespace-nowrap">{{ line.performed_on|date:"SHORT_DATE_FORMAT" }}</td>
+                <td class="px-4 py-2">{{ line.item }}{% if line.comment %}<div class="text-zinc-500">{{ line.comment }}</div>{% endif %}</td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">{{ line.quantity|floatformat:"-2" }} {{ line.item.unit }}</td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">{% if amount is None %}<span class="text-amber-700 dark:text-amber-400">{% translate "no price" %}</span>{% else %}{{ amount }}{% endif %}</td>
+                <td class="px-2 py-2 text-right">
+                  {% if order.status == "open" %}
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove_line">
+                      <button type="submit" name="line" value="{{ line.pk }}" class="btn-ghost px-2 text-red-600" aria-label="{% translate 'Remove' %}"><c-icon name="trash" class="size-4" /></button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="px-4 py-8 text-center text-zinc-500">{% translate "No line yet." %}</td></tr>
+            {% endfor %}
+          </tbody>
+          {% if lines %}
+            <tfoot class="border-t border-zinc-200 font-semibold dark:border-zinc-800">
+              <tr><td colspan="3" class="px-4 py-3 text-right">{% translate "Total excl. tax" %}</td><td class="px-4 py-3 text-right">{{ total }} {{ current_space.currency }}</td><td></td></tr>
+            </tfoot>
+          {% endif %}
+        </table>
+      </div>
+      {% if order.status == "open" %}
+        <form method="post" class="card space-y-4" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_line">
+          <h2 class="font-semibold">{% translate "Record a service" %}</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <c-field :field="line_form.item" />
+            <c-field :field="line_form.quantity" />
+            <c-field :field="line_form.performed_on" />
+            <c-field :field="line_form.comment" />
+          </div>
+          <button type="submit" class="btn-primary">{% translate "Add" %}</button>
+        </form>
+      {% endif %}
+    </div>
+    <aside class="space-y-6">
+      {% if order.note %}<div class="card text-sm">{{ order.note|linebreaksbr }}</div>{% endif %}
+      <form method="post" class="card space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="status">
+        <label for="order-status">{% translate "Status" %}</label>
+        <select id="order-status" name="status">
+          {% for value, label in statuses %}<option value="{{ value }}" {% if value == order.status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="btn-secondary w-full">{% translate "Save" %}</button>
+        <p class="text-xs text-zinc-500">{% translate "Open and completed orders are billed with the platform's invoicing run." %}</p>
+      </form>
+    </aside>
+  </div>
+{% endblock content %}

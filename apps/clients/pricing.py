@@ -174,3 +174,8 @@ def quote(
             return Quote(tuple(lines))
     lines += _hourly_lines(start, end, grid, rates)
     return Quote(tuple(lines))
+
+
+def service_amount(unit_price: Decimal, quantity: Decimal) -> Decimal:
+    """Price of ``quantity`` units of a service, rounded half up to the cent."""
+    return _money(unit_price * quantity)
