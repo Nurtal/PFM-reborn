@@ -790,3 +790,203 @@ msgstr "Créneaux bloqués : maintenance, congés, formations."
 
 msgid "Remove"
 msgstr "Retirer"
+
+msgid "Choose the client account to bill."
+msgstr "Choisissez le compte client à facturer."
+
+msgid "You cannot bill this client account."
+msgstr "Vous ne pouvez pas facturer ce compte client."
+
+msgid "This package does not apply to this resource."
+msgstr "Ce forfait ne s'applique pas à cette ressource."
+
+msgid "client"
+msgstr "client"
+
+msgid "package"
+msgstr "forfait"
+
+msgid "Client account"
+msgstr "Compte client"
+
+msgid "Package"
+msgstr "Forfait"
+
+msgid "Hourly rate"
+msgstr "Tarif horaire"
+
+#, python-format
+msgid "Invalid amounts: %(values)s"
+msgstr "Montants invalides : %(values)s"
+
+msgid "Prices saved."
+msgstr "Tarifs enregistrés."
+
+msgid "night rate"
+msgstr "tarif de nuit"
+
+msgid "night starts at"
+msgstr "début de la nuit"
+
+msgid "night ends at"
+msgstr "fin de la nuit"
+
+msgid "weekend rate"
+msgstr "tarif week-end"
+
+msgid "weekend days"
+msgstr "jours de week-end"
+
+msgid "pricing grid"
+msgstr "grille tarifaire"
+
+msgid "pricing grids"
+msgstr "grilles tarifaires"
+
+msgid "organization"
+msgstr "organisme"
+
+msgid "contact"
+msgstr "contact"
+
+msgid "email"
+msgstr "e-mail"
+
+msgid "phone"
+msgstr "téléphone"
+
+msgid "invoice address"
+msgstr "adresse de facturation"
+
+msgid "accounting reference"
+msgstr "référence comptable"
+
+msgid "Purchase order, cost centre..."
+msgstr "Bon de commande, centre de coût…"
+
+msgid "users"
+msgstr "utilisateurs"
+
+msgid "clients"
+msgstr "clients"
+
+msgid "hourly rate"
+msgstr "tarif horaire"
+
+msgid "night hourly rate"
+msgstr "tarif horaire de nuit"
+
+msgid "weekend hourly rate"
+msgstr "tarif horaire week-end"
+
+msgid "resource price"
+msgstr "tarif de ressource"
+
+msgid "resource prices"
+msgstr "tarifs de ressources"
+
+msgid "duration (minutes)"
+msgstr "durée (minutes)"
+
+msgid "packages"
+msgstr "forfaits"
+
+msgid "price"
+msgstr "prix"
+
+msgid "Weekend days"
+msgstr "Jours de week-end"
+
+msgid "Clients & pricing"
+msgstr "Clients et tarifs"
+
+msgid "Clients & prices"
+msgstr "Clients et tarifs"
+
+msgid "No client."
+msgstr "Aucun client."
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Prices"
+msgstr "Tarifs"
+
+msgid "New client"
+msgstr "Nouveau client"
+
+msgid "Edit client"
+msgstr "Modifier le client"
+
+msgid "New pricing grid"
+msgstr "Nouvelle grille tarifaire"
+
+msgid "Edit pricing grid"
+msgstr "Modifier la grille tarifaire"
+
+msgid "Edit package"
+msgstr "Modifier le forfait"
+
+msgid "Pricing grid"
+msgstr "Grille tarifaire"
+
+msgid "Contact"
+msgstr "Contact"
+
+msgid "Billing accounts and the users who book for them."
+msgstr "Comptes de facturation et utilisateurs qui réservent pour eux."
+
+msgid "Create a pricing grid first"
+msgstr "Créez d'abord une grille tarifaire"
+
+msgid "Every client is billed with a grid (academic, industrial...)."
+msgstr "Chaque client est facturé selon une grille (académique, industriel…)."
+
+msgid "Search a client"
+msgstr "Rechercher un client"
+
+msgid "New package"
+msgstr "Nouveau forfait"
+
+msgid "Hourly rates per resource and pricing grid"
+msgstr "Tarifs horaires par ressource et par grille"
+
+msgid "day"
+msgstr "jour"
+
+msgid "night"
+msgstr "nuit"
+
+msgid "weekend"
+msgstr "week-end"
+
+msgid "Package prices"
+msgstr "Prix des forfaits"
+
+msgid "Save prices"
+msgstr "Enregistrer les tarifs"
+
+msgid "No pricing grid yet"
+msgstr "Aucune grille tarifaire pour le moment"
+
+#, python-format
+msgid "Hourly rates in %(c)s, excluding tax. Leave empty for no price."
+msgstr "Tarifs horaires en %(c)s HT. Laisser vide pour aucun tarif."
+
+msgid "Night"
+msgstr "Nuit"
+
+msgid "Weekend"
+msgstr "Week-end"
+
+msgid "Day"
+msgstr "Jour"
+
+msgid "Estimated price"
+msgstr "Prix estimé"
+
+msgid "Choose a client account to see the estimated price."
+msgstr "Choisissez un compte client pour voir le prix estimé."
+
+msgid "No price defined for this client and resource."
+msgstr "Aucun tarif défini pour ce client et cette ressource."

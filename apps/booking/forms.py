@@ -9,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from apps.accounts.models import User
 from apps.booking import services
 from apps.booking.models import Booking, Closure
+from apps.clients.models import Client, Package
+from apps.clients.services import clients_for
 from apps.core.models import Role
 from apps.resources.models import Area, Resource
 
@@ -28,6 +30,12 @@ class BookingForm(forms.Form):
     for_user = forms.ModelChoiceField(
         label=_("Book for"), queryset=User.objects.none(), required=False
     )
+    client = forms.ModelChoiceField(
+        label=_("Client account"), queryset=Client.objects.none(), required=False
+    )
+    package = forms.ModelChoiceField(
+        label=_("Package"), queryset=Package.objects.none(), required=False
+    )
 
     def __init__(
         self,
@@ -45,6 +53,8 @@ class BookingForm(forms.Form):
                     "end": timezone.localtime(instance.end),
                     "title": instance.title,
                     "note": instance.note,
+                    "client": instance.client_id,
+                    "package": instance.package_id,
                 },
             )
         super().__init__(*args, **kwargs)
@@ -62,6 +72,26 @@ class BookingForm(forms.Form):
             for_user.empty_label = _("Myself")
         else:
             del self.fields["for_user"]
+
+        # Billing: the service re-checks; here we only offer sensible choices.
+        owner = instance.user if instance is not None else actor
+        clients = clients_for(actor, resource.space)
+        if not services.is_resource_manager(actor, resource):
+            clients = clients.filter(pk__in=clients_for(owner, resource.space).values("pk"))
+        client_field = cast(forms.ModelChoiceField, self.fields["client"])
+        client_field.queryset = clients
+        if clients.exists():
+            if clients.count() == 1 and not self.initial.get("client"):
+                self.initial["client"] = clients.first().pk  # type: ignore[union-attr]
+        else:
+            del self.fields["client"]
+        packages = Package.objects.filter(resource=resource, is_active=True)
+        if packages.exists():
+            package_field = cast(forms.ModelChoiceField, self.fields["package"])
+            package_field.queryset = packages
+            package_field.empty_label = _("Hourly rate")
+        else:
+            del self.fields["package"]
 
     def clean(self) -> dict[str, Any]:
         super().clean()

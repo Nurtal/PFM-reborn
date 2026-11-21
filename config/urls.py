@@ -11,6 +11,7 @@ urlpatterns = [
     path("i18n/setlang/", login_not_required(set_language), name="set_language"),
     path("ical/<str:token>.ics", ical_feed, name="ical_feed"),
     path("s/<slug:space_slug>/resources/", include("apps.resources.urls")),
+    path("s/<slug:space_slug>/clients/", include("apps.clients.urls")),
     path("s/<slug:space_slug>/", include("apps.booking.urls")),
     path("", include("apps.core.urls")),
 ]

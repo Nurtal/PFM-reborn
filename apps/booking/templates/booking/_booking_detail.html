@@ -25,7 +25,20 @@
         <c-field :field="form.end" />
       </div>
       <c-field :field="form.title" />
+      {% if form.client or form.package %}
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% if form.client %}<c-field :field="form.client" />{% endif %}
+          {% if form.package %}<c-field :field="form.package" />{% endif %}
+        </div>
+      {% endif %}
       <c-field :field="form.note" />
+      <div id="quote"
+           hx-get="{% url 'booking:quote' current_space.slug booking.resource.public_id %}"
+           hx-trigger="load, change from:closest form"
+           hx-target="this"
+           hx-swap="innerHTML"
+           hx-include="closest form"
+           aria-live="polite"></div>
       <div class="flex flex-wrap justify-between gap-2">
         <button type="submit"
                 name="action"

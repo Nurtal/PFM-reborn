@@ -18,8 +18,20 @@
   </div>
   <c-field :field="form.title" />
   {% if form.for_user %}<c-field :field="form.for_user" />{% endif %}
+  {% if form.client or form.package %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% if form.client %}<c-field :field="form.client" />{% endif %}
+      {% if form.package %}<c-field :field="form.package" />{% endif %}
+    </div>
+  {% endif %}
   <c-field :field="form.note" />
-  <p class="text-sm text-zinc-500">{% translate "Estimated price: available with pricing (milestone M2)." %}</p>
+  <div id="quote"
+       hx-get="{% url 'booking:quote' current_space.slug resource.public_id %}"
+       hx-trigger="load, change from:closest form"
+       hx-target="this"
+       hx-swap="innerHTML"
+       hx-include="closest form"
+       aria-live="polite"></div>
   <div class="flex justify-end gap-2">
     <button type="button" class="btn-secondary" data-close-dialog>{% translate "Cancel" %}</button>
     <button type="submit" class="btn-primary">{% translate "Confirm booking" %}</button>
