@@ -420,13 +420,13 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 | Jalon | État |
 |---|---|
-| M0 Socle | ✅ (image Docker écrite mais pas encore construite en CI) |
+| M0 Socle | ✅ (image Docker écrite mais pas encore construite) ; + demandes d'adhésion, export/suppression RGPD |
 | M1 Ressources & réservation | ✅ |
 | M2 Clients & tarification | ✅ |
 | M3 Facturation | ✅ (+ devis) |
 | M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
 | M5 Migration legacy | ✅ cœur (voir §12) — prestations legacy à faire, à valider sur une vraie base |
-| M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer — helpdesk IMAP et LDAP/OIDC à faire |
+| M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer, helpdesk IMAP, SSO OpenID Connect, LDAP (ldap3, sans dépendance système) |
 | M7 / M8 | à faire |
 
 ## 14. Licence
