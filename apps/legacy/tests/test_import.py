@@ -291,6 +291,6 @@ def test_services_orders_and_projects(legacy_db, admin):
         admin, space, client, dt.date(2025, 3, 1), dt.date(2025, 3, 31)
     ).invoice
     amounts = sorted(line.amount for line in draft.lines.filter(order_line__isnull=False))
-    assert amounts == [D("25.00"), D("50.00")]  # order 2 (2 × 12.50) and project (4 × 12.50)
+    assert amounts == [D("25.00"), D("50.00")]  # order 2 (2 x 12.50) and project (4 x 12.50)
     run(legacy_db)
     assert OrderLine.objects.count() == 3  # idempotent
