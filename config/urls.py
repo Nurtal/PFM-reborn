@@ -4,18 +4,21 @@ from django.urls import include, path
 from django.views.i18n import set_language
 
 from apps.booking.views import ical_feed
+from apps.catalog.views import catalogue
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("i18n/setlang/", login_not_required(set_language), name="set_language"),
     path("ical/<str:token>.ics", ical_feed, name="ical_feed"),
+    path("c/<slug:space_slug>/", catalogue, name="catalogue"),
     path("s/<slug:space_slug>/resources/", include("apps.resources.urls")),
     path("s/<slug:space_slug>/clients/", include("apps.clients.urls")),
     path("s/<slug:space_slug>/invoices/", include("apps.invoices.urls")),
     path("s/<slug:space_slug>/services/", include("apps.services.urls")),
     path("s/<slug:space_slug>/statistics/", include("apps.statistics.urls")),
     path("s/<slug:space_slug>/documents/", include("apps.documents.urls")),
+    path("s/<slug:space_slug>/mailer/", include("apps.mailer.urls")),
     path("s/<slug:space_slug>/", include("apps.booking.urls")),
     path("", include("apps.core.urls")),
 ]

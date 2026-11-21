@@ -9,7 +9,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import gettext as _
@@ -27,6 +27,7 @@ from apps.invoices.models import (
     InvoiceSettings,
     Kind,
     NumberCounter,
+    QuoteStatus,
     Status,
 )
 from apps.services.models import OrderLine, OrderStatus
@@ -318,7 +319,10 @@ def issue(
     space = invoice.space
     conf = InvoiceSettings.for_space(space)
     issue_date = issue_date or timezone.localdate(timezone=zoneinfo.ZoneInfo(space.timezone))
-    prefix = conf.credit_prefix if invoice.kind == Kind.CREDIT else conf.number_prefix
+    prefix = {
+        Kind.CREDIT: conf.credit_prefix,
+        Kind.QUOTE: conf.quote_prefix,
+    }.get(Kind(invoice.kind), conf.number_prefix)
     invoice.number = _next_number(space, invoice.kind, issue_date.year, prefix)
     invoice.vat_rate = vat_rate if vat_rate is not None else vat_rate_for(invoice, conf)
     totals = compute_totals(amounts, invoice.vat_rate)
@@ -333,7 +337,9 @@ def issue(
     invoice.client_reference = client.reference
     invoice.currency = space.currency
     invoice.issue_date = issue_date
-    invoice.due_date = issue_date + dt.timedelta(days=conf.payment_terms_days)
+    # For a quote, the "due date" is the end of its validity.
+    days = conf.quote_validity_days if invoice.kind == Kind.QUOTE else conf.payment_terms_days
+    invoice.due_date = issue_date + dt.timedelta(days=days)
     invoice.status = Status.ISSUED
     invoice.issued_by = actor
     invoice.save()
@@ -385,7 +391,73 @@ def credit(actor: User, invoice: Invoice, reason: str = "") -> Invoice:
     return issue(actor, note, vat_rate=invoice.vat_rate)
 
 
+def create_quote(actor: User, space: Space, client: Client, note: str = "") -> Invoice:
+    """Empty draft quote; lines are added by hand."""
+    if client.space_id != space.pk:
+        raise InvoicingError(_("This client belongs to another platform."))
+    today = timezone.localdate(timezone=zoneinfo.ZoneInfo(space.timezone))
+    return Invoice.objects.create(
+        space=space,
+        kind=Kind.QUOTE,
+        client=client,
+        period_start=today,
+        period_end=today,
+        note=note,
+        currency=space.currency,
+        created_by=actor,
+    )
+
+
+def answer_quote(quote: Invoice, status: str) -> Invoice:
+    if quote.kind != Kind.QUOTE or quote.status != Status.ISSUED:
+        raise InvoicingError(_("Only sent quotes can be answered."))
+    if status not in QuoteStatus.values:
+        raise InvoicingError(_("Unknown status."))
+    quote.quote_status = status
+    quote.save(update_fields=["quote_status", "updated_at"])
+    return quote
+
+
+@transaction.atomic
+def convert_quote(actor: User, quote: Invoice) -> Invoice:
+    """Turn an accepted quote into a draft invoice with the same lines."""
+    quote = Invoice.objects.select_for_update().get(pk=quote.pk)
+    if quote.kind != Kind.QUOTE or quote.quote_status != QuoteStatus.ACCEPTED:
+        raise InvoicingError(_("Only accepted quotes can be invoiced."))
+    if quote.converted_to_id:
+        raise InvoicingError(_("This quote has already been invoiced."))
+    today = timezone.localdate(timezone=zoneinfo.ZoneInfo(quote.space.timezone))
+    draft = Invoice.objects.create(
+        space=quote.space,
+        client=quote.client,
+        period_start=today,
+        period_end=today,
+        note=_("According to quote %(number)s") % {"number": quote.number},
+        currency=quote.currency,
+        created_by=actor,
+    )
+    InvoiceLine.objects.bulk_create(
+        [
+            InvoiceLine(
+                invoice=draft,
+                position=line.position,
+                description=line.description,
+                quantity=line.quantity,
+                unit=line.unit,
+                unit_price=line.unit_price,
+                amount=line.amount,
+            )
+            for line in quote.lines.all()
+        ]
+    )
+    quote.converted_to = draft
+    quote.save(update_fields=["converted_to", "updated_at"])
+    return draft
+
+
 def mark_paid(invoice: Invoice, on: dt.date | None) -> Invoice:
+    if invoice.kind != Kind.INVOICE:
+        raise InvoicingError(_("Only invoices can be paid."))
     if invoice.status != Status.ISSUED:
         raise InvoicingError(_("Only issued invoices can be paid."))
     invoice.paid_at = on
@@ -393,9 +465,7 @@ def mark_paid(invoice: Invoice, on: dt.date | None) -> Invoice:
     return invoice
 
 
-def space_invoices(space: Space) -> QuerySet[Invoice]:
-    return (
-        Invoice.objects.for_space(space)
-        .select_related("client", "credited_invoice")
-        .filter(Q(status=Status.ISSUED) | Q(status=Status.DRAFT))
-    )
+def space_invoices(space: Space, quotes: bool = False) -> QuerySet[Invoice]:
+    """Invoices and credit notes of a space, or its quotes when ``quotes``."""
+    qs = Invoice.objects.for_space(space).select_related("client", "credited_invoice")
+    return qs.filter(kind=Kind.QUOTE) if quotes else qs.exclude(kind=Kind.QUOTE)

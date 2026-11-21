@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "apps.services",
     "apps.statistics",
     "apps.documents",
+    "apps.catalog",
+    "apps.mailer",
 ]
 
 MIDDLEWARE = [

@@ -52,6 +52,11 @@ class Space(models.Model):
         _("accent colour"), max_length=7, default="#4f46e5", validators=[hex_color]
     )
     is_active = models.BooleanField(_("active"), default=True)
+    catalogue_public = models.BooleanField(
+        _("public catalogue"),
+        default=False,
+        help_text=_("Publish the equipment and services list at /c/<short name>/."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()

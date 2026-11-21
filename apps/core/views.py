@@ -20,7 +20,13 @@ from django.views.generic import TemplateView
 
 from apps.core import services
 from apps.core.email import smtp_backend_from
-from apps.core.forms import AddMemberForm, RoleForm, SetupForm, SMTPTestForm
+from apps.core.forms import (
+    AddMemberForm,
+    RoleForm,
+    SetupForm,
+    SMTPTestForm,
+    SpaceSettingsForm,
+)
 from apps.core.models import InstanceSettings, Role, SpaceMembership
 from apps.core.permissions import SpaceViewMixin
 
@@ -185,3 +191,26 @@ class MemberDetailView(SpaceViewMixin, View):
         except services.LastAdminError:
             messages.error(request, _("A space needs at least one administrator."))
         return redirect("core:members", space_slug=self.space.slug)
+
+
+class SpaceSettingsView(SpaceViewMixin, View):
+    permission_required = "core.administer_space"
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        return self._render(SpaceSettingsForm(instance=self.space))
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        form = SpaceSettingsForm(request.POST, instance=self.space)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Saved."))
+            return redirect("core:space_settings", space_slug=self.space.slug)
+        return self._render(form)
+
+    def _render(self, form: SpaceSettingsForm) -> HttpResponse:
+        context = {
+            "form": form,
+            "title": _("Platform settings"),
+            "cancel_url": f"/s/{self.space.slug}/",
+        }
+        return render(self.request, "resources/form.html", context)

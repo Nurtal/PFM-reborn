@@ -14,7 +14,7 @@ from django.db.models.functions import TruncMonth
 from apps.booking.models import Booking, Status
 from apps.booking.services import SlotRules
 from apps.core.models import Space
-from apps.invoices.models import Invoice
+from apps.invoices.models import ACCOUNTING_KINDS, Invoice
 from apps.invoices.models import Status as InvoiceStatus
 from apps.resources.models import Resource
 
@@ -115,6 +115,7 @@ def monthly_revenue(space: Space, start: dt.date, end: dt.date) -> list[tuple[dt
         Invoice.objects.filter(
             space=space,
             status=InvoiceStatus.ISSUED,
+            kind__in=ACCOUNTING_KINDS,
             issue_date__gte=start,
             issue_date__lte=end,
         )

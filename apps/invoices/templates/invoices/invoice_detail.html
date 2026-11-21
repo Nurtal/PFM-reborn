@@ -4,6 +4,8 @@
 {% block content %}
   {% if invoice.kind == "credit" %}
     {% translate "Credit note" as kind_label %}
+  {% elif invoice.kind == "quote" %}
+    {% translate "Quote" as kind_label %}
   {% else %}
     {% translate "Invoice" as kind_label %}
   {% endif %}
@@ -94,9 +96,36 @@
         <form method="post" class="card space-y-3">
           {% csrf_token %}
           <p class="text-sm text-zinc-600 dark:text-zinc-400">{% translate "Issuing assigns the next number and freezes the invoice: it can then only be cancelled by a credit note." %}</p>
-          <button type="submit" name="action" value="issue" class="btn-primary w-full" data-confirm="{% translate 'Issue this invoice? It cannot be changed afterwards.' %}">{% translate "Issue the invoice" %}</button>
+          {% if invoice.kind == "quote" %}
+            <button type="submit" name="action" value="issue" class="btn-primary w-full" data-confirm="{% translate 'Issue this quote? It cannot be changed afterwards.' %}">{% translate "Issue the quote" %}</button>
+          {% else %}
+            <button type="submit" name="action" value="issue" class="btn-primary w-full" data-confirm="{% translate 'Issue this invoice? It cannot be changed afterwards.' %}">{% translate "Issue the invoice" %}</button>
+          {% endif %}
           <button type="submit" name="action" value="delete" class="btn-ghost w-full text-red-600" data-confirm="{% translate 'Delete this draft?' %}">{% translate "Delete the draft" %}</button>
         </form>
+      {% elif invoice.kind == "quote" %}
+        <form method="post" class="card space-y-3">
+          {% csrf_token %}
+          <h2 class="font-semibold">{% translate "Client answer" %}</h2>
+          <p class="text-sm">{{ invoice.get_quote_status_display }} · {% translate "Valid until" %} {{ invoice.due_date|date:"SHORT_DATE_FORMAT" }}</p>
+          {% if not invoice.converted_to %}
+            <div class="flex gap-2">
+              <button type="submit" name="quote_status" value="accepted" class="btn-secondary flex-1">{% translate "Accepted" %}</button>
+              <button type="submit" name="quote_status" value="refused" class="btn-secondary flex-1">{% translate "Refused" %}</button>
+            </div>
+            <input type="hidden" name="action" value="answer">
+          {% endif %}
+        </form>
+        {% if invoice.quote_status == "accepted" %}
+          {% if invoice.converted_to %}
+            <p class="card text-sm">{% translate "Invoiced in" %} <a href="{% url 'invoices:detail' current_space.slug invoice.converted_to.public_id %}">{{ invoice.converted_to.number|default:_("a draft") }}</a></p>
+          {% else %}
+            <form method="post" class="card">
+              {% csrf_token %}
+              <button type="submit" name="action" value="convert" class="btn-primary w-full">{% translate "Create the invoice" %}</button>
+            </form>
+          {% endif %}
+        {% endif %}
       {% elif invoice.kind == "invoice" and not credit_note %}
         <form method="post" class="card space-y-3">
           {% csrf_token %}

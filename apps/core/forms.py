@@ -122,3 +122,29 @@ class AddMemberForm(forms.Form):
 
 class RoleForm(forms.Form):
     role = forms.TypedChoiceField(label=_("Role"), choices=Role.choices, coerce=int)
+
+
+class SpaceSettingsForm(forms.ModelForm):
+    timezone = forms.ChoiceField(label=_("Time zone"))
+
+    class Meta:
+        model = Space
+        fields = ["name", "description", "timezone", "currency", "accent_color", "catalogue_public"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+            "accent_color": forms.TextInput(attrs={"type": "color"}),
+        }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        import zoneinfo
+
+        super().__init__(*args, **kwargs)
+        self.fields["timezone"].choices = [  # type: ignore[attr-defined]
+            (tz, tz) for tz in sorted(zoneinfo.available_timezones())
+        ]
+
+    def clean_currency(self) -> str:
+        currency: str = self.cleaned_data["currency"].upper()
+        if len(currency) != 3 or not currency.isalpha():
+            raise forms.ValidationError(_("Use a three-letter ISO code such as EUR."))
+        return currency

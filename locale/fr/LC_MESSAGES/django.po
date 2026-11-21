@@ -1580,3 +1580,279 @@ msgid "%(n)s line without price"
 msgid_plural "%(n)s lines without price"
 msgstr[0] "%(n)s ligne sans tarif"
 msgstr[1] "%(n)s lignes sans tarif"
+
+msgid "The period is limited to three years."
+msgstr "La période est limitée à trois ans."
+
+msgid "Statistics"
+msgstr "Statistiques"
+
+msgid "Quote updated."
+msgstr "Devis mis à jour."
+
+msgid "Draft invoice created from the quote."
+msgstr "Brouillon de facture créé à partir du devis."
+
+msgid "Only sent quotes can be answered."
+msgstr "Seuls les devis émis peuvent recevoir une réponse."
+
+msgid "Only accepted quotes can be invoiced."
+msgstr "Seuls les devis acceptés peuvent être facturés."
+
+msgid "This quote has already been invoiced."
+msgstr "Ce devis a déjà été facturé."
+
+#, python-format
+msgid "According to quote %(number)s"
+msgstr "Selon le devis %(number)s"
+
+msgid "Only invoices can be paid."
+msgstr "Seules les factures peuvent être réglées."
+
+msgid "Quote"
+msgstr "Devis"
+
+msgid "Valid until"
+msgstr "Valable jusqu'au"
+
+msgid "quote prefix"
+msgstr "préfixe des devis"
+
+msgid "quote validity (days)"
+msgstr "validité des devis (jours)"
+
+msgid "Awaiting answer"
+msgstr "En attente de réponse"
+
+msgid "Accepted"
+msgstr "Accepté"
+
+msgid "Refused"
+msgstr "Refusé"
+
+msgid "quote status"
+msgstr "statut du devis"
+
+msgid "invoice created from this quote"
+msgstr "facture issue de ce devis"
+
+msgid "Document deleted."
+msgstr "Document supprimé."
+
+msgid "Document uploaded."
+msgstr "Document ajouté."
+
+msgid "Every member of the platform"
+msgstr "Tous les membres de la plateforme"
+
+msgid "visible to"
+msgstr "visible par"
+
+msgid "document"
+msgstr "document"
+
+msgid "documents"
+msgstr "documents"
+
+msgid "Documents"
+msgstr "Documents"
+
+msgid "Platform settings"
+msgstr "Réglages de la plateforme"
+
+#, python-format
+msgid "File type not allowed. Accepted: %(types)s."
+msgstr "Type de fichier non autorisé. Acceptés : %(types)s."
+
+msgid "The file is larger than 20 MB."
+msgstr "Le fichier dépasse 20 Mo."
+
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+msgid "The file content does not match its extension."
+msgstr "Le contenu du fichier ne correspond pas à son extension."
+
+msgid "Text files must be UTF-8."
+msgstr "Les fichiers texte doivent être en UTF-8."
+
+msgid "public catalogue"
+msgstr "catalogue public"
+
+msgid "Publish the equipment and services list at /c/<short name>/."
+msgstr "Publie la liste des équipements et prestations à l’adresse /c/<nom court>/."
+
+msgid "Time zone"
+msgstr "Fuseau horaire"
+
+msgid "Use a three-letter ISO code such as EUR."
+msgstr "Utilisez un code ISO à trois lettres, par exemple EUR."
+
+msgid "The subject must fit on one line."
+msgstr "L'objet doit tenir sur une ligne."
+
+msgid "Choose the resource."
+msgstr "Choisissez la ressource."
+
+#, python-format
+msgid "Message queued for %(n)d recipients."
+msgstr "Message mis en file pour %(n)d destinataires."
+
+msgid "Every member"
+msgstr "Tous les membres"
+
+msgid "Users and above (not visitors)"
+msgstr "Utilisateurs et plus (hors visiteurs)"
+
+msgid "Managers and administrators"
+msgstr "Gestionnaires et administrateurs"
+
+msgid "Users who booked a resource recently"
+msgstr "Utilisateurs ayant réservé une ressource récemment"
+
+msgid "subject"
+msgstr "objet"
+
+msgid "message"
+msgstr "message"
+
+msgid "recipients"
+msgstr "destinataires"
+
+msgid "mailing"
+msgstr "envoi"
+
+msgid "mailings"
+msgstr "envois"
+
+msgid "Mailer"
+msgstr "Envoi de mails"
+
+msgid "Public catalogue"
+msgstr "Catalogue public"
+
+msgid "Technology platform"
+msgstr "Plateforme technologique"
+
+msgid "No equipment listed yet."
+msgstr "Aucun équipement listé pour le moment."
+
+msgid "Sign in to book"
+msgstr "Se connecter pour réserver"
+
+msgid "Confirm and send"
+msgstr "Confirmer et envoyer"
+
+msgid "Preview recipients"
+msgstr "Voir les destinataires"
+
+msgid "History"
+msgstr "Historique"
+
+msgid "queued"
+msgstr "en file"
+
+msgid "No message sent yet."
+msgstr "Aucun message envoyé pour le moment."
+
+msgid "Write to the members of the platform. Each recipient gets their own message."
+msgstr "Écrivez aux membres de la plateforme. Chaque destinataire reçoit son propre message."
+
+msgid "Size"
+msgstr "Taille"
+
+msgid "Added"
+msgstr "Ajouté le"
+
+msgid "Managers"
+msgstr "Gestionnaires"
+
+msgid "No document."
+msgstr "Aucun document."
+
+msgid "Add a document"
+msgstr "Ajouter un document"
+
+msgid "PDF, images, text, Office and OpenDocument files, 20 MB max."
+msgstr "PDF, images, texte, fichiers Office et OpenDocument, 20 Mo max."
+
+msgid "Upload"
+msgstr "Envoyer"
+
+msgid "Delete this document?"
+msgstr "Supprimer ce document ?"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Quotes"
+msgstr "Devis"
+
+msgid "New quote for"
+msgstr "Nouveau devis pour"
+
+msgid "Create the quote"
+msgstr "Créer le devis"
+
+msgid "Issue the quote"
+msgstr "Émettre le devis"
+
+msgid "Client answer"
+msgstr "Réponse du client"
+
+msgid "Invoiced in"
+msgstr "Facturé dans"
+
+msgid "Create the invoice"
+msgstr "Créer la facture"
+
+msgid "Issue this quote? It cannot be changed afterwards."
+msgstr "Émettre ce devis ? Il ne pourra plus être modifié."
+
+msgid "a draft"
+msgstr "un brouillon"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Bookings"
+msgstr "Réservations"
+
+msgid "Booked hours"
+msgstr "Heures réservées"
+
+msgid "Invoiced (excl. tax)"
+msgstr "Facturé (HT)"
+
+msgid "Hours per resource"
+msgstr "Heures par ressource"
+
+msgid "Hours"
+msgstr "Heures"
+
+msgid "Occupancy"
+msgstr "Occupation"
+
+msgid "Invoiced per month"
+msgstr "Facturé par mois"
+
+msgid "Top clients by booked hours"
+msgstr "Principaux clients (heures réservées)"
+
+msgid "No booking over this period."
+msgstr "Aucune réservation sur cette période."
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "Visible to"
+msgstr "Visible par"
+
+msgid "Hello"
+msgstr "Bonjour"
+
+#, python-format
+msgid "This message will be sent to %(n)s person."
+msgid_plural "This message will be sent to %(n)s people."
+msgstr[0] "Ce message sera envoyé à %(n)s personne."
+msgstr[1] "Ce message sera envoyé à %(n)s personnes."

@@ -72,3 +72,27 @@ def _login(client, user):
     # Admins must have a second factor (enforcement itself is tested in accounts).
     Authenticator.objects.get_or_create(user=user, type=Authenticator.Type.TOTP, data={})
     client.force_login(user)
+
+
+def test_space_settings_for_admins_only(client, setup_done):
+    m = MembershipFactory(role=Role.MANAGER)
+    _login(client, m.user)
+    url = reverse("core:space_settings", args=[m.space.slug])
+    assert client.get(url).status_code == 404
+    admin = MembershipFactory(space=m.space, role=Role.ADMIN).user
+    _login(client, admin)
+    assert client.get(url).status_code == 200
+    response = client.post(
+        url,
+        {
+            "name": "Renamed",
+            "description": "",
+            "timezone": "Europe/Paris",
+            "currency": "chf",
+            "accent_color": "#123456",
+            "catalogue_public": "on",
+        },
+    )
+    assert response.status_code == 302
+    m.space.refresh_from_db()
+    assert (m.space.name, m.space.currency, m.space.catalogue_public) == ("Renamed", "CHF", True)

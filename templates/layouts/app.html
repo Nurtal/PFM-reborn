@@ -60,6 +60,11 @@
               <c-icon name="layout-grid" class="size-4" />
               {% translate "Stock" %}
             </a>
+            {% url 'mailer:index' current_space.slug as mailer_url %}
+            <a href="{{ mailer_url }}" class="nav-link" {% if request.path == mailer_url %}aria-current="page"{% endif %}>
+              <c-icon name="mail" class="size-4" />
+              {% translate "Mailer" %}
+            </a>
             {% url 'statistics:dashboard' current_space.slug as stats_url %}
             <a href="{{ stats_url }}" class="nav-link" {% if request.path == stats_url %}aria-current="page"{% endif %}>
               <c-icon name="layout-dashboard" class="size-4" />
@@ -86,6 +91,11 @@
             <a href="{{ members_url }}" class="nav-link" {% if request.path == members_url %}aria-current="page"{% endif %}>
               <c-icon name="users" class="size-4" />
               {% translate "Members" %}
+            </a>
+            {% url 'core:space_settings' current_space.slug as space_settings_url %}
+            <a href="{{ space_settings_url }}" class="nav-link" {% if request.path == space_settings_url %}aria-current="page"{% endif %}>
+              <c-icon name="settings" class="size-4" />
+              {% translate "Platform settings" %}
             </a>
           {% endif %}
         {% else %}
