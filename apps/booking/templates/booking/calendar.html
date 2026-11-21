@@ -1,0 +1,32 @@
+{% extends "layouts/app.html" %}
+{% load i18n static %}
+{% block title %}{{ resource.name }}{% endblock title %}
+{% block extra_head %}
+  <meta name="csp-nonce" content="{{ CSP_NONCE }}">
+  <script src="{% static 'vendor/fullcalendar-6.1.22.min.js' %}" defer></script>
+  <script src="{% static 'vendor/fullcalendar-6.1.22-fr.min.js' %}" defer></script>
+  <script src="{% static 'js/calendar.js' %}" defer></script>
+{% endblock extra_head %}
+{% block content %}
+  <c-page-header :title="resource.name" subtitle="{{ resource.category }} · {{ resource.area }}">
+    <label for="resource-picker" class="sr-only">{% translate "Resource" %}</label>
+    <select id="resource-picker" class="w-auto" data-navigate>
+      {% for r in resources %}
+        <option value="{% url 'booking:calendar' current_space.slug r.public_id %}" {% if r == resource %}selected{% endif %}>{{ r.name }}</option>
+      {% endfor %}
+    </select>
+  </c-page-header>
+  {% if refusals %}
+    <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200" role="note">
+      <c-icon name="alert" class="mt-0.5 size-4" />
+      <div>{% for r in refusals %}<p>{{ r }}</p>{% endfor %}</div>
+    </div>
+  {% elif resource.description %}
+    <p class="mb-4 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">{{ resource.description|linebreaksbr }}</p>
+  {% endif %}
+  <div class="card p-2 sm:p-4">
+    {{ calendar_config|json_script:"calendar-config" }}
+    <div id="calendar" data-lang="{{ LANGUAGE_CODE|default:'fr' }}"></div>
+  </div>
+  <p class="mt-3 text-xs text-zinc-500">{% translate "Select a time range in the calendar to book it. Click one of your bookings to change or cancel it." %}</p>
+{% endblock content %}

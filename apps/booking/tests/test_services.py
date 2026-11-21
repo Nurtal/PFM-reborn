@@ -226,3 +226,22 @@ def test_concurrent_reservations_cannot_double_book():
 
     assert results.count("ok") == 1, results
     assert Booking.objects.filter(resource=resource, status=Status.CONFIRMED).count() == 1
+
+
+@pytest.mark.skipif(connection.vendor != "postgresql", reason="PostgreSQL exclusion constraint")
+def test_postgres_constraint_rejects_overlap_even_bypassing_services(resource):
+    from django.db import IntegrityError, transaction
+
+    user = member(resource)
+    Booking.objects.create(
+        space=resource.space, resource=resource, user=user, created_by=user, start=at(9), end=at(11)
+    )
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Booking.objects.create(
+            space=resource.space,
+            resource=resource,
+            user=user,
+            created_by=user,
+            start=at(10),
+            end=at(12),
+        )

@@ -19,6 +19,28 @@
             <c-icon name="layout-dashboard" class="size-4" />
             {% translate "Dashboard" %}
           </a>
+          {% url 'booking:home' current_space.slug as booking_url %}
+          <a href="{{ booking_url }}" class="nav-link" {% if "/booking/" in request.path %}aria-current="page"{% endif %}>
+            <c-icon name="calendar" class="size-4" />
+            {% translate "Booking" %}
+          </a>
+          {% url 'booking:mine' current_space.slug as mine_url %}
+          <a href="{{ mine_url }}" class="nav-link" {% if request.path == mine_url %}aria-current="page"{% endif %}>
+            <c-icon name="check" class="size-4" />
+            {% translate "My bookings" %}
+          </a>
+          {% url 'resources:list' current_space.slug as resources_url %}
+          <a href="{{ resources_url }}" class="nav-link" {% if request.path == resources_url %}aria-current="page"{% endif %}>
+            <c-icon name="layout-grid" class="size-4" />
+            {% translate "Resources" %}
+          </a>
+          {% if can_manage_space %}
+            {% url 'resources:authorizations' current_space.slug as auth_url %}
+            <a href="{{ auth_url }}" class="nav-link" {% if request.path == auth_url %}aria-current="page"{% endif %}>
+              <c-icon name="file-text" class="size-4" />
+              {% translate "Authorizations" %}
+            </a>
+          {% endif %}
           {% if can_administer_space %}
             {% url 'core:members' current_space.slug as members_url %}
             <a href="{{ members_url }}" class="nav-link" {% if request.path == members_url %}aria-current="page"{% endif %}>

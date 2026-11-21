@@ -212,7 +212,7 @@ CONTENT_SECURITY_POLICY = {
         "script-src": [SELF, NONCE],
         "style-src": [SELF, NONCE],
         "img-src": [SELF, "data:"],
-        "font-src": [SELF],
+        "font-src": [SELF, "data:"],  # FullCalendar ships its icon font inline
         "connect-src": [SELF],
         "object-src": [NONE],
         "base-uri": [SELF],

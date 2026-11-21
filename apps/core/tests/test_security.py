@@ -38,3 +38,8 @@ def test_prod_settings_refuse_debug(monkeypatch):
         import config.settings.prod as prod
 
         importlib.reload(prod)
+
+
+def test_login_page_does_not_invite_to_sign_up(client, setup_done):
+    response = client.get(reverse("account_login"))
+    assert reverse("account_signup").encode() not in response.content

@@ -110,3 +110,26 @@ class Closure(SpaceScopedModel):
 
     def __str__(self) -> str:
         return self.reason
+
+
+def _new_token() -> str:
+    import secrets
+
+    return secrets.token_urlsafe(24)
+
+
+class FeedToken(models.Model):
+    """Secret part of a user's iCal feed URL. Regenerate it to revoke the old URL."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="feed_token"
+    )
+    token = models.CharField(max_length=64, unique=True, default=_new_token)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"iCal feed of {self.user}"
+
+    def regenerate(self) -> None:
+        self.token = _new_token()
+        self.save(update_fields=["token"])

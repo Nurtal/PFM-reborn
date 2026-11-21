@@ -1,0 +1,21 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{{ title }}{% endblock title %}
+{% block content %}
+  <c-page-header :title="title" :subtitle="current_space.name" />
+  <form method="post" class="card max-w-3xl space-y-6" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for field in form %}
+        <div class="{% if field.widget_type == 'textarea' or field.widget_type == 'checkboxselectmultiple' %}sm:col-span-2{% endif %}">
+          <c-field :field="field" />
+        </div>
+      {% endfor %}
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="btn-primary">{% translate "Save" %}</button>
+      <a href="{{ cancel_url }}" class="btn-secondary">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+{% endblock content %}

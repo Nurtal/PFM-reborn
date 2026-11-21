@@ -18,3 +18,5 @@ WHITENOISE_AUTOREFRESH = True
 # A file (not :memory:) so the concurrency tests exercise real SQLite locking.
 if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
     DATABASES["default"]["TEST"] = {"NAME": str(DATA_DIR / "test.sqlite3")}
+# Assertions match English messages; French rendering is tested explicitly.
+LANGUAGE_CODE = "en"

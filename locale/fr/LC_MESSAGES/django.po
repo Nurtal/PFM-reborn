@@ -304,3 +304,453 @@ msgstr "E-mail de test envoyé."
 
 msgid "Choose a platform"
 msgstr "Choisir une plateforme"
+
+msgid "Booked"
+msgstr "Réservé"
+
+msgid "Booking confirmed."
+msgstr "Réservation confirmée."
+
+msgid "Booking cancelled."
+msgstr "Réservation annulée."
+
+msgid "Booking updated."
+msgstr "Réservation modifiée."
+
+msgid "The end must be after the start."
+msgstr "La fin doit être après le début."
+
+msgid "You cannot book in the past."
+msgstr "Impossible de réserver dans le passé."
+
+#, python-format
+msgid "The minimum duration is %(minutes)d minutes."
+msgstr "La durée minimale est de %(minutes)d minutes."
+
+#, python-format
+msgid "The maximum duration is %(minutes)d minutes."
+msgstr "La durée maximale est de %(minutes)d minutes."
+
+#, python-format
+msgid "Bookings follow %(minutes)d-minute slots."
+msgstr "Les réservations suivent des créneaux de %(minutes)d minutes."
+
+#, python-format
+msgid "The resource is closed on %(day)s."
+msgstr "La ressource est fermée le %(day)s."
+
+msgid "The booking is outside opening hours."
+msgstr "La réservation sort des horaires d'ouverture."
+
+msgid "This resource is not available."
+msgstr "Cette ressource n'est pas disponible."
+
+msgid "Your account cannot book on this platform."
+msgstr "Votre compte ne peut pas réserver sur cette plateforme."
+
+msgid "Only managers can book this resource."
+msgstr "Seuls les gestionnaires peuvent réserver cette ressource."
+
+#, python-format
+msgid "You need an authorization for “%(category)s” to book this resource."
+msgstr "Il vous faut une habilitation « %(category)s » pour réserver cette ressource."
+
+msgid "This slot overlaps another booking."
+msgstr "Ce créneau chevauche une autre réservation."
+
+#, python-format
+msgid "The resource is unavailable: %(reason)s."
+msgstr "La ressource est indisponible : %(reason)s."
+
+msgid "Only managers can book for someone else."
+msgstr "Seuls les gestionnaires peuvent réserver pour quelqu'un d'autre."
+
+msgid "This booking can no longer be changed."
+msgstr "Cette réservation ne peut plus être modifiée."
+
+msgid "This booking can no longer be cancelled."
+msgstr "Cette réservation ne peut plus être annulée."
+
+msgid "Confirmed"
+msgstr "Confirmée"
+
+msgid "Cancelled"
+msgstr "Annulée"
+
+msgid "resource"
+msgstr "ressource"
+
+msgid "booked for"
+msgstr "réservé pour"
+
+msgid "start"
+msgstr "début"
+
+msgid "end"
+msgstr "fin"
+
+msgid "title"
+msgstr "titre"
+
+msgid "note"
+msgstr "remarque"
+
+msgid "booking"
+msgstr "réservation"
+
+msgid "bookings"
+msgstr "réservations"
+
+msgid "area"
+msgstr "zone"
+
+msgid "reason"
+msgstr "motif"
+
+msgid "closure"
+msgstr "fermeture"
+
+msgid "closures"
+msgstr "fermetures"
+
+msgid "Start"
+msgstr "Début"
+
+msgid "End"
+msgstr "Fin"
+
+msgid "Title"
+msgstr "Titre"
+
+msgid "Note"
+msgstr "Remarque"
+
+msgid "Book for"
+msgstr "Réserver pour"
+
+msgid "Myself"
+msgstr "Moi-même"
+
+msgid "Saved."
+msgstr "Enregistré."
+
+msgid "restricted"
+msgstr "restreinte"
+
+msgid "Only managers can see this area."
+msgstr "Seuls les gestionnaires voient cette zone."
+
+msgid "display order"
+msgstr "ordre d'affichage"
+
+msgid "open days"
+msgstr "jours d'ouverture"
+
+msgid "Bit mask, Monday = 1, Tuesday = 2, ..., Sunday = 64."
+msgstr "Masque de bits : lundi = 1, mardi = 2, …, dimanche = 64."
+
+msgid "opening time"
+msgstr "heure d'ouverture"
+
+msgid "closing time"
+msgstr "heure de fermeture"
+
+msgid "slot size (minutes)"
+msgstr "taille des créneaux (minutes)"
+
+msgid "areas"
+msgstr "zones"
+
+msgid "Closing time must be after opening time."
+msgstr "L'heure de fermeture doit suivre l'heure d'ouverture."
+
+msgid "resource category"
+msgstr "catégorie de ressources"
+
+msgid "resource categories"
+msgstr "catégories de ressources"
+
+msgid "Every platform user"
+msgstr "Tous les utilisateurs de la plateforme"
+
+msgid "Authorized users only"
+msgstr "Utilisateurs habilités uniquement"
+
+msgid "Managers only"
+msgstr "Gestionnaires uniquement"
+
+msgid "brand"
+msgstr "marque"
+
+msgid "model"
+msgstr "modèle"
+
+msgid "category"
+msgstr "catégorie"
+
+msgid "colour"
+msgstr "couleur"
+
+msgid "managers"
+msgstr "responsables"
+
+msgid "who can book"
+msgstr "qui peut réserver"
+
+msgid "minimum duration (minutes)"
+msgstr "durée minimale (minutes)"
+
+msgid "maximum duration (minutes)"
+msgstr "durée maximale (minutes)"
+
+msgid "maximum bookings per user and day"
+msgstr "réservations max. par utilisateur et par jour"
+
+msgid "bookable up to (days ahead)"
+msgstr "réservable jusqu'à (jours à l'avance)"
+
+msgid "users can change or cancel until (hours before start)"
+msgstr "modifiable ou annulable jusqu'à (heures avant le début)"
+
+msgid "resources"
+msgstr "ressources"
+
+msgid "Must belong to the same platform."
+msgstr "Doit appartenir à la même plateforme."
+
+msgid "Must be at least the minimum duration."
+msgstr "Doit être au moins égale à la durée minimale."
+
+msgid "granted on"
+msgstr "accordée le"
+
+msgid "expires on"
+msgstr "expire le"
+
+msgid "trainer"
+msgstr "formateur"
+
+msgid "comment"
+msgstr "commentaire"
+
+msgid "authorization"
+msgstr "habilitation"
+
+msgid "authorizations"
+msgstr "habilitations"
+
+msgid "Monday"
+msgstr "Lundi"
+
+msgid "Tuesday"
+msgstr "Mardi"
+
+msgid "Wednesday"
+msgstr "Mercredi"
+
+msgid "Thursday"
+msgstr "Jeudi"
+
+msgid "Friday"
+msgstr "Vendredi"
+
+msgid "Saturday"
+msgstr "Samedi"
+
+msgid "Sunday"
+msgstr "Dimanche"
+
+msgid "Open days"
+msgstr "Jours d'ouverture"
+
+msgid "Must be after the grant date."
+msgstr "Doit être postérieure à la date d'attribution."
+
+msgid "This user already has this authorization."
+msgstr "Cet utilisateur a déjà cette habilitation."
+
+msgid "Resources"
+msgstr "Ressources"
+
+msgid "My bookings"
+msgstr "Mes réservations"
+
+msgid "Authorizations"
+msgstr "Habilitations"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Areas & categories"
+msgstr "Zones et catégories"
+
+msgid "Areas and opening hours"
+msgstr "Zones et horaires d'ouverture"
+
+msgid "Restricted"
+msgstr "Restreinte"
+
+msgid "No area yet."
+msgstr "Aucune zone pour le moment."
+
+msgid "Categories"
+msgstr "Catégories"
+
+msgid "No category yet."
+msgstr "Aucune catégorie pour le moment."
+
+#, python-format
+msgid "%(n)s min slots"
+msgstr "créneaux de %(n)s min"
+
+msgid "Revoked"
+msgstr "Révoquée"
+
+msgid "No authorization."
+msgstr "Aucune habilitation."
+
+msgid "New authorization"
+msgstr "Nouvelle habilitation"
+
+msgid "Edit authorization"
+msgstr "Modifier l'habilitation"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "Valid"
+msgstr "Validité"
+
+msgid "Trainer"
+msgstr "Formateur"
+
+msgid "Users trained to book a category of resources."
+msgstr "Utilisateurs formés pour réserver une catégorie de ressources."
+
+msgid "Search a user or a category"
+msgstr "Rechercher un utilisateur ou une catégorie"
+
+msgid "New resource"
+msgstr "Nouvelle ressource"
+
+msgid "Edit resource"
+msgstr "Modifier la ressource"
+
+msgid "New area"
+msgstr "Nouvelle zone"
+
+msgid "Edit area"
+msgstr "Modifier la zone"
+
+msgid "New category"
+msgstr "Nouvelle catégorie"
+
+msgid "Edit category"
+msgstr "Modifier la catégorie"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "Authorization"
+msgstr "Habilitation"
+
+msgid "Calendar"
+msgstr "Calendrier"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Set up areas & categories"
+msgstr "Configurer zones et catégories"
+
+msgid "No resource yet"
+msgstr "Aucune ressource pour le moment"
+
+msgid "Create an area and a category first, then add your equipment."
+msgstr "Créez d'abord une zone et une catégorie, puis ajoutez vos équipements."
+
+msgid "Estimated price: available with pricing (milestone M2)."
+msgstr "Prix estimé : disponible avec la tarification (jalon M2)."
+
+msgid "Confirm booking"
+msgstr "Confirmer la réservation"
+
+#, python-format
+msgid "Book %(name)s"
+msgstr "Réserver %(name)s"
+
+msgid "Upcoming"
+msgstr "À venir"
+
+msgid "Past"
+msgstr "Passées"
+
+msgid "When"
+msgstr "Quand"
+
+msgid "Resource"
+msgstr "Ressource"
+
+msgid "Subscribe in your calendar app"
+msgstr "Abonnez-vous depuis votre agenda"
+
+msgid "Private address: anyone who has it can see your bookings."
+msgstr "Adresse privée : toute personne qui la connaît voit vos réservations."
+
+msgid "iCal address"
+msgstr "Adresse iCal"
+
+msgid "No booking"
+msgstr "Aucune réservation"
+
+msgid "Cancel booking"
+msgstr "Annuler la réservation"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Save changes"
+msgstr "Enregistrer"
+
+msgid "Cancel this booking?"
+msgstr "Annuler cette réservation ?"
+
+msgid "Select a time range in the calendar to book it. Click one of your bookings to change or cancel it."
+msgstr "Sélectionnez une plage dans le calendrier pour réserver. Cliquez sur une de vos réservations pour la modifier ou l'annuler."
+
+msgid "Booking confirmed"
+msgstr "Réservation confirmée"
+
+msgid "Booking changed"
+msgstr "Réservation modifiée"
+
+msgid "Booking cancelled"
+msgstr "Réservation annulée"
+
+msgid "Your booking is confirmed."
+msgstr "Votre réservation est confirmée."
+
+msgid "Your booking has been changed."
+msgstr "Votre réservation a été modifiée."
+
+msgid "Your booking has been cancelled."
+msgstr "Votre réservation a été annulée."
+
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "Bonjour %(name)s,"
+
+#, python-format
+msgid "This resource can be booked at most %(days)d day ahead."
+msgid_plural "This resource can be booked at most %(days)d days ahead."
+msgstr[0] "Cette ressource se réserve au plus %(days)d jour à l'avance."
+msgstr[1] "Cette ressource se réserve au plus %(days)d jours à l'avance."
+
+#, python-format
+msgid "You can book this resource at most %(n)d time per day."
+msgid_plural "You can book this resource at most %(n)d times per day."
+msgstr[0] "Vous pouvez réserver cette ressource au plus %(n)d fois par jour."
+msgstr[1] "Vous pouvez réserver cette ressource au plus %(n)d fois par jour."

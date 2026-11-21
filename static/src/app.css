@@ -69,3 +69,34 @@
   }
   .nav-link[aria-current="page"] { @apply bg-accent/10 text-accent; }
 }
+
+/* FullCalendar: follow the design tokens and the dark theme. */
+#calendar {
+  --fc-border-color: var(--color-zinc-200);
+  --fc-today-bg-color: color-mix(in oklab, var(--color-accent) 8%, transparent);
+  --fc-button-bg-color: var(--color-zinc-100);
+  --fc-button-border-color: var(--color-zinc-200);
+  --fc-button-text-color: var(--color-zinc-800);
+  --fc-button-hover-bg-color: var(--color-zinc-200);
+  --fc-button-hover-border-color: var(--color-zinc-300);
+  --fc-button-active-bg-color: var(--color-accent);
+  --fc-button-active-border-color: var(--color-accent);
+  --fc-bg-event-color: var(--color-zinc-400);
+  --fc-bg-event-opacity: 0.35;
+  --fc-page-bg-color: transparent;
+  font-size: 0.875rem;
+}
+.dark #calendar {
+  --fc-border-color: var(--color-zinc-800);
+  --fc-button-bg-color: var(--color-zinc-800);
+  --fc-button-border-color: var(--color-zinc-700);
+  --fc-button-text-color: var(--color-zinc-100);
+  --fc-button-hover-bg-color: var(--color-zinc-700);
+  --fc-neutral-bg-color: var(--color-zinc-900);
+  --fc-list-event-hover-bg-color: var(--color-zinc-800);
+}
+#calendar .fc-button-active { color: var(--color-accent-fg); }
+#calendar .fc-event.pfm-mine { box-shadow: inset 4px 0 0 0 color-mix(in oklab, black 25%, transparent); }
+#calendar a { text-decoration: none; }
+dialog#modal[open] { animation: pfm-pop 120ms ease-out; }
+@keyframes pfm-pop { from { opacity: 0; transform: translateY(4px) scale(0.98); } }

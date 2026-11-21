@@ -1,0 +1,49 @@
+{% load i18n %}
+<div id="booking-detail" class="space-y-4">
+  <div>
+    <h2 class="text-lg font-semibold">{{ booking.resource.name }}</h2>
+    <p class="text-sm text-zinc-500">
+      {{ booking.start|date:"DATETIME_FORMAT" }} → {{ booking.end|date:"TIME_FORMAT" }}
+      · {{ booking.user }}
+    </p>
+  </div>
+  {% if can_change and form %}
+    <form method="post"
+          hx-post="{{ request.path }}"
+          hx-target="#booking-detail"
+          hx-swap="outerHTML"
+          class="space-y-4"
+          novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200" role="alert">
+          {% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        <c-field :field="form.start" />
+        <c-field :field="form.end" />
+      </div>
+      <c-field :field="form.title" />
+      <c-field :field="form.note" />
+      <div class="flex flex-wrap justify-between gap-2">
+        <button type="submit"
+                name="action"
+                value="cancel"
+                class="btn-danger"
+                hx-confirm="{% translate 'Cancel this booking?' %}">{% translate "Cancel booking" %}</button>
+        <div class="flex gap-2">
+          <button type="button" class="btn-secondary" data-close-dialog>{% translate "Close" %}</button>
+          <button type="submit" class="btn-primary">{% translate "Save changes" %}</button>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    {% if booking.title %}<p>{{ booking.title }}</p>{% endif %}
+    {% if booking.note %}<p class="text-sm text-zinc-600 dark:text-zinc-400">{{ booking.note|linebreaksbr }}</p>{% endif %}
+    <p class="text-sm text-zinc-500">{% translate "This booking can no longer be changed." %}</p>
+    <div class="flex justify-end">
+      <button type="button" class="btn-secondary" data-close-dialog>{% translate "Close" %}</button>
+    </div>
+  {% endif %}
+</div>
