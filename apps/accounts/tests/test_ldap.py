@@ -137,3 +137,12 @@ def test_bind_password_is_encrypted_at_rest():
     conf.save()
     assert "svc-pass" not in InstanceSettings.load().ldap_bind_password_encrypted
     assert InstanceSettings.load().get_ldap_bind_password() == "svc-pass"
+
+
+def test_directory_email_counts_as_verified():
+    from apps.core.services import has_verified_email
+
+    configure(ldap_user_dn_template="uid={username},ou=people,dc=univ,dc=fr")
+    user = auth("jdoe", "s3cret")
+    assert has_verified_email(user)
+    assert auth("jdoe", "s3cret") == user  # second login: no duplicate address

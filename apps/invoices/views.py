@@ -16,6 +16,7 @@ from django.views.generic import ListView, TemplateView, UpdateView
 
 from apps.accounts.models import User
 from apps.clients.models import Client
+from apps.core.csvsafe import csv_safe
 from apps.core.permissions import SpaceViewMixin
 from apps.invoices import services
 from apps.invoices.forms import InvoiceRunForm, InvoiceSettingsForm, LineForm
@@ -275,26 +276,11 @@ class InvoiceExportView(InvoicingMixin, View):
         writer = csv.writer(text, delimiter=";")
         writer.writerow(EXPORT_HEADERS)
         for row in rows:
-            writer.writerow(["" if v is None else _csv_safe(str(v)) for v in row])
+            writer.writerow([csv_safe(v) for v in row])
         bom = chr(0xFEFF)  # lets Excel detect UTF-8
         response = HttpResponse(bom + text.getvalue(), content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="invoices-{stamp}.csv"'
         return response
-
-
-def _csv_safe(value: str) -> str:
-    """Neutralise spreadsheet formulas (CSV injection) in user-provided text."""
-    if value and value[0] in "=+-@\t\r" and not _is_number(value):
-        return "'" + value
-    return value
-
-
-def _is_number(value: str) -> bool:
-    try:
-        Decimal(value)
-    except ArithmeticError:
-        return False
-    return True
 
 
 class InvoiceSettingsView(InvoicingMixin, UpdateView):

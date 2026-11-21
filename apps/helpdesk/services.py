@@ -14,7 +14,7 @@ from django.db.models import Max
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.core.models import Space
+from apps.core.models import Role, Space
 from apps.helpdesk.models import Mailbox, Ticket, TicketMessage, TicketStatus
 from apps.helpdesk.parsing import Incoming, parse
 
@@ -35,6 +35,9 @@ def ingest(space: Space, mail: Incoming) -> Ticket | None:
     ticket = None
     if mail.ticket_number is not None:
         ticket = Ticket.objects.filter(space=space, number=mail.ticket_number).first()
+        if ticket is not None and not _may_post(ticket, mail.sender):
+            # A [#N] tag alone proves nothing: strangers get their own ticket.
+            ticket = None
     if ticket is None:
         if mail.automatic:
             return None  # do not open tickets for bounces and auto-replies
@@ -46,8 +49,8 @@ def ingest(space: Space, mail: Incoming) -> Ticket | None:
             requester_email=mail.sender,
             requester=User.objects.filter(email__iexact=mail.sender, is_active=True).first(),
         )
-    elif ticket.status != TicketStatus.OPEN:
-        ticket.status = TicketStatus.OPEN  # the requester answered
+    elif ticket.status != TicketStatus.OPEN and not mail.automatic:
+        ticket.status = TicketStatus.OPEN  # the requester answered (not an out-of-office)
         ticket.save(update_fields=["status", "updated_at"])
     TicketMessage.objects.create(
         ticket=ticket, incoming=True, sender=mail.sender, body=mail.body, message_id=mail.message_id
@@ -55,11 +58,23 @@ def ingest(space: Space, mail: Incoming) -> Ticket | None:
     return ticket
 
 
+def _may_post(ticket: Ticket, sender: str) -> bool:
+    """The requester, or a manager of the space, may add to a ticket."""
+    if sender.lower() == ticket.requester_email.lower():
+        return True
+    return User.objects.filter(
+        email__iexact=sender,
+        is_active=True,
+        memberships__space=ticket.space,
+        memberships__role__gte=Role.MANAGER,
+    ).exists()
+
+
 def fetch(mailbox: Mailbox, connect: Callable[..., Any] | None = None) -> int:
     """Import unread messages of ``mailbox``; returns how many were stored."""
     if connect is None:
         connect = imaplib.IMAP4_SSL if mailbox.imap_ssl else imaplib.IMAP4
-    stored = 0
+    stored = failed = 0
     try:
         imap = connect(mailbox.imap_host, mailbox.imap_port, timeout=20)
         try:
@@ -71,13 +86,18 @@ def fetch(mailbox: Mailbox, connect: Callable[..., Any] | None = None) -> int:
             for num in (data[0] or b"").decode().split()[:MAX_PER_RUN]:
                 _typ, parts = imap.fetch(num, "(RFC822)")
                 raw = next((p[1] for p in parts if isinstance(p, tuple)), b"")
-                if ingest(mailbox.space, parse(raw)) is not None:
-                    stored += 1
+                try:
+                    if ingest(mailbox.space, parse(raw)) is not None:
+                        stored += 1
+                except Exception:
+                    failed += 1
+                    logger.exception("Helpdesk %s: message %s skipped", mailbox.address, num)
+                # Marked seen even when skipped, or it would be retried forever.
                 imap.store(num, "+FLAGS", "\\Seen")
         finally:
             with contextlib.suppress(OSError, imaplib.IMAP4.error):
                 imap.logout()
-        mailbox.last_error = ""
+        mailbox.last_error = f"{failed} message(s) could not be imported" if failed else ""
     except (OSError, imaplib.IMAP4.error) as exc:
         logger.warning("Helpdesk %s: %s", mailbox.address, exc)
         mailbox.last_error = str(exc)[:500]

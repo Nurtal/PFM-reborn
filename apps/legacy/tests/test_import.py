@@ -232,3 +232,16 @@ def test_command_dry_run_saves_nothing(legacy_db, admin, settings):
 def test_source_refuses_unknown_tables(legacy_db):
     with pytest.raises(ValueError):
         list(SQLiteSource(str(legacy_db)).rows("core_users; DROP TABLE x"))
+
+
+def test_rerun_does_not_resurrect_an_erased_account(legacy_db, admin):
+    from apps.accounts.services import anonymize
+
+    run(legacy_db)
+    bob = User.objects.get(username="bob")
+    anonymize(bob)
+    run(legacy_db)
+    bob.refresh_from_db()
+    assert not bob.is_active and bob.username.startswith("deleted-") and bob.last_name == ""
+    assert not Client.objects.filter(users=bob).exists()
+    assert not SpaceMembership.objects.filter(user=bob).exists()

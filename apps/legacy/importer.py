@@ -214,7 +214,10 @@ class Importer:
                     )
                     email = f"{slugify(login) or legacy_id}.{legacy_id}@legacy.invalid"
             else:
-                login, email = existing.username, existing.email
+                # Once imported, the account belongs to PFM-NG: a re-run never
+                # overwrites it nor reactivates one that was deleted (GDPR).
+                self.report.skipped["core_users"] += 1
+                continue
             usernames.add(login)
             emails.add(email)
             user = self.upsert(
@@ -229,16 +232,15 @@ class Importer:
                     "is_active": bool(_int(row.get("is_active"), 1)),
                 },
             )
-            if existing is None:
-                user.set_unusable_password()  # legacy hashes are not trusted (md5)
-                user.save(update_fields=["password"])
+            user.set_unusable_password()  # legacy hashes are not trusted (md5)
+            user.save(update_fields=["password"])
 
     def memberships(self) -> None:
         for row in self.rows("core_j_spaces_user"):
             user = self.get(User, "core_users", row["id_user"])
             space = self.get(Space, "core_spaces", row["id_space"])
             role = LEGACY_ROLES.get(_int(row.get("status")))
-            if not (user and space):
+            if not (user and space) or not user.is_active:
                 self.report.skipped["core_j_spaces_user"] += 1
                 continue
             if role is None:  # inactive or pending in the legacy system
@@ -324,7 +326,7 @@ class Importer:
         for row in self.rows("cl_j_client_user"):
             client = self.get(Client, "cl_clients", row["id_client"])
             user = self.get(User, "core_users", row["id_user"])
-            if client and user:
+            if client and user and user.is_active:
                 client.users.add(user)
 
     def resources(self) -> None:

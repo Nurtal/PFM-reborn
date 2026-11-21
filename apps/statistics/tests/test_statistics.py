@@ -113,3 +113,27 @@ def test_dashboard_is_for_managers_and_rejects_huge_periods(client, env, setup_d
         {"start": "2000-01-01", "end": "2026-01-01"},
     )
     assert response.context["form"].errors
+
+
+def test_csv_exports_neutralise_formulas(client, env, setup_done):
+    resource, customer, manager = env
+    resource.name = "=HYPERLINK(1)"
+    resource.save()
+    customer.name = "@SUM(A1)"
+    customer.save()
+    book(resource, customer, manager, dt.datetime(2026, 11, 10, 9, tzinfo=PARIS), 1)
+    client.force_login(manager)
+    params = {"start": "2026-11-01", "end": "2026-11-30"}
+    space = resource.space.slug
+    assert (
+        "'=HYPERLINK"
+        in client.get(
+            reverse("statistics:export", args=[space, "resources"]), params
+        ).content.decode()
+    )
+    assert (
+        "'@SUM"
+        in client.get(
+            reverse("statistics:export", args=[space, "clients"]), params
+        ).content.decode()
+    )

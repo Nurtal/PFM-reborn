@@ -137,7 +137,25 @@ class LDAPBackend(BaseBackend):
             if email and email != user.email and not taken:
                 user.email = email
         user.save()
+        if email and user.email == email:
+            _mark_verified(user)
         return user
 
     def get_user(self, user_id: int) -> User | None:
         return User.objects.filter(pk=user_id, is_active=True).first()
+
+
+def _mark_verified(user: User) -> None:
+    """The directory vouches for the address: record it as verified for allauth
+    (join requests need a verified e-mail)."""
+    from allauth.account.models import EmailAddress
+
+    address, _created = EmailAddress.objects.get_or_create(
+        user=user, email__iexact=user.email, defaults={"email": user.email}
+    )
+    if not (address.verified and address.primary):
+        EmailAddress.objects.filter(user=user, primary=True).exclude(pk=address.pk).update(
+            primary=False
+        )
+        address.verified = address.primary = True
+        address.save(update_fields=["verified", "primary"])

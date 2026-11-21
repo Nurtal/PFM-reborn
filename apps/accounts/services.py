@@ -152,7 +152,7 @@ def anonymize(user: User) -> None:
         sender=placeholder, body=erased
     )
     Ticket.objects.filter(models_q_requester(user)).update(
-        requester=None, requester_email=f"{placeholder}@invalid.invalid"
+        requester=None, requester_email=f"{placeholder}@invalid.invalid", subject=erased
     )
     Booking.objects.filter(user=user).update(title="", note="")
     Booking.history.filter(user=user).update(title="", note="")  # audit trail too

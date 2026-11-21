@@ -2124,3 +2124,14 @@ msgstr "Mot de passe IMAP"
 
 msgid "Leave empty to keep the current one."
 msgstr "Laisser vide pour conserver l'actuel."
+
+msgid "Confirmation failed: your account was not deleted."
+msgstr "Confirmation incorrecte : votre compte n'a pas été supprimé."
+
+#, python-format
+msgid "You are the only administrator of %(spaces)s: name another one first."
+msgstr "Vous êtes le seul administrateur de %(spaces)s : nommez-en un autre d'abord."
+
+#, python-format
+msgid "Type your username (%(name)s) to confirm"
+msgstr "Saisissez votre nom d'utilisateur (%(name)s) pour confirmer"

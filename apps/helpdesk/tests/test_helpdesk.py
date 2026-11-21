@@ -156,3 +156,67 @@ def test_pages_permissions(client, setup_done):
     assert (
         client.get(reverse("helpdesk:mailbox", args=[space.slug])).status_code == 404
     )  # admins only
+
+
+def test_strangers_cannot_post_into_a_ticket():
+    space = SpaceFactory()
+    ticket = services.ingest(space, parse(raw()))
+    other = services.ingest(
+        space, parse(raw(subject="[#1] urgent", sender="eve@evil.example", msg_id="<e@x>"))
+    )
+    assert other != ticket and other.requester_email == "eve@evil.example"
+    assert ticket.messages.count() == 1
+
+
+def test_manager_may_post_into_a_ticket():
+    space = SpaceFactory()
+    manager = MembershipFactory(space=space, role=Role.MANAGER).user
+    ticket = services.ingest(space, parse(raw()))
+    same = services.ingest(
+        space, parse(raw(subject="[#1] note", sender=manager.email, msg_id="<m@x>"))
+    )
+    assert same == ticket
+
+
+def test_out_of_office_does_not_reopen():
+    space = SpaceFactory()
+    ticket = services.ingest(space, parse(raw()))
+    ticket.status = TicketStatus.WAITING
+    ticket.save()
+    services.ingest(
+        space,
+        parse(
+            raw(subject="Re: [#1] x", msg_id="<a@x>", headers={"Auto-Submitted": "auto-replied"})
+        ),
+    )
+    ticket.refresh_from_db()
+    assert ticket.status == TicketStatus.WAITING
+
+
+def test_one_bad_message_does_not_block_the_box(monkeypatch):
+    space = SpaceFactory()
+    mailbox = Mailbox.objects.create(
+        space=space, address="s@pfm.fr", imap_host="imap", username="u"
+    )
+    mailbox.set_password("pw")
+    mailbox.save()
+    real_parse = services.parse
+    calls = []
+
+    def flaky(data):
+        calls.append(1)
+        if len(calls) == 1:
+            raise ValueError("broken headers")
+        return real_parse(data)
+
+    monkeypatch.setattr(services, "parse", flaky)
+    imap = {}
+
+    def connect(*a, **k):
+        imap["c"] = FakeIMAP(*a, **k)
+        return imap["c"]
+
+    assert services.fetch(mailbox, connect=connect) == 1
+    assert imap["c"].seen == ["1", "2"]  # the bad one is marked seen too
+    mailbox.refresh_from_db()
+    assert "1 message" in mailbox.last_error

@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import TemplateView
 
+from apps.core.csvsafe import csv_safe
 from apps.core.permissions import SpaceViewMixin
 from apps.statistics import services
 
@@ -89,12 +90,18 @@ class StatisticsExportView(SpaceViewMixin, View):
             writer.writerow(["resource", "bookings", "hours", "open_hours", "occupancy_percent"])
             for u in services.resource_usage(self.space, start, end):
                 writer.writerow(
-                    [u.resource.name, u.bookings, u.hours, u.open_hours, u.occupancy or ""]
+                    [
+                        csv_safe(u.resource.name),
+                        u.bookings,
+                        u.hours,
+                        u.open_hours,
+                        u.occupancy or "",
+                    ]
                 )
         elif table == "clients":
             writer.writerow(["client", "bookings", "hours"])
             for c in services.client_usage(self.space, start, end):
-                writer.writerow([c.name, c.bookings, c.hours])
+                writer.writerow([csv_safe(c.name), c.bookings, c.hours])
         else:
             writer.writerow(["month", "revenue_excl_tax"])
             for month, total in services.monthly_revenue(self.space, start, end):
