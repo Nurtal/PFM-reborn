@@ -55,6 +55,7 @@ class ClientForm(SpaceModelForm):
             "email",
             "phone",
             "reference",
+            "vat_rate",
             "invoice_address",
             "is_active",
             "users",

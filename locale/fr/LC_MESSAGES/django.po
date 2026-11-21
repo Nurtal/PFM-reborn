@@ -990,3 +990,313 @@ msgstr "Choisissez un compte client pour voir le prix estimé."
 
 msgid "No price defined for this client and resource."
 msgstr "Aucun tarif défini pour ce client et cette ressource."
+
+msgid "Nothing to bill over this period."
+msgstr "Rien à facturer sur cette période."
+
+#, python-format
+msgid "Invoice %(n)s issued."
+msgstr "Facture %(n)s émise."
+
+msgid "Draft deleted."
+msgstr "Brouillon supprimé."
+
+#, python-format
+msgid "Credit note %(n)s issued."
+msgstr "Avoir %(n)s émis."
+
+msgid "Payment status saved."
+msgstr "Règlement enregistré."
+
+msgid "Invalid date."
+msgstr "Date invalide."
+
+msgid "Invoicing settings"
+msgstr "Réglages de facturation"
+
+msgid "This client belongs to another platform."
+msgstr "Ce client appartient à une autre plateforme."
+
+msgid "The period end must be after its start."
+msgstr "La fin de période doit suivre son début."
+
+msgid "Only drafts can be changed."
+msgstr "Seuls les brouillons sont modifiables."
+
+msgid "Quantity cannot be zero."
+msgstr "La quantité ne peut pas être nulle."
+
+msgid "An invoice needs at least one line."
+msgstr "Une facture doit avoir au moins une ligne."
+
+msgid "Only issued invoices can be credited."
+msgstr "Seules les factures émises peuvent faire l’objet d’un avoir."
+
+msgid "This invoice has already been credited."
+msgstr "Cette facture a déjà été annulée par un avoir."
+
+#, python-format
+msgid "Cancels invoice %(number)s"
+msgstr "Annule la facture %(number)s"
+
+msgid "Only issued invoices can be paid."
+msgstr "Seules les factures émises peuvent être réglées."
+
+msgid "Credit note"
+msgstr "Avoir"
+
+msgid "Invoice"
+msgstr "Facture"
+
+msgid "Number"
+msgstr "Numéro"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Due date"
+msgstr "Échéance"
+
+msgid "Cancels invoice"
+msgstr "Annule la facture"
+
+msgid "Period"
+msgstr "Période"
+
+msgid "Billed to"
+msgstr "Facturé à"
+
+msgid "Description"
+msgstr "Désignation"
+
+msgid "Qty"
+msgstr "Qté"
+
+msgid "Unit"
+msgstr "Unité"
+
+msgid "Unit price"
+msgstr "Prix unitaire"
+
+msgid "Amount"
+msgstr "Montant"
+
+msgid "Total excl. tax"
+msgstr "Total HT"
+
+msgid "Total incl. tax"
+msgstr "Total TTC"
+
+msgid "VAT not applicable."
+msgstr "TVA non applicable."
+
+msgid "Payment"
+msgstr "Règlement"
+
+msgid "invoice prefix"
+msgstr "préfixe des factures"
+
+msgid "credit note prefix"
+msgstr "préfixe des avoirs"
+
+msgid "VAT rate (%)"
+msgstr "taux de TVA (%)"
+
+msgid "payment terms (days)"
+msgstr "délai de paiement (jours)"
+
+msgid "issuer"
+msgstr "émetteur"
+
+msgid "issuer address"
+msgstr "adresse de l'émetteur"
+
+msgid "legal mentions"
+msgstr "mentions légales"
+
+msgid "SIRET, VAT number, legal form..."
+msgstr "SIRET, numéro de TVA, forme juridique…"
+
+msgid "payment details"
+msgstr "modalités de paiement"
+
+msgid "Bank details, payment instructions."
+msgstr "Coordonnées bancaires, instructions de paiement."
+
+msgid "footer"
+msgstr "pied de page"
+
+msgid "invoicing settings"
+msgstr "réglages de facturation"
+
+msgid "Draft"
+msgstr "Brouillon"
+
+msgid "Issued"
+msgstr "Émises"
+
+msgid "number"
+msgstr "numéro"
+
+msgid "period start"
+msgstr "début de période"
+
+msgid "period end"
+msgstr "fin de période"
+
+msgid "credited invoice"
+msgstr "facture annulée"
+
+msgid "issue date"
+msgstr "date d'émission"
+
+msgid "due date"
+msgstr "échéance"
+
+msgid "paid on"
+msgstr "réglée le"
+
+msgid "invoice"
+msgstr "facture"
+
+msgid "invoices"
+msgstr "factures"
+
+msgid "quantity"
+msgstr "quantité"
+
+msgid "unit"
+msgstr "unité"
+
+msgid "unit price"
+msgstr "prix unitaire"
+
+msgid "amount"
+msgstr "montant"
+
+msgid "From"
+msgstr "Du"
+
+msgid "To"
+msgstr "Au"
+
+msgid "Client"
+msgstr "Client"
+
+msgid "Every client with bookings to bill"
+msgstr "Tous les clients ayant des réservations à facturer"
+
+msgid "Quantity"
+msgstr "Quantité"
+
+msgid "Leave empty to use the platform rate; 0 for VAT-exempt clients."
+msgstr "Laisser vide pour le taux de la plateforme ; 0 pour un client exonéré."
+
+msgid "Settings"
+msgstr "Réglages"
+
+msgid "Bill a period"
+msgstr "Facturer une période"
+
+msgid "Drafts"
+msgstr "Brouillons"
+
+msgid "Year"
+msgstr "Année"
+
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Credited"
+msgstr "Annulée"
+
+msgid "Paid"
+msgstr "Réglée"
+
+msgid "Awaiting payment"
+msgstr "En attente de règlement"
+
+msgid "Invoice status"
+msgstr "Statut des factures"
+
+msgid "Number or client"
+msgstr "Numéro ou client"
+
+msgid "No invoice"
+msgstr "Aucune facture"
+
+msgid "Bill a period to create drafts from the bookings of your clients."
+msgstr "Facturez une période pour créer des brouillons à partir des réservations de vos clients."
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "Cancelled by credit note"
+msgstr "Annulée par l’avoir"
+
+msgid "Add a line"
+msgstr "Ajouter une ligne"
+
+msgid "VAT"
+msgstr "TVA"
+
+msgid "Issued on"
+msgstr "Émise le"
+
+msgid "Issuing assigns the next number and freezes the invoice: it can then only be cancelled by a credit note."
+msgstr "L'émission attribue le numéro suivant et fige la facture : elle ne pourra ensuite être annulée que par un avoir."
+
+msgid "Issue the invoice"
+msgstr "Émettre la facture"
+
+msgid "Delete the draft"
+msgstr "Supprimer le brouillon"
+
+msgid "Paid on"
+msgstr "Réglée le"
+
+msgid "Cancel with a credit note"
+msgstr "Annuler par un avoir"
+
+msgid "Issue a credit note"
+msgstr "Émettre un avoir"
+
+msgid "Issue this invoice? It cannot be changed afterwards."
+msgstr "Émettre cette facture ? Elle ne pourra plus être modifiée."
+
+msgid "Delete this draft?"
+msgstr "Supprimer ce brouillon ?"
+
+msgid "Issue a credit note cancelling this invoice?"
+msgstr "Émettre un avoir annulant cette facture ?"
+
+msgid "Create drafts"
+msgstr "Créer les brouillons"
+
+msgid "Creates a draft per client from confirmed bookings not billed yet. Nothing is numbered until you issue it."
+msgstr "Crée un brouillon par client à partir des réservations confirmées non encore facturées. Aucun numéro n'est attribué avant l'émission."
+
+msgid "Reference"
+msgstr "Référence"
+
+msgid "(draft)"
+msgstr "(brouillon)"
+
+#, python-format
+msgid "%(n)d draft created."
+msgid_plural "%(n)d drafts created."
+msgstr[0] "%(n)d brouillon créé."
+msgstr[1] "%(n)d brouillons créés."
+
+#, python-format
+msgid "%(n)d booking has no price for its client and was left out."
+msgid_plural "%(n)d bookings have no price for their client and were left out."
+msgstr[0] "%(n)d réservation n'a pas de tarif pour son client et a été écartée."
+msgstr[1] "%(n)d réservations n'ont pas de tarif pour leur client et ont été écartées."
+
+#, python-format
+msgid "Reference: %(ref)s"
+msgstr "Référence : %(ref)s"

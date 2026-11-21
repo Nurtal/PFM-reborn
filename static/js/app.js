@@ -78,6 +78,12 @@ document.addEventListener("alpine:init", () => {
     }
   });
 
+  // Confirmation for destructive actions of plain (non-HTMX) forms.
+  document.addEventListener("click", (e) => {
+    const button = e.target.closest("[data-confirm]");
+    if (button && !window.confirm(button.dataset.confirm)) e.preventDefault();
+  });
+
   document.addEventListener("change", (e) => {
     const select = e.target.closest("select[data-navigate]");
     if (select && select.value) window.location.assign(select.value);

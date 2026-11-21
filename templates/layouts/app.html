@@ -40,6 +40,11 @@
               <c-icon name="file-text" class="size-4" />
               {% translate "Authorizations" %}
             </a>
+            {% url 'invoices:list' current_space.slug as invoices_url %}
+            <a href="{{ invoices_url }}" class="nav-link" {% if "/invoices/" in request.path %}aria-current="page"{% endif %}>
+              <c-icon name="file-text" class="size-4" />
+              {% translate "Invoicing" %}
+            </a>
             {% url 'clients:list' current_space.slug as clients_url %}
             <a href="{{ clients_url }}" class="nav-link" {% if "/clients/" in request.path %}aria-current="page"{% endif %}>
               <c-icon name="building" class="size-4" />

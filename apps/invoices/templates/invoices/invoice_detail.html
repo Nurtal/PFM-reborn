@@ -1,0 +1,118 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{{ invoice.number|default:_("Draft") }}{% endblock title %}
+{% block content %}
+  {% if invoice.kind == "credit" %}
+    {% translate "Credit note" as kind_label %}
+  {% else %}
+    {% translate "Invoice" as kind_label %}
+  {% endif %}
+  <c-page-header title="{{ kind_label }} {{ invoice.number|default:_('(draft)') }}" subtitle="{{ invoice.client_name|default:invoice.client.name }} · {{ invoice.period_start|date:'SHORT_DATE_FORMAT' }} – {{ invoice.period_end|date:'SHORT_DATE_FORMAT' }}">
+    {% if invoice.pdf %}
+      <a href="{% url 'invoices:pdf' current_space.slug invoice.public_id %}" class="btn-secondary" target="_blank" rel="noopener">PDF</a>
+    {% endif %}
+    <a href="{% url 'invoices:list' current_space.slug %}{% if invoice.status == 'draft' %}?status=draft{% endif %}" class="btn-ghost">{% translate "Back" %}</a>
+  </c-page-header>
+
+  {% if invoice.credited_invoice %}
+    <p class="mb-4 text-sm">{% translate "Cancels invoice" %} <a href="{% url 'invoices:detail' current_space.slug invoice.credited_invoice.public_id %}">{{ invoice.credited_invoice.number }}</a></p>
+  {% endif %}
+  {% if credit_note %}
+    <p class="mb-4 text-sm">{% translate "Cancelled by credit note" %} <a href="{% url 'invoices:detail' current_space.slug credit_note.public_id %}">{{ credit_note.number }}</a></p>
+  {% endif %}
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="space-y-6 lg:col-span-2">
+      <div class="card overflow-x-auto p-0">
+        <table class="w-full text-left text-sm">
+          <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+            <tr>
+              <th scope="col" class="px-4 py-3">{% translate "Description" %}</th>
+              <th scope="col" class="px-4 py-3 text-right">{% translate "Qty" %}</th>
+              <th scope="col" class="px-4 py-3 text-right">{% translate "Unit price" %}</th>
+              <th scope="col" class="px-4 py-3 text-right">{% translate "Amount" %}</th>
+              {% if invoice.status == "draft" %}<th scope="col" class="px-2 py-3"><span class="sr-only">{% translate "Actions" %}</span></th>{% endif %}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {% for line in lines %}
+              <tr>
+                <td class="px-4 py-2">{{ line.description }}</td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">{{ line.quantity|floatformat:"-2" }} {{ line.unit }}</td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">{{ line.unit_price }}</td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">{{ line.amount }}</td>
+                {% if invoice.status == "draft" %}
+                  <td class="px-2 py-2 text-right">
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove_line">
+                      <button type="submit" name="line" value="{{ line.pk }}" class="btn-ghost px-2 text-red-600" aria-label="{% translate 'Remove' %}">
+                        <c-icon name="trash" class="size-4" />
+                      </button>
+                    </form>
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if invoice.status == "draft" %}
+        <form method="post" class="card space-y-4" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_line">
+          <h2 class="font-semibold">{% translate "Add a line" %}</h2>
+          <c-field :field="line_form.description" />
+          <div class="grid gap-4 sm:grid-cols-3">
+            <c-field :field="line_form.quantity" />
+            <c-field :field="line_form.unit" />
+            <c-field :field="line_form.unit_price" />
+          </div>
+          <button type="submit" class="btn-secondary">{% translate "Add" %}</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <aside class="space-y-6">
+      <div class="card">
+        <dl class="space-y-2 text-sm">
+          {% if totals %}
+            <div class="flex justify-between"><dt>{% translate "Total excl. tax" %}</dt><dd>{{ totals.excl_tax }} {{ invoice.currency }}</dd></div>
+            <div class="flex justify-between"><dt>{% translate "VAT" %} {{ vat_rate|floatformat:"-2" }} %</dt><dd>{{ totals.tax }} {{ invoice.currency }}</dd></div>
+            <div class="flex justify-between border-t border-zinc-200 pt-2 font-semibold dark:border-zinc-700"><dt>{% translate "Total incl. tax" %}</dt><dd>{{ totals.incl_tax }} {{ invoice.currency }}</dd></div>
+          {% else %}
+            <div class="flex justify-between"><dt>{% translate "Total excl. tax" %}</dt><dd>{{ invoice.total_excl_tax }} {{ invoice.currency }}</dd></div>
+            <div class="flex justify-between"><dt>{% translate "VAT" %} {{ invoice.vat_rate|floatformat:"-2" }} %</dt><dd>{{ invoice.total_tax }} {{ invoice.currency }}</dd></div>
+            <div class="flex justify-between border-t border-zinc-200 pt-2 font-semibold dark:border-zinc-700"><dt>{% translate "Total incl. tax" %}</dt><dd>{{ invoice.total_incl_tax }} {{ invoice.currency }}</dd></div>
+            <div class="flex justify-between text-zinc-500"><dt>{% translate "Issued on" %}</dt><dd>{{ invoice.issue_date|date:"SHORT_DATE_FORMAT" }}</dd></div>
+            {% if invoice.kind == "invoice" %}<div class="flex justify-between text-zinc-500"><dt>{% translate "Due date" %}</dt><dd>{{ invoice.due_date|date:"SHORT_DATE_FORMAT" }}</dd></div>{% endif %}
+          {% endif %}
+        </dl>
+      </div>
+
+      {% if invoice.status == "draft" %}
+        <form method="post" class="card space-y-3">
+          {% csrf_token %}
+          <p class="text-sm text-zinc-600 dark:text-zinc-400">{% translate "Issuing assigns the next number and freezes the invoice: it can then only be cancelled by a credit note." %}</p>
+          <button type="submit" name="action" value="issue" class="btn-primary w-full" data-confirm="{% translate 'Issue this invoice? It cannot be changed afterwards.' %}">{% translate "Issue the invoice" %}</button>
+          <button type="submit" name="action" value="delete" class="btn-ghost w-full text-red-600" data-confirm="{% translate 'Delete this draft?' %}">{% translate "Delete the draft" %}</button>
+        </form>
+      {% elif invoice.kind == "invoice" and not credit_note %}
+        <form method="post" class="card space-y-3">
+          {% csrf_token %}
+          <h2 class="font-semibold">{% translate "Payment" %}</h2>
+          <label for="paid_at">{% translate "Paid on" %}</label>
+          <input id="paid_at" type="date" name="paid_at" value="{{ invoice.paid_at|date:'Y-m-d' }}">
+          <button type="submit" name="action" value="paid" class="btn-secondary w-full">{% translate "Save" %}</button>
+        </form>
+        <form method="post" class="card space-y-3">
+          {% csrf_token %}
+          <h2 class="font-semibold">{% translate "Cancel with a credit note" %}</h2>
+          <label for="reason">{% translate "Reason" %}</label>
+          <input id="reason" type="text" name="reason" maxlength="300">
+          <button type="submit" name="action" value="credit" class="btn-danger w-full" data-confirm="{% translate 'Issue a credit note cancelling this invoice?' %}">{% translate "Issue a credit note" %}</button>
+        </form>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock content %}

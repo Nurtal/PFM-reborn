@@ -174,6 +174,7 @@ class Command(BaseCommand):
                 start,
                 end,
                 for_user=actor,
+                client=martin if actor != manager else None,
                 title=title,
                 now=start - dt.timedelta(days=30),
             )

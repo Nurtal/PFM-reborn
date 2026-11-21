@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "apps.resources",
     "apps.booking",
     "apps.clients",
+    "apps.invoices",
 ]
 
 MIDDLEWARE = [
@@ -280,5 +281,6 @@ LOGGING = {
     "loggers": {
         "django.db.backends": {"level": "WARNING"},
         "huey": {"level": "INFO"},
+        "fontTools": {"level": "WARNING"},  # PDF font subsetting is very chatty
     },
 }

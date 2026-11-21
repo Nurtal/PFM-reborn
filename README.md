@@ -105,7 +105,7 @@ Second fil conducteur : **tout tient dans un processus**. Une plateforme, c'est 
 
 | Besoin | Lib |
 |---|---|
-| PDF (factures, devis) | **Typst** via le paquet Python `typst` : un seul wheel, aucune dépendance système, des PDF générés en quelques millisecondes et un très beau rendu typographique. Écarté : WeasyPrint, qui tire Pango/Cairo (~+80 Mo d'image). |
+| PDF (factures, devis) | **fpdf2** (Python pur) avec la police libre Noto Sans embarquée : aucune dépendance système, quelques dizaines de ms par facture. Écartés : **Typst** (le wheel pèse 84 Mo, soit plus que tout le reste de l'image : incompatible avec le budget de taille) et WeasyPrint (Pango/Cairo, ~+80 Mo). |
 | Export Excel | **openpyxl** |
 | Authentification | **django-allauth** (local + OIDC/SSO + MFA TOTP/WebAuthn) et **django-auth-ldap** |
 | Anti brute-force | **django-axes** |
