@@ -15,6 +15,7 @@ dependencies = [
     "django-csp>=4",
     "django-environ>=0.14.0",
     "django-htmx>=1.29.0",
+    "django-ninja>=1.8.0",
     "django-simple-history>=3.13.0",
     "fpdf2>=2.9.0",
     "granian>=2.8.9",

@@ -160,6 +160,7 @@
               <li><a href="{% url 'account_change_password' %}" class="nav-link">{% translate "Password" %}</a></li>
               <li><a href="{% url 'mfa_index' %}" class="nav-link">{% translate "Two-factor authentication" %}</a></li>
               <li><a href="{% url 'accounts:my_data' %}" class="nav-link">{% translate "My data" %}</a></li>
+              <li><a href="{% url 'api_tokens' %}" class="nav-link">{% translate "API tokens" %}</a></li>
               <li>
                 <form method="post" action="{% url 'account_logout' %}">
                   {% csrf_token %}

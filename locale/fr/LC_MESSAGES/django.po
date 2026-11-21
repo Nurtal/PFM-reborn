@@ -2135,3 +2135,63 @@ msgstr "Vous êtes le seul administrateur de %(spaces)s : nommez-en un autre d'a
 #, python-format
 msgid "Type your username (%(name)s) to confirm"
 msgstr "Saisissez votre nom d'utilisateur (%(name)s) pour confirmer"
+
+msgid "Token revoked."
+msgstr "Jeton révoqué."
+
+msgid "API token"
+msgstr "Jeton d'API"
+
+msgid "expires"
+msgstr "expire"
+
+msgid "API tokens"
+msgstr "Jetons d'API"
+
+msgid "API"
+msgstr "API"
+
+msgid "Copy your token now: it will not be shown again."
+msgstr "Copiez votre jeton maintenant : il ne sera plus affiché."
+
+msgid "Token"
+msgstr "Jeton"
+
+msgid "Last used"
+msgstr "Dernière utilisation"
+
+msgid "Expires"
+msgstr "Expire"
+
+msgid "Revoke"
+msgstr "Révoquer"
+
+msgid "No token."
+msgstr "Aucun jeton."
+
+msgid "New token"
+msgstr "Nouveau jeton"
+
+msgid "Valid for"
+msgstr "Valable"
+
+msgid "30 days"
+msgstr "30 jours"
+
+msgid "90 days"
+msgstr "90 jours"
+
+msgid "1 year"
+msgstr "1 an"
+
+msgid "No expiry"
+msgstr "Sans expiration"
+
+msgid "Create"
+msgstr "Créer"
+
+msgid "For scripts and integrations: send it as Authorization: Bearer <token>. It acts with your rights."
+msgstr "Pour les scripts et intégrations : envoyez-le dans l’en-tête Authorization: Bearer <jeton>. Il agit avec vos droits."
+
+msgid "Revoke this token?"
+msgstr "Révoquer ce jeton ?"

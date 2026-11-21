@@ -427,7 +427,8 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 | M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
 | M5 Migration legacy | ✅ cœur (voir §12) — prestations legacy à faire, à valider sur une vraie base |
 | M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer, helpdesk IMAP, SSO OpenID Connect, LDAP (ldap3, sans dépendance système) |
-| M7 / M8 | à faire |
+| M7 Modules P3 | à faire (en attente de l'élagage avec les utilisateurs) |
+| M8 API | ✅ REST v1 (django-ninja) : jetons personnels hachés, espaces, ressources, réservations (création/annulation via les règles métier), factures ; schéma OpenAPI sur `/api/v1/openapi.json` |
 
 ## 14. Licence
 

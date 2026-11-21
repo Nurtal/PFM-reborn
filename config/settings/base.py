@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "apps.mailer",
     "apps.legacy",
     "apps.helpdesk",
+    "apps.api",
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "apps.core.middleware.SetupRequiredMiddleware",
     # Deny by default: every view needs a login unless marked @login_not_required.
-    "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    "apps.core.middleware.LoginRequiredMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "apps.accounts.middleware.AdminMFARequiredMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
