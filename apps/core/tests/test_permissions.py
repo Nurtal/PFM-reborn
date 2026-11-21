@@ -1,6 +1,7 @@
 """Space isolation and role checks (README §7.5)."""
 
 import pytest
+from allauth.mfa.models import Authenticator
 from django.urls import reverse
 
 from apps.core.models import Role
@@ -68,7 +69,6 @@ def test_inactive_space_is_hidden_from_members(client, setup_done):
 
 
 def _login(client, user):
+    # Admins must have a second factor (enforcement itself is tested in accounts).
+    Authenticator.objects.get_or_create(user=user, type=Authenticator.Type.TOTP, data={})
     client.force_login(user)
-    session = client.session
-    session["pfm_mfa_ok"] = True  # MFA enforcement is tested separately
-    session.save()

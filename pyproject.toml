@@ -22,6 +22,10 @@ dependencies = [
     "whitenoise[brotli]>=6.12.0",
 ]
 
+[project.optional-dependencies]
+# Only for instances that set DATABASE_URL=postgres://... (+ ~10 MB in the image).
+postgres = ["psycopg[binary]>=3.2"]
+
 [tool.uv]
 package = false
 

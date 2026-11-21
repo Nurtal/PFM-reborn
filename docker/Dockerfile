@@ -8,6 +8,8 @@ FROM python:${PYTHON_VERSION}-slim AS builder
 ARG TARGETARCH
 ARG TAILWIND_VERSION=v4.3.5
 ARG TINI_VERSION=v0.19.0
+# Build with --build-arg PFM_EXTRAS="--extra postgres" for PostgreSQL support.
+ARG PFM_EXTRAS=""
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 \
@@ -29,7 +31,7 @@ RUN set -eux; \
 WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-install-project
+    uv sync --locked --no-dev --no-install-project $PFM_EXTRAS
 
 COPY . .
 ENV PFM_DATA_DIR=/tmp/build-data PFM_SECRET_KEY=build-only-not-secret \

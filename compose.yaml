@@ -1,7 +1,8 @@
 # Production: one service, one volume.
 #   docker compose up -d                      # app only
 #   docker compose --profile tls up -d        # + Caddy (automatic HTTPS)
-#   docker compose --profile postgres up -d   # + PostgreSQL (set DATABASE_URL)
+#   docker compose --profile postgres up -d   # + PostgreSQL (set DATABASE_URL; image
+#     built with --build-arg PFM_EXTRAS="--extra postgres")
 services:
   pfm:
     image: ghcr.io/OWNER/pfm-ng:latest

@@ -49,3 +49,22 @@ def test_login_page_renders(client, setup_done):
     response = client.get(reverse("account_login"))
     assert response.status_code == 200
     assert b"btn-primary" in response.content
+
+
+def test_promotion_to_admin_is_caught_after_recheck_window(client, setup_done, monkeypatch):
+    import time
+
+    from apps.accounts import middleware
+
+    m = MembershipFactory(role=Role.USER)
+    client.force_login(m.user)
+    url = reverse("core:space_dashboard", args=[m.space.slug])
+    assert client.get(url).status_code == 200
+
+    m.role = Role.ADMIN
+    m.save()
+    assert client.get(url).status_code == 200  # still inside the window
+
+    now = time.time() + middleware.RECHECK_SECONDS + 1
+    monkeypatch.setattr(middleware.time, "time", lambda: now)
+    assert client.get(url)["Location"] == reverse("mfa_activate_totp")

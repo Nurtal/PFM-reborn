@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 
 from django.contrib import messages
@@ -9,7 +10,10 @@ from django.utils.translation import gettext as _
 
 from apps.accounts import services
 
-SESSION_FLAG = "pfm_mfa_ok"
+SESSION_KEY = "pfm_mfa_checked_until"
+# Re-check periodically so a user promoted to admin, or an admin who removed
+# their authenticator, is caught within minutes instead of at the next login.
+RECHECK_SECONDS = 300
 # Paths an admin without MFA may still reach (to set it up or to leave).
 ALLOWED_PREFIXES = ("/accounts/", "/static/", "/healthz", "/i18n/", "/setup/")
 
@@ -24,7 +28,7 @@ class AdminMFARequiredMiddleware:
         user = request.user
         if (
             user.is_authenticated
-            and not request.session.get(SESSION_FLAG)
+            and request.session.get(SESSION_KEY, 0) < time.time()
             and not request.path.startswith(ALLOWED_PREFIXES)
         ):
             if services.requires_mfa(user) and not services.has_mfa(user):  # type: ignore[arg-type]
@@ -33,5 +37,5 @@ class AdminMFARequiredMiddleware:
                     _("Two-factor authentication is mandatory for administrators."),
                 )
                 return redirect("mfa_activate_totp")
-            request.session[SESSION_FLAG] = True
+            request.session[SESSION_KEY] = time.time() + RECHECK_SECONDS
         return self.get_response(request)
