@@ -136,7 +136,36 @@ class InstanceSettings(models.Model):
     )
     smtp_from_email = models.EmailField(_("sender address"), blank=True)
 
-    history = HistoricalRecords(excluded_fields=["smtp_password_encrypted"])
+    ldap_url = models.CharField(
+        _("LDAP server"), max_length=255, blank=True, help_text=_("e.g. ldaps://ldap.univ.fr")
+    )
+    ldap_start_tls = models.BooleanField(_("STARTTLS"), default=False)
+    ldap_bind_dn = models.CharField(
+        _("service account DN"),
+        max_length=255,
+        blank=True,
+        help_text=_("Leave empty to bind directly with the user DN template."),
+    )
+    ldap_bind_password_encrypted = models.TextField(blank=True, editable=False)
+    ldap_user_dn_template = models.CharField(
+        _("user DN template"),
+        max_length=255,
+        blank=True,
+        help_text=_("e.g. uid={username},ou=people,dc=univ,dc=fr (direct bind)."),
+    )
+    ldap_search_base = models.CharField(_("user search base"), max_length=255, blank=True)
+    ldap_search_filter = models.CharField(
+        _("user search filter"), max_length=255, default="(uid={username})"
+    )
+    ldap_attr_email = models.CharField(_("e-mail attribute"), max_length=64, default="mail")
+    ldap_attr_first_name = models.CharField(
+        _("first name attribute"), max_length=64, default="givenName"
+    )
+    ldap_attr_last_name = models.CharField(_("last name attribute"), max_length=64, default="sn")
+
+    history = HistoricalRecords(
+        excluded_fields=["smtp_password_encrypted", "ldap_bind_password_encrypted"]
+    )
 
     class Meta:
         verbose_name = _("instance settings")
@@ -158,6 +187,18 @@ class InstanceSettings(models.Model):
         from apps.core.crypto import encrypt
 
         self.smtp_password_encrypted = encrypt(raw) if raw else ""
+
+    def set_ldap_bind_password(self, raw: str) -> None:
+        from apps.core.crypto import encrypt
+
+        self.ldap_bind_password_encrypted = encrypt(raw) if raw else ""
+
+    def get_ldap_bind_password(self) -> str:
+        from apps.core.crypto import decrypt
+
+        if not self.ldap_bind_password_encrypted:
+            return ""
+        return decrypt(self.ldap_bind_password_encrypted)
 
     def get_smtp_password(self) -> str:
         from apps.core.crypto import decrypt

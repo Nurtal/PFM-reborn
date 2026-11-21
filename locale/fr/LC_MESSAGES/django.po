@@ -1992,3 +1992,42 @@ msgstr "Demande d'accès"
 
 msgid "No account yet? Sign up, then ask to join a platform."
 msgstr "Pas encore de compte ? Inscrivez-vous, puis demandez à rejoindre une plateforme."
+
+msgid "LDAP server"
+msgstr "Serveur LDAP"
+
+msgid "e.g. ldaps://ldap.univ.fr"
+msgstr "par exemple ldaps://ldap.univ.fr"
+
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
+msgid "service account DN"
+msgstr "DN du compte de service"
+
+msgid "Leave empty to bind directly with the user DN template."
+msgstr "Laisser vide pour se connecter directement avec le modèle de DN utilisateur."
+
+msgid "user DN template"
+msgstr "modèle de DN utilisateur"
+
+msgid "e.g. uid={username},ou=people,dc=univ,dc=fr (direct bind)."
+msgstr "par exemple uid={username},ou=people,dc=univ,dc=fr (connexion directe)."
+
+msgid "user search base"
+msgstr "base de recherche des utilisateurs"
+
+msgid "user search filter"
+msgstr "filtre de recherche des utilisateurs"
+
+msgid "e-mail attribute"
+msgstr "attribut e-mail"
+
+msgid "first name attribute"
+msgstr "attribut prénom"
+
+msgid "last name attribute"
+msgstr "attribut nom"
+
+msgid "Legacy import"
+msgstr "Import de l'ancien système"

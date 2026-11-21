@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.mfa",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "axes",
     "csp",
     "django_cotton",
@@ -152,6 +154,7 @@ AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "rules.permissions.ObjectPermissionBackend",
+    "apps.accounts.ldap.LDAPBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
@@ -181,6 +184,15 @@ ACCOUNT_SESSION_REMEMBER = None
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = False
 ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,5/5m/key"}
 ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+# Institutional SSO (OpenID Connect: Renater, Keycloak, Azure AD...). Each provider
+# is a "Social application" configured in the admin (provider: OpenID Connect).
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_PROVIDERS = {"openid_connect": {"OAUTH_PKCE_ENABLED": True}}
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"  # trust the IdP's verified e-mail claim
+# Never link an SSO login to an existing local account just because e-mails match:
+# that would let a misconfigured IdP take over accounts.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_STORE_TOKENS = False
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes", "webauthn"]
 MFA_PASSKEY_LOGIN_ENABLED = True
 MFA_TOTP_ISSUER = "PFM"
