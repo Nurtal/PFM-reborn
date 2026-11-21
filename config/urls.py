@@ -20,6 +20,7 @@ urlpatterns = [
     path("s/<slug:space_slug>/statistics/", include("apps.statistics.urls")),
     path("s/<slug:space_slug>/documents/", include("apps.documents.urls")),
     path("s/<slug:space_slug>/mailer/", include("apps.mailer.urls")),
+    path("s/<slug:space_slug>/helpdesk/", include("apps.helpdesk.urls")),
     path("s/<slug:space_slug>/", include("apps.booking.urls")),
     path("", include("apps.core.urls")),
 ]

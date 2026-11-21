@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.mailer",
     "apps.legacy",
+    "apps.helpdesk",
 ]
 
 MIDDLEWARE = [

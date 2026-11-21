@@ -81,6 +81,11 @@
               <c-icon name="layout-dashboard" class="size-4" />
               {% translate "Statistics" %}
             </a>
+            {% url 'helpdesk:list' current_space.slug as helpdesk_url %}
+            <a href="{{ helpdesk_url }}" class="nav-link" {% if "/helpdesk/" in request.path %}aria-current="page"{% endif %}>
+              <c-icon name="mail" class="size-4" />
+              {% translate "Helpdesk" %}
+            </a>
             {% url 'mailer:index' current_space.slug as mailer_url %}
             <a href="{{ mailer_url }}" class="nav-link" {% if request.path == mailer_url %}aria-current="page"{% endif %}>
               <c-icon name="mail" class="size-4" />

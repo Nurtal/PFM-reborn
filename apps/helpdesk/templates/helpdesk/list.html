@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Helpdesk" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Helpdesk' %}" subtitle="{% if mailbox %}{{ mailbox.address }}{% else %}{% translate 'No mailbox configured yet.' %}{% endif %}">
+    {% if can_administer_space %}<a href="{% url 'helpdesk:mailbox' current_space.slug %}" class="btn-secondary">{% translate "Mailbox" %}</a>{% endif %}
+  </c-page-header>
+  {% if mailbox.last_error %}
+    <p class="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200" role="alert">{% translate "Last check failed:" %} {{ mailbox.last_error }}</p>
+  {% endif %}
+  <nav class="mb-4 flex gap-1" aria-label="{% translate 'Ticket status' %}">
+    {% for value, label in statuses %}
+      <a href="?status={{ value }}" class="btn-ghost {% if status == value %}bg-zinc-100 dark:bg-zinc-800{% endif %}" {% if status == value %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  {% if tickets %}
+    <div class="card overflow-x-auto p-0">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr><th scope="col" class="px-4 py-3">#</th><th scope="col" class="px-4 py-3">{% translate "Subject" %}</th><th scope="col" class="px-4 py-3">{% translate "Requester" %}</th><th scope="col" class="px-4 py-3">{% translate "Assigned to" %}</th><th scope="col" class="px-4 py-3">{% translate "Updated" %}</th></tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for t in tickets %}
+            <tr>
+              <td class="px-4 py-3 text-zinc-500">{{ t.number }}</td>
+              <td class="px-4 py-3"><a href="{% url 'helpdesk:detail' current_space.slug t.number %}" class="font-medium">{{ t.subject }}</a></td>
+              <td class="px-4 py-3">{{ t.requester_email }}</td>
+              <td class="px-4 py-3">{{ t.assignee|default:"—" }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ t.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <c-empty-state icon="mail" title="{% translate 'No ticket' %}" />
+  {% endif %}
+{% endblock content %}

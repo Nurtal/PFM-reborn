@@ -2031,3 +2031,96 @@ msgstr "attribut nom"
 
 msgid "Legacy import"
 msgstr "Import de l'ancien système"
+
+msgid "Reply sent."
+msgstr "Réponse envoyée."
+
+msgid "Ticket updated."
+msgstr "Ticket mis à jour."
+
+msgid "Helpdesk mailbox"
+msgstr "Boîte mail du support"
+
+msgid "support address"
+msgstr "adresse du support"
+
+msgid "IMAP host"
+msgstr "serveur IMAP"
+
+msgid "IMAP port"
+msgstr "port IMAP"
+
+msgid "SSL/TLS"
+msgstr "SSL/TLS"
+
+msgid "IMAP user"
+msgstr "utilisateur IMAP"
+
+msgid "folder"
+msgstr "dossier"
+
+msgid "helpdesk mailbox"
+msgstr "boîte mail du support"
+
+msgid "helpdesk mailboxes"
+msgstr "boîtes mail du support"
+
+msgid "Waiting for the requester"
+msgstr "En attente du demandeur"
+
+msgid "requester"
+msgstr "demandeur"
+
+msgid "assigned to"
+msgstr "assigné à"
+
+msgid "ticket"
+msgstr "ticket"
+
+msgid "tickets"
+msgstr "tickets"
+
+msgid "Helpdesk"
+msgstr "Support"
+
+msgid "Reply"
+msgstr "Répondre"
+
+msgid "Send"
+msgstr "Envoyer"
+
+msgid "Close the ticket"
+msgstr "Clore le ticket"
+
+msgid "Assigned to"
+msgstr "Assigné à"
+
+msgid "Mailbox"
+msgstr "Boîte mail"
+
+msgid "Last check failed:"
+msgstr "Dernière relève en échec :"
+
+msgid "Subject"
+msgstr "Objet"
+
+msgid "Requester"
+msgstr "Demandeur"
+
+msgid "Updated"
+msgstr "Mis à jour"
+
+msgid "No mailbox configured yet."
+msgstr "Aucune boîte mail configurée pour le moment."
+
+msgid "Ticket status"
+msgstr "Statut des tickets"
+
+msgid "No ticket"
+msgstr "Aucun ticket"
+
+msgid "IMAP password"
+msgstr "Mot de passe IMAP"
+
+msgid "Leave empty to keep the current one."
+msgstr "Laisser vide pour conserver l'actuel."
