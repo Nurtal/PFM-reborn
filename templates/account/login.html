@@ -10,7 +10,11 @@
         {% trans "Sign In" %}
     {% endelement %}
     {% if not SOCIALACCOUNT_ONLY %}
-        {# PFM: self sign-up is closed; accounts come from platform administrators. #}
+        {% if signup_open %}
+            {% element p %}
+                <a href="{{ signup_url }}">{% trans "No account yet? Sign up, then ask to join a platform." %}</a>
+            {% endelement %}
+        {% endif %}
         {% url 'account_login' as login_url %}
         {% element form form=form method="post" action=login_url tags="entrance,login" %}
             {% slot body %}

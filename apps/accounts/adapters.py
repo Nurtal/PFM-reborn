@@ -5,10 +5,13 @@ from django.http import HttpRequest
 
 
 class AccountAdapter(DefaultAccountAdapter):
-    """Self sign-up is closed: accounts are created by space administrators.
+    """Self sign-up follows the instance setting (closed by default).
 
-    Joining requests (legacy "demandes d'adhésion") will reopen this per space.
+    Signing up gives no access by itself: users then send a join request
+    that a space administrator approves.
     """
 
     def is_open_for_signup(self, request: HttpRequest) -> bool:
-        return False
+        from apps.core.models import InstanceSettings
+
+        return InstanceSettings.load().allow_signup

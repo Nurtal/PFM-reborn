@@ -9,9 +9,17 @@ from dataclasses import dataclass
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from apps.accounts.models import User
-from apps.core.models import InstanceSettings, Role, Space, SpaceMembership
+from apps.core.models import (
+    InstanceSettings,
+    JoinRequest,
+    JoinStatus,
+    Role,
+    Space,
+    SpaceMembership,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -147,3 +155,71 @@ def remove_member(membership: SpaceMembership) -> None:
     if membership.role == Role.ADMIN and _admin_count(membership.space) <= 1:
         raise LastAdminError
     membership.delete()
+
+
+# --- Join requests (legacy "demandes d'adhésion") -----------------------------------
+
+
+class JoinError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
+def joinable_spaces(user: User) -> list[Space]:
+    return list(
+        Space.objects.filter(is_active=True, accepts_join_requests=True)
+        .exclude(memberships__user=user)
+        .order_by("name")
+    )
+
+
+def has_verified_email(user: User) -> bool:
+    from allauth.account.models import EmailAddress
+
+    return bool(
+        EmailAddress.objects.filter(user=user, email__iexact=user.email, verified=True).exists()
+    )
+
+
+@transaction.atomic
+def request_join(user: User, space: Space, message: str = "") -> JoinRequest:
+    if not (space.is_active and space.accepts_join_requests):
+        raise JoinError(_("This platform does not accept requests."))
+    if SpaceMembership.objects.filter(user=user, space=space).exists():
+        raise JoinError(_("You are already a member of this platform."))
+    if JoinRequest.objects.filter(user=user, space=space, status=JoinStatus.PENDING).exists():
+        raise JoinError(_("Your request is already pending."))
+    if not has_verified_email(user):
+        raise JoinError(_("Confirm your e-mail address first."))
+    join = JoinRequest.objects.create(user=user, space=space, message=message[:2000])
+    transaction.on_commit(lambda: _notify_admins(join.pk))
+    return join
+
+
+@transaction.atomic
+def decide_join(
+    admin: User, join: JoinRequest, approve: bool, role: Role = Role.USER
+) -> JoinRequest:
+    if join.status != JoinStatus.PENDING:
+        raise JoinError(_("This request has already been handled."))
+    if approve:
+        add_member(join.space, join.user, role)
+    join.status = JoinStatus.APPROVED if approve else JoinStatus.REJECTED
+    join.decided_by = admin
+    join.decided_at = timezone.now()
+    join.save(update_fields=["status", "decided_by", "decided_at"])
+    transaction.on_commit(lambda: _notify_user(join.pk))
+    return join
+
+
+def _notify_admins(join_id: int) -> None:
+    from apps.core import tasks
+
+    tasks.notify_join_request(join_id)
+
+
+def _notify_user(join_id: int) -> None:
+    from apps.core import tasks
+
+    tasks.notify_join_decision(join_id)

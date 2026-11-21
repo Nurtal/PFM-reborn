@@ -1856,3 +1856,139 @@ msgid "This message will be sent to %(n)s person."
 msgid_plural "This message will be sent to %(n)s people."
 msgstr[0] "Ce message sera envoyé à %(n)s personne."
 msgstr[1] "Ce message sera envoyé à %(n)s personnes."
+
+msgid "Wrong password: your account was not deleted."
+msgstr "Mot de passe incorrect : votre compte n'a pas été supprimé."
+
+msgid "Super-administrators must be removed by another administrator."
+msgstr "Un super-administrateur doit être supprimé par un autre administrateur."
+
+msgid "Your account and personal data have been deleted."
+msgstr "Votre compte et vos données personnelles ont été supprimés."
+
+msgid "Request sent. An administrator will review it."
+msgstr "Demande envoyée. Un administrateur va l’examiner."
+
+msgid "Request approved."
+msgstr "Demande acceptée."
+
+msgid "Request declined."
+msgstr "Demande refusée."
+
+#, python-format
+msgid "[%(space)s] Access request from %(user)s"
+msgstr "[%(space)s] Demande d'accès de %(user)s"
+
+#, python-format
+msgid "%(user)s (%(email)s) asks to join %(space)s."
+msgstr "%(user)s (%(email)s) demande à rejoindre %(space)s."
+
+#, python-format
+msgid "Your access to %(space)s has been approved."
+msgstr "Votre accès à %(space)s a été accepté."
+
+#, python-format
+msgid "Your access request to %(space)s was declined."
+msgstr "Votre demande d'accès à %(space)s a été refusée."
+
+msgid "This platform does not accept requests."
+msgstr "Cette plateforme n'accepte pas de demandes."
+
+msgid "You are already a member of this platform."
+msgstr "Vous êtes déjà membre de cette plateforme."
+
+msgid "Your request is already pending."
+msgstr "Votre demande est déjà en attente."
+
+msgid "Confirm your e-mail address first."
+msgstr "Confirmez d'abord votre adresse e-mail."
+
+msgid "This request has already been handled."
+msgstr "Cette demande a déjà été traitée."
+
+msgid "accepts access requests"
+msgstr "accepte les demandes d'accès"
+
+msgid "Signed-in users can ask to join; an administrator approves."
+msgstr "Les utilisateurs connectés peuvent demander à rejoindre ; un administrateur valide."
+
+msgid "open sign-up"
+msgstr "inscription ouverte"
+
+msgid "Let people create an account and request access to platforms."
+msgstr "Permet de créer un compte puis de demander l'accès aux plateformes."
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "Approved"
+msgstr "Acceptée"
+
+msgid "Rejected"
+msgstr "Refusée"
+
+msgid "Management"
+msgstr "Gestion"
+
+msgid "My data"
+msgstr "Mes données"
+
+msgid "Pending requests"
+msgstr "Demandes en attente"
+
+msgid "awaiting approval"
+msgstr "en attente de validation"
+
+msgid "Join a platform"
+msgstr "Rejoindre une plateforme"
+
+msgid "Confirm your e-mail address before asking to join."
+msgstr "Confirmez votre adresse e-mail avant de demander à rejoindre une plateforme."
+
+msgid "E-mail settings"
+msgstr "Réglages e-mail"
+
+msgid "Message to the administrators (optional)"
+msgstr "Message aux administrateurs (facultatif)"
+
+msgid "Request access"
+msgstr "Demander l'accès"
+
+msgid "Ask to join a platform below, or ask an administrator to add you."
+msgstr "Demandez à rejoindre une plateforme ci-dessous, ou demandez à un administrateur de vous ajouter."
+
+msgid "Access requests"
+msgstr "Demandes d'accès"
+
+msgid "Approve"
+msgstr "Accepter"
+
+msgid "Decline"
+msgstr "Refuser"
+
+msgid "Download my data"
+msgstr "Télécharger mes données"
+
+msgid "Profile, memberships, authorizations, bookings and requests, as a JSON file."
+msgstr "Profil, adhésions, habilitations, réservations et demandes, dans un fichier JSON."
+
+msgid "Download"
+msgstr "Télécharger"
+
+msgid "Delete my account"
+msgstr "Supprimer mon compte"
+
+msgid "Your name, e-mail and notes are erased and you lose every access. Bookings and invoices stay, anonymised, because the platforms must keep their accounts."
+msgstr "Vos nom, e-mail et notes sont effacés et vous perdez tout accès. Les réservations et factures restent, anonymisées, car les plateformes doivent conserver leur comptabilité."
+
+msgid "What PFM keeps about you, and how to take it or erase it."
+msgstr "Ce que PFM conserve sur vous, et comment le récupérer ou l’effacer."
+
+msgid "Delete your account for good?"
+msgstr "Supprimer définitivement votre compte ?"
+
+msgid "Access request"
+msgstr "Demande d'accès"
+
+msgid "No account yet? Sign up, then ask to join a platform."
+msgstr "Pas encore de compte ? Inscrivez-vous, puis demandez à rejoindre une plateforme."

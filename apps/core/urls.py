@@ -7,6 +7,7 @@ app_name = "core"
 urlpatterns = [
     path("", views.home, name="home"),
     path("healthz", views.healthz, name="healthz"),
+    path("join/<slug:space_slug>/", views.join_space, name="join"),
     path("setup/", views.setup, name="setup"),
     path("setup/test-smtp/", views.setup_test_smtp, name="setup_test_smtp"),
     path("s/<slug:space_slug>/", views.SpaceDashboardView.as_view(), name="space_dashboard"),

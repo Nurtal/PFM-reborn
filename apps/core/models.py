@@ -52,6 +52,11 @@ class Space(models.Model):
         _("accent colour"), max_length=7, default="#4f46e5", validators=[hex_color]
     )
     is_active = models.BooleanField(_("active"), default=True)
+    accepts_join_requests = models.BooleanField(
+        _("accepts access requests"),
+        default=True,
+        help_text=_("Signed-in users can ask to join; an administrator approves."),
+    )
     catalogue_public = models.BooleanField(
         _("public catalogue"),
         default=False,
@@ -113,6 +118,11 @@ class InstanceSettings(models.Model):
 
     site_name = models.CharField(_("site name"), max_length=120, default="PFM")
     setup_completed_at = models.DateTimeField(null=True, blank=True)
+    allow_signup = models.BooleanField(
+        _("open sign-up"),
+        default=False,
+        help_text=_("Let people create an account and request access to platforms."),
+    )
 
     smtp_host = models.CharField(_("SMTP host"), max_length=255, blank=True)
     smtp_port = models.PositiveIntegerField(_("SMTP port"), default=587)
@@ -153,6 +163,41 @@ class InstanceSettings(models.Model):
         from apps.core.crypto import decrypt
 
         return decrypt(self.smtp_password_encrypted) if self.smtp_password_encrypted else ""
+
+
+class JoinStatus(models.TextChoices):
+    PENDING = "pending", _("Pending")
+    APPROVED = "approved", _("Approved")
+    REJECTED = "rejected", _("Rejected")
+
+
+class JoinRequest(models.Model):
+    """A user asks to become a member of a space (legacy "demande d'adhésion")."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="join_requests"
+    )
+    space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name="join_requests")
+    message = models.TextField(_("message"), blank=True)
+    status = models.CharField(max_length=10, choices=JoinStatus.choices, default=JoinStatus.PENDING)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "space"],
+                condition=models.Q(status="pending"),
+                name="one_pending_request",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} -> {self.space}"
 
 
 def user_role(user: User, space: Space) -> int | None:

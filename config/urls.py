@@ -9,6 +9,7 @@ from apps.catalog.views import catalogue
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
+    path("me/data/", include("apps.accounts.urls")),
     path("i18n/setlang/", login_not_required(set_language), name="set_language"),
     path("ical/<str:token>.ics", ical_feed, name="ical_feed"),
     path("c/<slug:space_slug>/", catalogue, name="catalogue"),

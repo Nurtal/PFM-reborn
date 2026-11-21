@@ -29,21 +29,27 @@
             <c-icon name="check" class="size-4" />
             {% translate "My bookings" %}
           </a>
-          {% url 'documents:list' current_space.slug as documents_url %}
-          <a href="{{ documents_url }}" class="nav-link" {% if request.path == documents_url %}aria-current="page"{% endif %}>
-            <c-icon name="file-text" class="size-4" />
-            {% translate "Documents" %}
-          </a>
           {% url 'resources:list' current_space.slug as resources_url %}
           <a href="{{ resources_url }}" class="nav-link" {% if request.path == resources_url %}aria-current="page"{% endif %}>
             <c-icon name="layout-grid" class="size-4" />
             {% translate "Resources" %}
           </a>
+          {% url 'documents:list' current_space.slug as documents_url %}
+          <a href="{{ documents_url }}" class="nav-link" {% if request.path == documents_url %}aria-current="page"{% endif %}>
+            <c-icon name="file-text" class="size-4" />
+            {% translate "Documents" %}
+          </a>
           {% if can_manage_space %}
+          <p class="px-3 pt-4 pb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">{% translate "Management" %}</p>
             {% url 'resources:authorizations' current_space.slug as auth_url %}
             <a href="{{ auth_url }}" class="nav-link" {% if request.path == auth_url %}aria-current="page"{% endif %}>
               <c-icon name="file-text" class="size-4" />
               {% translate "Authorizations" %}
+            </a>
+            {% url 'booking:closures' current_space.slug as closures_url %}
+            <a href="{{ closures_url }}" class="nav-link" {% if request.path == closures_url %}aria-current="page"{% endif %}>
+              <c-icon name="x" class="size-4" />
+              {% translate "Closures" %}
             </a>
             {% url 'services:orders' current_space.slug as orders_url %}
             <a href="{{ orders_url }}" class="nav-link" {% if "/services/" in request.path and "/projects/" not in request.path and "/stock/" not in request.path %}aria-current="page"{% endif %}>
@@ -60,33 +66,29 @@
               <c-icon name="layout-grid" class="size-4" />
               {% translate "Stock" %}
             </a>
-            {% url 'mailer:index' current_space.slug as mailer_url %}
-            <a href="{{ mailer_url }}" class="nav-link" {% if request.path == mailer_url %}aria-current="page"{% endif %}>
-              <c-icon name="mail" class="size-4" />
-              {% translate "Mailer" %}
-            </a>
-            {% url 'statistics:dashboard' current_space.slug as stats_url %}
-            <a href="{{ stats_url }}" class="nav-link" {% if request.path == stats_url %}aria-current="page"{% endif %}>
-              <c-icon name="layout-dashboard" class="size-4" />
-              {% translate "Statistics" %}
+            {% url 'clients:list' current_space.slug as clients_url %}
+            <a href="{{ clients_url }}" class="nav-link" {% if "/clients/" in request.path %}aria-current="page"{% endif %}>
+              <c-icon name="building" class="size-4" />
+              {% translate "Clients & prices" %}
             </a>
             {% url 'invoices:list' current_space.slug as invoices_url %}
             <a href="{{ invoices_url }}" class="nav-link" {% if "/invoices/" in request.path %}aria-current="page"{% endif %}>
               <c-icon name="file-text" class="size-4" />
               {% translate "Invoicing" %}
             </a>
-            {% url 'clients:list' current_space.slug as clients_url %}
-            <a href="{{ clients_url }}" class="nav-link" {% if "/clients/" in request.path %}aria-current="page"{% endif %}>
-              <c-icon name="building" class="size-4" />
-              {% translate "Clients & prices" %}
+            {% url 'statistics:dashboard' current_space.slug as stats_url %}
+            <a href="{{ stats_url }}" class="nav-link" {% if request.path == stats_url %}aria-current="page"{% endif %}>
+              <c-icon name="layout-dashboard" class="size-4" />
+              {% translate "Statistics" %}
             </a>
-            {% url 'booking:closures' current_space.slug as closures_url %}
-            <a href="{{ closures_url }}" class="nav-link" {% if request.path == closures_url %}aria-current="page"{% endif %}>
-              <c-icon name="x" class="size-4" />
-              {% translate "Closures" %}
+            {% url 'mailer:index' current_space.slug as mailer_url %}
+            <a href="{{ mailer_url }}" class="nav-link" {% if request.path == mailer_url %}aria-current="page"{% endif %}>
+              <c-icon name="mail" class="size-4" />
+              {% translate "Mailer" %}
             </a>
           {% endif %}
           {% if can_administer_space %}
+          <p class="px-3 pt-4 pb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">{% translate "Administration" %}</p>
             {% url 'core:members' current_space.slug as members_url %}
             <a href="{{ members_url }}" class="nav-link" {% if request.path == members_url %}aria-current="page"{% endif %}>
               <c-icon name="users" class="size-4" />
@@ -152,6 +154,7 @@
               <li><a href="{% url 'account_email' %}" class="nav-link">{% translate "Email addresses" %}</a></li>
               <li><a href="{% url 'account_change_password' %}" class="nav-link">{% translate "Password" %}</a></li>
               <li><a href="{% url 'mfa_index' %}" class="nav-link">{% translate "Two-factor authentication" %}</a></li>
+              <li><a href="{% url 'accounts:my_data' %}" class="nav-link">{% translate "My data" %}</a></li>
               <li>
                 <form method="post" action="{% url 'account_logout' %}">
                   {% csrf_token %}
