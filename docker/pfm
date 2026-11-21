@@ -12,7 +12,7 @@ case "$cmd" in
   migrate)       exec python manage.py pfm_init "$@" ;;
   shell)         exec python manage.py shell "$@" ;;
   manage)        exec python manage.py "$@" ;;
-  import-legacy) echo "import-legacy ships with milestone M5 (image tag :legacy-import)." >&2; exit 2 ;;
+  import-legacy) exec python manage.py import_legacy "$@" ;;
   *)
     cat <<USAGE
 Usage: pfm <command>

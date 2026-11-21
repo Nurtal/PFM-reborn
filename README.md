@@ -388,7 +388,10 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 ## 12. Migration depuis l'ancien Platform-Manager
 
-- La commande `python manage.py import_legacy --mysql-url=... --space=<id|all>` lit directement la base MySQL legacy (en lecture seule) et peuple la base PFM-NG. Elle est accessible aussi via `docker exec pfm pfm import-legacy`. Le pilote MySQL n'est installé que dans une variante d'image `:legacy-import`, pour ne pas alourdir l'image principale.
+- La commande `python manage.py import_legacy --source mysql://user:pass@hôte/base --space <id[,id]|all> [--dry-run]` lit directement la base MySQL legacy (en lecture seule) et peuple la base PFM-NG. Elle est accessible aussi via `docker exec pfm pfm import-legacy …`. `--dry-run` exécute tout puis annule, pour lire le rapport sans rien écrire. Le pilote MySQL (PyMySQL) n'est installé que dans une variante d'image, construite avec `--build-arg PFM_EXTRAS="--extra legacy"` (tag `:legacy-import`), pour ne pas alourdir l'image principale. Une copie SQLite de la base (`--source sqlite:///chemin`) marche aussi.
+- Tables reprises : espaces, utilisateurs, rôles, grilles et règles nuit/week-end, clients et adresses, zones et horaires, catégories, ressources, habilitations, tarifs et forfaits, réservations, factures. Pas encore : prestations/commandes/projets/stock (`se_*`), documents, helpdesk.
+- Réservations : celles déjà facturées par l'ancien système sont marquées et ne seront jamais refacturées. Les chevauchements hérités sont importés comme annulés et signalés dans le rapport.
+- Factures : l'ancien système ne stockait que le HT ; elles sont importées figées à TVA 0, avec une ligne d'ajustement quand la somme des lignes diffère du total (remises).
 - Elle est **idempotente et rejouable** : la correspondance des anciens IDs est conservée dans une table `LegacyIdMap`.
 - Ordre d'import : espaces → utilisateurs → clients et grilles → ressources → habilitations → réservations → prestations et commandes → factures (importées **figées**, avec leur numéro d'origine) → le reste.
 - **Mots de passe** : les anciens hachages ne sont pas repris. Les utilisateurs reçoivent un lien de réinitialisation, ou passent par LDAP/SSO.
@@ -412,6 +415,19 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 | **M8 — API** | API REST (django-ninja) avec tokens par utilisateur. |
 
 ---
+
+## État d'avancement (novembre 2026)
+
+| Jalon | État |
+|---|---|
+| M0 Socle | ✅ (image Docker écrite mais pas encore construite en CI) |
+| M1 Ressources & réservation | ✅ |
+| M2 Clients & tarification | ✅ |
+| M3 Facturation | ✅ (+ devis) |
+| M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
+| M5 Migration legacy | ✅ cœur (voir §12) — prestations legacy à faire, à valider sur une vraie base |
+| M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer — helpdesk IMAP et LDAP/OIDC à faire |
+| M7 / M8 | à faire |
 
 ## 14. Licence
 

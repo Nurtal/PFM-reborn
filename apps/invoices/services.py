@@ -69,6 +69,7 @@ def billable_bookings(
     qs = Booking.objects.filter(
         space=space,
         status=BookingStatus.CONFIRMED,
+        billed_externally=False,
         client__isnull=False,
         end__gt=lo,
         end__lte=hi,

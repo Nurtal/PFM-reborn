@@ -58,6 +58,9 @@ class Booking(SpaceScopedModel):
     title = models.CharField(_("title"), max_length=200, blank=True)
     note = models.TextField(_("note"), blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.CONFIRMED)
+    billed_externally = models.BooleanField(
+        default=False, help_text="Already invoiced outside PFM-NG (e.g. by the legacy system)."
+    )
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancelled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"

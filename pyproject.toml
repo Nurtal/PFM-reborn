@@ -27,6 +27,8 @@ dependencies = [
 [project.optional-dependencies]
 # Only for instances that set DATABASE_URL=postgres://... (+ ~10 MB in the image).
 postgres = ["psycopg[binary]>=3.2"]
+# Only for the one-off import from the old Platform-Manager (image tag :legacy-import).
+legacy = ["pymysql>=1.1"]
 
 [tool.uv]
 package = false
@@ -64,6 +66,8 @@ ignore = ["RUF012", "RUF001"]  # RUF001: French typography (– … ’ nbsp) is
 "**/tests/**" = ["S101", "S105", "S106", "RUF059"]
 "tests/**" = ["S101", "S105", "S106"]
 "config/settings/*" = ["F405"]
+# Synthetic legacy schema: long column lists and SQL built from constant table names.
+"apps/legacy/tests/*" = ["S101", "S608", "E501", "RUF059"]
 
 [tool.mypy]
 python_version = "3.13"

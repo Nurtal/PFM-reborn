@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "apps.documents",
     "apps.catalog",
     "apps.mailer",
+    "apps.legacy",
 ]
 
 MIDDLEWARE = [
