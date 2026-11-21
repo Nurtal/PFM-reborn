@@ -30,6 +30,15 @@ from apps.invoices.models import Invoice, InvoiceLine, Kind, Status
 from apps.legacy.models import LegacyIdMap
 from apps.legacy.sources import Source
 from apps.resources.models import ALL_WEEKDAYS, Area, Authorization, Resource, ResourceCategory
+from apps.services.models import (
+    Order,
+    OrderLine,
+    OrderStatus,
+    Project,
+    ProjectStatus,
+    ServiceItem,
+    ServicePrice,
+)
 
 LEGACY_ROLES = {1: Role.VISITOR, 2: Role.USER, 3: Role.MANAGER, 4: Role.ADMIN}
 WEEKDAY_COLUMNS = (
@@ -158,6 +167,7 @@ class Importer:
         self.authorizations()
         self.prices()
         self.bookings()
+        self.services()
         self.invoices()
         return self.report
 
@@ -512,6 +522,150 @@ class Importer:
                     # Invoiced by the legacy system: never bill it again.
                     "billed_externally": _int(row.get("invoice_id")) > 0,
                 },
+            )
+
+    def services(self) -> None:
+        for row in self.rows("se_services"):
+            space = self.get(Space, "core_spaces", row["id_space"])
+            if space is None:
+                continue
+            name = (row.get("name") or f"Service {row['id']}")[:200]
+            if (
+                not self.new_id("se_services", row["id"])
+                and ServiceItem.objects.filter(space=space, name=name).exists()
+            ):
+                name = f"{name} ({row['id']})"[:200]
+            self.upsert(
+                "se_services",
+                row["id"],
+                ServiceItem,
+                {
+                    "space": space,
+                    "name": name,
+                    "description": row.get("description") or "",
+                    "order": _int(row.get("display_order")),
+                    "is_active": bool(_int(row.get("is_active"), 1)),
+                },
+            )
+        for row in self.rows("se_prices"):
+            item = self.get(ServiceItem, "se_services", row.get("id_service"))
+            grid = self.get(PricingGrid, "cl_pricings", row.get("id_belonging"))
+            price = _decimal(row.get("price"))
+            if item and grid and price is not None:
+                ServicePrice.objects.update_or_create(
+                    item=item, grid=grid, defaults={"space": item.space, "price": price}
+                )
+                self.report.created["se_prices"] += 1
+        self._orders()
+        self._projects()
+
+    def _order_lines(
+        self,
+        order: Order,
+        rows: list[dict[str, Any]],
+        table: str,
+        default_day: dt.date,
+        billed: bool,
+    ) -> None:
+        for row in rows:
+            item = self.get(ServiceItem, "se_services", row.get("id_service"))
+            quantity = _decimal(row.get("quantity"))
+            if item is None or quantity is None or quantity <= 0:
+                self.report.skipped[table] += 1
+                continue
+            self.upsert(
+                table,
+                row["id"],
+                OrderLine,
+                {
+                    "order": order,
+                    "item": item,
+                    "quantity": quantity,
+                    "performed_on": _date(row.get("date")) or default_day,
+                    "comment": (row.get("comment") or "")[:200],
+                    "billed_externally": billed or _int(row.get("id_invoice")) > 0,
+                },
+            )
+
+    def _orders(self) -> None:
+        lines: dict[int, list[dict[str, Any]]] = defaultdict(list)
+        for row in self.rows("se_order_service"):
+            lines[_int(row.get("id_order"))].append(row)
+        for row in self.rows("se_order"):
+            space = self.get(Space, "core_spaces", row["id_space"])
+            client = self.get(Client, "cl_clients", row.get("id_resp"))
+            if not (space and client):
+                self.report.skipped["se_order"] += 1
+                continue
+            opened = _date(row.get("date_open")) or dt.date(2000, 1, 1)
+            closed = _date(row.get("date_close"))
+            order = self.upsert(
+                "se_order",
+                row["id"],
+                Order,
+                {
+                    "space": space,
+                    "client": client,
+                    "requester": self.get(User, "core_users", row.get("id_user")),
+                    "title": (row.get("no_identification") or f"Order {row['id']}")[:200],
+                    "status": OrderStatus.DONE if closed else OrderStatus.OPEN,
+                    "closed_at": dt.datetime.combine(closed, dt.time(12), tzinfo=dt.UTC)
+                    if closed
+                    else None,
+                },
+            )
+            self._order_lines(
+                order,
+                lines.get(_int(row["id"]), []),
+                "se_order_service",
+                opened,
+                billed=_int(row.get("id_invoice")) > 0,
+            )
+
+    def _projects(self) -> None:
+        lines: dict[int, list[dict[str, Any]]] = defaultdict(list)
+        for row in self.rows("se_project_service"):
+            lines[_int(row.get("id_project"))].append(row)
+        for row in self.rows("se_project"):
+            space = self.get(Space, "core_spaces", row["id_space"])
+            client = self.get(Client, "cl_clients", row.get("id_resp"))
+            if not (space and client):
+                self.report.skipped["se_project"] += 1
+                continue
+            start = _date(row.get("date_open")) or dt.date(2000, 1, 1)
+            closed = _date(row.get("date_close"))
+            end = max(closed or _date(row.get("time_limit")) or start, start)
+            name = (row.get("name") or f"Project {row['id']}")[:200]
+            project = self.upsert(
+                "se_project",
+                row["id"],
+                Project,
+                {
+                    "space": space,
+                    "name": name,
+                    "client": client,
+                    "lead": self.get(User, "core_users", row.get("in_charge")),
+                    "start_date": start,
+                    "end_date": end,
+                    "status": ProjectStatus.CLOSED if closed else ProjectStatus.ACTIVE,
+                    "description": row.get("samplescomment") or "",
+                },
+            )
+            # Legacy projects hold service lines directly; here they live in an order.
+            order = self.upsert(
+                "se_project_order",
+                row["id"],
+                Order,
+                {
+                    "space": space,
+                    "client": client,
+                    "project": project,
+                    "title": name,
+                    "status": OrderStatus.DONE if closed else OrderStatus.OPEN,
+                },
+            )
+            self._order_lines(
+                order, lines.get(_int(row["id"]), []), "se_project_service", start, False
             )
 
     def invoices(self) -> None:

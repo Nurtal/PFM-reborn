@@ -42,6 +42,12 @@ SCHEMA = {
     "bk_calendar_entry": "id, start_time, end_time, resource_id, booked_by_id, recipient_id, short_description, full_description, package_id, responsible_id, invoice_id, id_space, deleted",
     "in_invoice": "id, number, id_space, period_begin, period_end, date_generated, date_paid, is_paid, id_responsible, total_ht, title, deleted",
     "in_invoice_item": "id, id_invoice, module, details, total_ht, id_space, deleted",
+    "se_services": "id, id_space, name, description, display_order, is_active, deleted",
+    "se_prices": "id, id_service, id_belonging, price, id_space, deleted",
+    "se_order": "id, id_resp, id_space, id_user, id_status, date_open, date_close, no_identification, id_invoice, deleted",
+    "se_order_service": "id, id_order, id_service, quantity, id_space, deleted",
+    "se_project": "id, id_space, name, id_resp, id_user, date_open, date_close, time_limit, in_charge, samplescomment, deleted",
+    "se_project_service": "id, id_project, id_service, date, quantity, comment, id_invoice, id_space, deleted",
 }
 
 ROWS = {
@@ -101,6 +107,15 @@ ROWS = {
         )
     ],
     "in_invoice_item": [(1, 7, "booking", "LSM 980 mars", "91.00", 1, 0)],
+    "se_services": [(1, 1, "Préparation", "", 0, 1, 0)],
+    "se_prices": [(1, 1, 1, "12,5", 1, 0)],
+    "se_order": [
+        (1, 1, 1, 1, 0, "2025-03-02", "2025-03-20", "BC-12", 4, 0),  # closed, billed by legacy
+        (2, 1, 1, 2, 1, "2025-03-05", None, "", 0, 0),  # open, not billed
+    ],
+    "se_order_service": [(1, 1, 1, "3", 1, 0), (2, 2, 1, "2", 1, 0), (3, 2, 1, "abc", 1, 0)],
+    "se_project": [(1, 1, "Atlas", 1, 1, "2025-01-10", None, "2025-06-30", 1, "", 0)],
+    "se_project_service": [(1, 1, 1, "2025-03-12", "4", "coupes", 0, 1, 0)],
 }
 
 
@@ -245,3 +260,37 @@ def test_rerun_does_not_resurrect_an_erased_account(legacy_db, admin):
     assert not bob.is_active and bob.username.startswith("deleted-") and bob.last_name == ""
     assert not Client.objects.filter(users=bob).exists()
     assert not SpaceMembership.objects.filter(user=bob).exists()
+
+
+def test_services_orders_and_projects(legacy_db, admin):
+    from apps.services.models import Order, OrderLine, Project, ServicePrice
+
+    report = run(legacy_db)
+    assert ServicePrice.objects.get().price == D("12.50")
+    closed = Order.objects.get(title="BC-12")
+    assert closed.status == "done" and closed.lines.get().billed_externally
+    open_order = Order.objects.get(title="Order 2")
+    assert open_order.lines.count() == 1  # the "abc" quantity is skipped
+    assert report.skipped["se_order_service"] == 1
+    project = Project.objects.get(name="Atlas")
+    assert (project.start_date, project.end_date, project.status) == (
+        dt.date(2025, 1, 10),
+        dt.date(2025, 6, 30),
+        "active",
+    )
+    line = OrderLine.objects.get(order__project=project)
+    assert (line.quantity, line.performed_on, line.comment) == (
+        D("4.00"),
+        dt.date(2025, 3, 12),
+        "coupes",
+    )
+    # Only what the legacy system did not invoice is billable now.
+    space = Space.objects.get(slug="imaging")
+    client = Client.objects.get(space=space)
+    draft = invoicing.create_draft(
+        admin, space, client, dt.date(2025, 3, 1), dt.date(2025, 3, 31)
+    ).invoice
+    amounts = sorted(line.amount for line in draft.lines.filter(order_line__isnull=False))
+    assert amounts == [D("25.00"), D("50.00")]  # order 2 (2 × 12.50) and project (4 × 12.50)
+    run(legacy_db)
+    assert OrderLine.objects.count() == 3  # idempotent

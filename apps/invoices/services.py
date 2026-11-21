@@ -91,6 +91,7 @@ def billable_order_lines(
     qs = OrderLine.objects.filter(
         order__space=space,
         order__status__in=[OrderStatus.OPEN, OrderStatus.DONE],
+        billed_externally=False,
         performed_on__gte=start,
         performed_on__lte=end,
     ).exclude(pk__in=covered)

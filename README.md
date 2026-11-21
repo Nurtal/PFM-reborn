@@ -389,7 +389,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 ## 12. Migration depuis l'ancien Platform-Manager
 
 - La commande `python manage.py import_legacy --source mysql://user:pass@hôte/base --space <id[,id]|all> [--dry-run]` lit directement la base MySQL legacy (en lecture seule) et peuple la base PFM-NG. Elle est accessible aussi via `docker exec pfm pfm import-legacy …`. `--dry-run` exécute tout puis annule, pour lire le rapport sans rien écrire. Le pilote MySQL (PyMySQL) n'est installé que dans une variante d'image, construite avec `--build-arg PFM_EXTRAS="--extra legacy"` (tag `:legacy-import`), pour ne pas alourdir l'image principale. Une copie SQLite de la base (`--source sqlite:///chemin`) marche aussi.
-- Tables reprises : espaces, utilisateurs, rôles, grilles et règles nuit/week-end, clients et adresses, zones et horaires, catégories, ressources, habilitations, tarifs et forfaits, réservations, factures. Pas encore : prestations/commandes/projets/stock (`se_*`), documents, helpdesk.
+- Tables reprises : espaces, utilisateurs, rôles, grilles et règles nuit/week-end, clients et adresses, zones et horaires, catégories, ressources, habilitations, tarifs et forfaits, réservations, factures. Aussi : catalogue de prestations et prix, commandes et leurs lignes, projets et leurs prestations (les lignes déjà facturées par l'ancien système ne sont jamais refacturées). Pas encore : achats, stock, documents, helpdesk.
 - Réservations : celles déjà facturées par l'ancien système sont marquées et ne seront jamais refacturées. Les chevauchements hérités sont importés comme annulés et signalés dans le rapport.
 - Factures : l'ancien système ne stockait que le HT ; elles sont importées figées à TVA 0, avec une ligne d'ajustement quand la somme des lignes diffère du total (remises).
 - Elle est **idempotente et rejouable** : la correspondance des anciens IDs est conservée dans une table `LegacyIdMap`.
@@ -425,7 +425,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 | M2 Clients & tarification | ✅ |
 | M3 Facturation | ✅ (+ devis) |
 | M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
-| M5 Migration legacy | ✅ cœur (voir §12) — prestations legacy à faire, à valider sur une vraie base |
+| M5 Migration legacy | ✅ (voir §12) — à valider sur une vraie base |
 | M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer, helpdesk IMAP, SSO OpenID Connect, LDAP (ldap3, sans dépendance système) |
 | M7 Modules P3 | à faire (en attente de l'élagage avec les utilisateurs) |
 | M8 API | ✅ REST v1 (django-ninja) : jetons personnels hachés, espaces, ressources, réservations (création/annulation via les règles métier), factures ; schéma OpenAPI sur `/api/v1/openapi.json` |

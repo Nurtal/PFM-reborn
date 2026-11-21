@@ -33,6 +33,12 @@ TABLES = frozenset(
         "bk_calendar_entry",
         "in_invoice",
         "in_invoice_item",
+        "se_services",
+        "se_prices",
+        "se_order",
+        "se_order_service",
+        "se_project",
+        "se_project_service",
     }
 )
 
