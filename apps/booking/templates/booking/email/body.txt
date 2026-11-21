@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=booking.user %}Hello {{ name }},{% endblocktranslate %}
+
+{% if event == "created" %}{% translate "Your booking is confirmed." %}{% elif event == "modified" %}{% translate "Your booking has been changed." %}{% else %}{% translate "Your booking has been cancelled." %}{% endif %}
+
+{% translate "Resource" %}: {{ booking.resource.name }}
+{% translate "Start" %}: {{ start|date:"DATETIME_FORMAT" }}
+{% translate "End" %}: {{ end|date:"DATETIME_FORMAT" }}
+{% if booking.title %}{% translate "Title" %}: {{ booking.title }}
+{% endif %}
+{{ url }}
+{% endautoescape %}

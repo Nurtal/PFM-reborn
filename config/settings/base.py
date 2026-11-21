@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     # Project
     "apps.accounts",
     "apps.core",
+    "apps.resources",
+    "apps.booking",
 ]
 
 MIDDLEWARE = [
