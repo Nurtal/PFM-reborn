@@ -152,7 +152,10 @@ class InstanceSettings(models.Model):
 
 def user_role(user: User, space: Space) -> int | None:
     """Role of ``user`` in ``space`` (cached on the user object for the request)."""
-    cache: dict[int, int | None] = user.__dict__.setdefault("_pfm_roles", {})
+    # request.user is a SimpleLazyObject while permission backends get the real
+    # user: cache on the real object so both paths share it.
+    target = getattr(user, "_wrapped", user)
+    cache: dict[int, int | None] = target.__dict__.setdefault("_pfm_roles", {})
     if space.pk not in cache:
         cache[space.pk] = (
             SpaceMembership.objects.filter(user=user, space=space)

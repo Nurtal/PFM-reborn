@@ -754,3 +754,39 @@ msgid "You can book this resource at most %(n)d time per day."
 msgid_plural "You can book this resource at most %(n)d times per day."
 msgstr[0] "Vous pouvez réserver cette ressource au plus %(n)d fois par jour."
 msgstr[1] "Vous pouvez réserver cette ressource au plus %(n)d fois par jour."
+
+msgid "Closure removed."
+msgstr "Fermeture supprimée."
+
+msgid "Closure saved."
+msgstr "Fermeture enregistrée."
+
+msgid "Leave the resource empty to block every resource of the area."
+msgstr "Laissez la ressource vide pour bloquer toutes les ressources de la zone."
+
+msgid "Choose a resource or an area."
+msgstr "Choisissez une ressource ou une zone."
+
+msgid "The resource is not in this area."
+msgstr "La ressource n'est pas dans cette zone."
+
+msgid "Closures"
+msgstr "Fermetures"
+
+msgid "What"
+msgstr "Quoi"
+
+msgid "Reason"
+msgstr "Motif"
+
+msgid "No upcoming closure."
+msgstr "Aucune fermeture à venir."
+
+msgid "Block a slot"
+msgstr "Bloquer un créneau"
+
+msgid "Blocked slots: maintenance, holidays, training sessions."
+msgstr "Créneaux bloqués : maintenance, congés, formations."
+
+msgid "Remove"
+msgstr "Retirer"

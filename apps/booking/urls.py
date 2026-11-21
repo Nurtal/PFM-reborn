@@ -11,4 +11,5 @@ urlpatterns = [
     path("booking/<uuid:resource_id>/new/", views.BookingCreateView.as_view(), name="create"),
     path("bookings/<uuid:booking_id>/", views.BookingDetailView.as_view(), name="detail"),
     path("my-bookings/", views.MyBookingsView.as_view(), name="mine"),
+    path("closures/", views.ClosureListView.as_view(), name="closures"),
 ]

@@ -4,6 +4,7 @@ import datetime as dt
 import json
 from typing import Any, cast
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_not_required
 from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -15,7 +16,7 @@ from django.views.generic import ListView, TemplateView
 
 from apps.accounts.models import User
 from apps.booking import ical, services
-from apps.booking.forms import BookingForm
+from apps.booking.forms import BookingForm, ClosureForm
 from apps.booking.models import Booking, Closure, FeedToken, Status
 from apps.core.permissions import SpaceViewMixin
 from apps.resources.models import Resource
@@ -285,3 +286,37 @@ def ical_feed(request: HttpRequest, token: str) -> HttpResponse:
     response["Content-Disposition"] = 'inline; filename="pfm.ics"'
     response["Cache-Control"] = "private, max-age=300"
     return response
+
+
+class ClosureListView(SpaceViewMixin, TemplateView):
+    """Managers block slots (maintenance, holidays) and remove past blocks."""
+
+    permission_required = "core.manage_space"
+    template_name = "booking/closures.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["closures"] = (
+            Closure.objects.for_space(self.space)
+            .filter(end__gte=timezone.now())
+            .select_related("resource", "area")
+        )
+        ctx["form"] = kwargs.get("form") or ClosureForm(space=self.space)
+        return ctx
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if "delete" in request.POST:
+            closure = get_object_or_404(
+                Closure.objects.for_space(self.space), pk=request.POST.get("delete")
+            )
+            closure.delete()
+            messages.success(request, _("Closure removed."))
+            return redirect("booking:closures", space_slug=self.space.slug)
+        form = ClosureForm(request.POST, space=self.space)
+        if form.is_valid():
+            closure = form.save(commit=False)
+            closure.created_by = cast(User, request.user)
+            closure.save()
+            messages.success(request, _("Closure saved."))
+            return redirect("booking:closures", space_slug=self.space.slug)
+        return self.render_to_response(self.get_context_data(form=form))

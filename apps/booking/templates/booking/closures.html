@@ -1,0 +1,48 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Closures" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Closures' %}" subtitle="{% translate 'Blocked slots: maintenance, holidays, training sessions.' %}" />
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="card overflow-x-auto p-0 lg:col-span-2">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "When" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "What" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Reason" %}</th>
+            <th scope="col" class="px-4 py-3"><span class="sr-only">{% translate "Actions" %}</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for c in closures %}
+            <tr>
+              <td class="px-4 py-3 whitespace-nowrap">{{ c.start|date:"SHORT_DATETIME_FORMAT" }} → {{ c.end|date:"SHORT_DATETIME_FORMAT" }}</td>
+              <td class="px-4 py-3">{{ c.resource|default:c.area }}</td>
+              <td class="px-4 py-3">{{ c.reason }}</td>
+              <td class="px-4 py-3 text-right">
+                <form method="post">
+                  {% csrf_token %}
+                  <button type="submit" name="delete" value="{{ c.pk }}" class="btn-ghost px-2 text-red-600" aria-label="{% translate 'Remove' %}">
+                    <c-icon name="trash" class="size-4" />
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="px-4 py-8 text-center text-zinc-500">{% translate "No upcoming closure." %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" class="card space-y-4" novalidate>
+      {% csrf_token %}
+      <h2 class="font-semibold">{% translate "Block a slot" %}</h2>
+      {{ form.non_field_errors }}
+      {% for field in form %}<c-field :field="field" />{% endfor %}
+      <button type="submit" class="btn-primary w-full">{% translate "Save" %}</button>
+    </form>
+  </div>
+{% endblock content %}

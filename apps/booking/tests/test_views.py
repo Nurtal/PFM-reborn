@@ -210,3 +210,72 @@ def test_manager_creates_resource_only_with_own_space_choices(client, resource):
     )
     assert response.status_code == 200
     assert "category" in response.context["form"].errors
+
+
+def test_manager_blocks_a_slot_and_users_cannot_book_it(client, resource):
+    login(client, resource, Role.MANAGER)
+    start, end = future()
+    fmt = "%Y-%m-%dT%H:%M"
+    response = client.post(
+        url("closures", resource),
+        {
+            "resource": resource.pk,
+            "start": start.strftime(fmt),
+            "end": end.strftime(fmt),
+            "reason": "Laser service",
+        },
+    )
+    assert response.status_code == 302
+    user = MembershipFactory(space=resource.space, role=Role.USER).user
+    with pytest.raises(services.BookingError, match="Laser service"):
+        services.reserve(user, resource, start, end)
+
+
+def test_closures_page_is_for_managers(client, resource):
+    login(client, resource)
+    assert client.get(url("closures", resource)).status_code == 404
+
+
+def test_closure_form_rejects_foreign_resource(client, resource):
+    login(client, resource, Role.MANAGER)
+    foreign = ResourceFactory()
+    start, end = future()
+    fmt = "%Y-%m-%dT%H:%M"
+    response = client.post(
+        url("closures", resource),
+        {
+            "resource": foreign.pk,
+            "start": start.strftime(fmt),
+            "end": end.strftime(fmt),
+            "reason": "x",
+        },
+    )
+    assert response.status_code == 200
+    assert "resource" in response.context["form"].errors
+
+
+def test_events_feed_query_count_is_constant(client, resource):
+    """No N+1: the feed costs the same with 1 or 20 bookings."""
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    login(client, resource)
+    feed = url("events", resource, resource_id=resource.public_id)
+    params = {
+        "start": timezone.now().isoformat(),
+        "end": (timezone.now() + dt.timedelta(days=7)).isoformat(),
+    }
+
+    def queries_for_feed(expected_events):
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(feed, params)
+        assert len(response.json()) == expected_events
+        return len(ctx.captured_queries)
+
+    owners = [MembershipFactory(space=resource.space, role=Role.USER).user for _ in range(20)]
+    services.reserve(owners[0], resource, *future(hours=24))
+    client.get(feed, params)  # warm up per-session caches
+    one = queries_for_feed(1)
+    for i, owner in enumerate(owners[1:], start=1):
+        services.reserve(owner, resource, *future(hours=24 + i))
+    assert queries_for_feed(20) == one
