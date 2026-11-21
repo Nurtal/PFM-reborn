@@ -17,9 +17,16 @@ RECENT = dt.timedelta(days=180)
 
 def recipients(mailing: Mailing) -> list[str]:
     """Distinct e-mail addresses of the active members targeted by ``mailing``."""
-    users = User.objects.filter(is_active=True, memberships__space_id=mailing.space_id).exclude(
-        email=""
-    )
+    # Space and role must be checked in ONE filter() call: separate calls on the
+    # multi-valued memberships relation would match a role held in another space.
+    if mailing.audience == Audience.RESOURCE:
+        users = User.objects.filter(memberships__space_id=mailing.space_id)
+    else:
+        users = User.objects.filter(
+            memberships__space_id=mailing.space_id,
+            memberships__role__gte=AUDIENCE_MIN_ROLE[Audience(mailing.audience)],
+        )
+    users = users.filter(is_active=True).exclude(email="")
     if mailing.audience == Audience.RESOURCE:
         booked = Booking.objects.filter(
             resource=mailing.resource,
@@ -27,8 +34,6 @@ def recipients(mailing: Mailing) -> list[str]:
             start__gte=timezone.now() - RECENT,
         ).values("user_id")
         users = users.filter(pk__in=booked)
-    else:
-        users = users.filter(memberships__role__gte=AUDIENCE_MIN_ROLE[Audience(mailing.audience)])
     return sorted(set(users.values_list("email", flat=True)))
 
 

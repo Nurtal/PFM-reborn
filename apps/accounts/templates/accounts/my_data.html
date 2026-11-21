@@ -13,8 +13,13 @@
       {% csrf_token %}
       <h2 class="font-semibold text-red-700 dark:text-red-400">{% translate "Delete my account" %}</h2>
       <p class="text-sm text-zinc-600 dark:text-zinc-400">{% translate "Your name, e-mail and notes are erased and you lose every access. Bookings and invoices stay, anonymised, because the platforms must keep their accounts." %}</p>
-      <label for="delete-password">{% translate "Password" %}</label>
-      <input id="delete-password" type="password" name="password" autocomplete="current-password" required>
+      {% if user.has_usable_password %}
+        <label for="delete-password">{% translate "Password" %}</label>
+        <input id="delete-password" type="password" name="password" autocomplete="current-password" required>
+      {% else %}
+        <label for="delete-username">{% blocktranslate with name=user.username %}Type your username ({{ name }}) to confirm{% endblocktranslate %}</label>
+        <input id="delete-username" type="text" name="username" autocomplete="off" required>
+      {% endif %}
       <button type="submit" class="btn-danger" data-confirm="{% translate 'Delete your account for good?' %}">{% translate "Delete my account" %}</button>
     </form>
   </div>

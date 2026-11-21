@@ -143,3 +143,34 @@ def test_delete_account_detaches_client_accounts(setup_done):
     lab.users.add(m.user)
     anonymize(m.user)
     assert not lab.users.exists()
+
+
+def test_approving_does_not_demote_an_existing_member(setup_done):
+    space = SpaceFactory()
+    admin = MembershipFactory(space=space, role=Role.ADMIN).user
+    user = verified(UserFactory())
+    join = services.request_join(user, space)
+    services.add_member(space, user, Role.MANAGER)  # added by hand meanwhile
+    join.refresh_from_db()
+    assert join.status == JoinStatus.APPROVED
+    assert SpaceMembership.objects.get(user=user, space=space).role == Role.MANAGER
+    del admin
+
+
+def test_sole_admin_cannot_delete_account(client, setup_done):
+    from allauth.mfa.models import Authenticator
+
+    m = MembershipFactory(role=Role.ADMIN)
+    Authenticator.objects.create(user=m.user, type=Authenticator.Type.TOTP, data={})
+    client.force_login(m.user)
+    client.post(reverse("accounts:delete"), {"password": "correct horse battery"})
+    assert User.objects.get(pk=m.user.pk).is_active
+
+
+def test_passwordless_account_confirms_with_username(client, setup_done):
+    user = UserFactory()
+    user.set_unusable_password()
+    user.save()
+    client.force_login(user)
+    client.post(reverse("accounts:delete"), {"username": user.username})
+    assert not User.objects.get(pk=user.pk).is_active

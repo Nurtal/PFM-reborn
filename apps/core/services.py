@@ -136,6 +136,10 @@ def add_member(space: Space, user: User, role: Role) -> SpaceMembership:
     membership, created = SpaceMembership.objects.get_or_create(
         space=space, user=user, defaults={"role": role}
     )
+    # Adding someone by hand answers their pending request.
+    JoinRequest.objects.filter(space=space, user=user, status=JoinStatus.PENDING).update(
+        status=JoinStatus.APPROVED, decided_at=timezone.now()
+    )
     if not created and membership.role != role:
         return change_role(membership, role)
     return membership
@@ -203,8 +207,9 @@ def decide_join(
 ) -> JoinRequest:
     if join.status != JoinStatus.PENDING:
         raise JoinError(_("This request has already been handled."))
-    if approve:
+    if approve and not SpaceMembership.objects.filter(space=join.space, user=join.user).exists():
         add_member(join.space, join.user, role)
+    # Already a member (added by hand meanwhile): keep their role, just close.
     join.status = JoinStatus.APPROVED if approve else JoinStatus.REJECTED
     join.decided_by = admin
     join.decided_at = timezone.now()

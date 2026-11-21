@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from allauth.mfa.models import Authenticator
 from django.db import transaction
 
@@ -23,6 +25,12 @@ def has_mfa(user: User) -> bool:
 
 
 # --- GDPR: export and erasure (README §7.12) ----------------------------------------
+
+
+def models_q_requester(user: User) -> Any:
+    from django.db.models import Q
+
+    return Q(requester=user) | Q(requester_email__iexact=user.email)
 
 
 def export_user_data(user: User) -> dict[str, object]:
@@ -73,11 +81,51 @@ def export_user_data(user: User) -> dict[str, object]:
             }
             for b in Booking.objects.filter(user=user).select_related("space", "resource")
         ],
+        "helpdesk": [
+            {
+                "space": t.space.name,
+                "number": t.number,
+                "subject": t.subject,
+                "messages": [
+                    {"at": m.created_at.isoformat(), "from": m.sender, "body": m.body}
+                    for m in t.messages.all()
+                ],
+            }
+            for t in _tickets(user)
+        ],
         "join_requests": [
             {"space": j.space.name, "status": j.status, "message": j.message}
             for j in JoinRequest.objects.filter(user=user).select_related("space")
         ],
     }
+
+
+def sole_admin_of(user: User) -> list[str]:
+    """Names of the spaces where ``user`` is the only administrator."""
+    from django.db.models import Count, Q
+
+    from apps.core.models import Space
+
+    return list(
+        Space.objects.filter(memberships__user=user, memberships__role=Role.ADMIN)
+        .annotate(admins=Count("memberships", filter=Q(memberships__role=Role.ADMIN)))
+        .filter(admins=1)
+        .values_list("name", flat=True)
+    )
+
+
+class ErasureRefused(Exception):
+    pass
+
+
+def _tickets(user: User) -> Any:
+    from apps.helpdesk.models import Ticket
+
+    return (
+        Ticket.objects.filter(models_q_requester(user))
+        .select_related("space")
+        .prefetch_related("messages")
+    )
 
 
 @transaction.atomic
@@ -91,7 +139,21 @@ def anonymize(user: User) -> None:
     from apps.booking.models import Booking, FeedToken
     from apps.core.models import JoinRequest
 
+    if sole_admin_of(user):
+        raise ErasureRefused("last administrator of a space")
+    from allauth.socialaccount.models import SocialAccount
+
+    from apps.helpdesk.models import Ticket, TicketMessage
+
     placeholder = f"deleted-{user.pk}"
+    SocialAccount.objects.filter(user=user).delete()  # IdP claims (name, e-mail)
+    erased = "[erased at the requester's request]"
+    TicketMessage.objects.filter(incoming=True, sender__iexact=user.email).update(
+        sender=placeholder, body=erased
+    )
+    Ticket.objects.filter(models_q_requester(user)).update(
+        requester=None, requester_email=f"{placeholder}@invalid.invalid"
+    )
     Booking.objects.filter(user=user).update(title="", note="")
     Booking.history.filter(user=user).update(title="", note="")  # audit trail too
     SpaceMembership.objects.filter(user=user).delete()

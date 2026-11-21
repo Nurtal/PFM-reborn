@@ -31,11 +31,25 @@ def export_data(request: HttpRequest) -> HttpResponse:
 @require_POST
 def delete_account(request: HttpRequest) -> HttpResponse:
     user = cast(User, request.user)
-    if not user.check_password(request.POST.get("password", "")):
-        messages.error(request, _("Wrong password: your account was not deleted."))
+    # Accounts without a local password (SSO, LDAP, legacy import) confirm by
+    # typing their username; the others with their password.
+    if user.has_usable_password():
+        confirmed = user.check_password(request.POST.get("password", ""))
+    else:
+        confirmed = request.POST.get("username", "").strip() == user.username
+    if not confirmed:
+        messages.error(request, _("Confirmation failed: your account was not deleted."))
         return redirect("accounts:my_data")
     if user.is_superuser:
         messages.error(request, _("Super-administrators must be removed by another administrator."))
+        return redirect("accounts:my_data")
+    spaces = services.sole_admin_of(user)
+    if spaces:
+        messages.error(
+            request,
+            _("You are the only administrator of %(spaces)s: name another one first.")
+            % {"spaces": ", ".join(spaces)},
+        )
         return redirect("accounts:my_data")
     services.anonymize(user)
     logout(request)

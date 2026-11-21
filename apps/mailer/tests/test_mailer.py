@@ -84,3 +84,10 @@ def test_subject_header_injection_is_refused(client, space, setup_done):
 def test_mailer_is_for_managers(client, space, setup_done):
     client.force_login(space.memberships.get(role=Role.USER).user)
     assert client.get(reverse("mailer:index", args=[space.slug])).status_code == 404
+
+
+def test_role_in_another_space_does_not_count(space):
+    visitor = space.memberships.get(role=Role.VISITOR).user
+    MembershipFactory(user=visitor, role=Role.MANAGER)  # manager elsewhere
+    mailing = Mailing(space=space, subject="s", body="b", audience=Audience.MANAGERS)
+    assert visitor.email not in services.recipients(mailing)
