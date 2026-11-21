@@ -11,4 +11,8 @@ urlpatterns = [
     path("orders/", views.OrderListView.as_view(), name="orders"),
     path("orders/new/", views.OrderCreateView.as_view(), name="order_create"),
     path("orders/<uuid:order_id>/", views.OrderDetailView.as_view(), name="order_detail"),
+    path("projects/", views.ProjectListView.as_view(), name="projects"),
+    path("projects/new/", views.ProjectCreateView.as_view(), name="project_create"),
+    path("projects/<uuid:pk>/", views.ProjectUpdateView.as_view(), name="project_update"),
+    path("stock/", views.StockView.as_view(), name="stock"),
 ]

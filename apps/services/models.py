@@ -83,6 +83,14 @@ class Order(SpaceScopedModel):
         related_name="+",
         verbose_name=_("requested by"),
     )
+    project = models.ForeignKey(
+        "services.Project",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name=_("project"),
+    )
     title = models.CharField(_("title"), max_length=200)
     note = models.TextField(_("note"), blank=True)
     status = models.CharField(
@@ -120,3 +128,113 @@ class OrderLine(models.Model):
 
     def __str__(self) -> str:
         return f"{self.quantity} × {self.item}"
+
+
+class ProjectStatus(models.TextChoices):
+    PLANNED = "planned", _("Planned")
+    ACTIVE = "active", _("In progress")
+    CLOSED = "closed", _("Closed")
+
+
+class Project(SpaceScopedModel):
+    """A long-running piece of work for a client, grouping orders (legacy "projet")."""
+
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(_("name"), max_length=200)
+    client = models.ForeignKey(
+        "clients.Client",
+        on_delete=models.PROTECT,
+        related_name="projects",
+        verbose_name=_("client"),
+    )
+    lead = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("lead"),
+    )
+    start_date = models.DateField(_("start date"))
+    end_date = models.DateField(_("planned end"))
+    status = models.CharField(
+        _("status"), max_length=10, choices=ProjectStatus.choices, default=ProjectStatus.PLANNED
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        ordering = ["start_date", "name"]
+        verbose_name = _("project")
+        verbose_name_plural = _("projects")
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(end_date__gte=models.F("start_date")),
+                name="project_end_after_start",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Cabinet(SpaceScopedModel):
+    """Storage unit (freezer, cabinet) holding shelves (legacy "armoire")."""
+
+    name = models.CharField(_("name"), max_length=120)
+    location = models.CharField(_("location"), max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("cabinet")
+        verbose_name_plural = _("cabinets")
+        constraints = [
+            models.UniqueConstraint(fields=["space", "name"], name="unique_cabinet_name"),
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Shelf(models.Model):
+    cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE, related_name="shelves")
+    name = models.CharField(_("name"), max_length=120)
+    capacity = models.PositiveIntegerField(_("capacity"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["cabinet", "name"]
+        verbose_name = _("shelf")
+        verbose_name_plural = _("shelves")
+        constraints = [
+            models.UniqueConstraint(fields=["cabinet", "name"], name="unique_shelf_name"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.cabinet} / {self.name}"
+
+
+class StockEntry(SpaceScopedModel):
+    """Client material stored on a shelf, from deposit to withdrawal."""
+
+    shelf = models.ForeignKey(
+        Shelf, on_delete=models.PROTECT, related_name="entries", verbose_name=_("shelf")
+    )
+    client = models.ForeignKey(
+        "clients.Client", on_delete=models.PROTECT, related_name="stock", verbose_name=_("client")
+    )
+    label = models.CharField(_("label"), max_length=200)
+    quantity = models.PositiveIntegerField(_("quantity"), default=1)
+    stored_on = models.DateField(_("stored on"), default=timezone.localdate)
+    removed_on = models.DateField(_("removed on"), null=True, blank=True)
+    note = models.CharField(_("note"), max_length=200, blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        ordering = ["-stored_on"]
+        verbose_name = _("stock entry")
+        verbose_name_plural = _("stock entries")
+
+    def __str__(self) -> str:
+        return self.label

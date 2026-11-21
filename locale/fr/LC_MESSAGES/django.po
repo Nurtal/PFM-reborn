@@ -1426,3 +1426,157 @@ msgid "%(n)d booking or service has no price for its client and was left out."
 msgid_plural "%(n)d bookings or services have no price for their client and were left out."
 msgstr[0] "%(n)d réservation ou prestation n'a pas de tarif pour son client et a été écartée."
 msgstr[1] "%(n)d réservations ou prestations n'ont pas de tarif pour leur client et ont été écartées."
+
+#, python-format
+msgid "Not enough room on this shelf (%(free)d left)."
+msgstr "Plus assez de place sur cette étagère (%(free)d restantes)."
+
+msgid "Already withdrawn."
+msgstr "Déjà retiré."
+
+msgid "Withdrawal cannot precede storage."
+msgstr "Le retrait ne peut pas précéder le dépôt."
+
+msgid "project"
+msgstr "projet"
+
+msgid "Planned"
+msgstr "Prévu"
+
+msgid "In progress"
+msgstr "En cours"
+
+msgid "Closed"
+msgstr "Clos"
+
+msgid "lead"
+msgstr "responsable"
+
+msgid "start date"
+msgstr "date de début"
+
+msgid "planned end"
+msgstr "fin prévue"
+
+msgid "projects"
+msgstr "projets"
+
+msgid "location"
+msgstr "emplacement"
+
+msgid "cabinet"
+msgstr "armoire"
+
+msgid "cabinets"
+msgstr "armoires"
+
+msgid "capacity"
+msgstr "capacité"
+
+msgid "shelf"
+msgstr "étagère"
+
+msgid "shelves"
+msgstr "étagères"
+
+msgid "label"
+msgstr "libellé"
+
+msgid "stored on"
+msgstr "déposé le"
+
+msgid "removed on"
+msgstr "retiré le"
+
+msgid "stock entry"
+msgstr "élément en stock"
+
+msgid "stock entries"
+msgstr "éléments en stock"
+
+msgid "Cabinet"
+msgstr "Armoire"
+
+msgid "Capacity"
+msgstr "Capacité"
+
+msgid "Shelf"
+msgstr "Étagère"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Projects"
+msgstr "Projets"
+
+msgid "Stock"
+msgstr "Stock"
+
+msgid "Since"
+msgstr "Depuis"
+
+msgid "Withdraw"
+msgstr "Retirer"
+
+msgid "Nothing in stock."
+msgstr "Rien en stock."
+
+msgid "No shelf yet."
+msgstr "Aucune étagère pour le moment."
+
+msgid "Store material"
+msgstr "Déposer du matériel"
+
+msgid "Store"
+msgstr "Déposer"
+
+msgid "New shelf"
+msgstr "Nouvelle étagère"
+
+msgid "New cabinet"
+msgstr "Nouvelle armoire"
+
+msgid "Client material stored in the platform cabinets."
+msgstr "Matériel des clients stocké dans les armoires de la plateforme."
+
+msgid "Label or client"
+msgstr "Libellé ou client"
+
+msgid "Mark as withdrawn?"
+msgstr "Marquer comme retiré ?"
+
+msgid "New project"
+msgstr "Nouveau projet"
+
+msgid "Edit project"
+msgstr "Modifier le projet"
+
+msgid "Today"
+msgstr "Aujourd'hui"
+
+msgid "Hide closed projects"
+msgstr "Masquer les projets clos"
+
+msgid "Show closed projects"
+msgstr "Afficher les projets clos"
+
+msgid "Earlier"
+msgstr "Plus tôt"
+
+msgid "Later"
+msgstr "Plus tard"
+
+msgid "No project in this period"
+msgstr "Aucun projet sur cette période"
+
+msgid "Orders of this project"
+msgstr "Commandes du projet"
+
+msgid "No order linked yet. Choose this project when creating an order."
+msgstr "Aucune commande liée. Choisissez ce projet en créant une commande."
+
+#, python-format
+msgid "%(n)s line without price"
+msgid_plural "%(n)s lines without price"
+msgstr[0] "%(n)s ligne sans tarif"
+msgstr[1] "%(n)s lignes sans tarif"

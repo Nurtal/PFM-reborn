@@ -1,0 +1,52 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Projects" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Projects' %}" :subtitle="current_space.name">
+    <a href="{% url 'services:orders' current_space.slug %}" class="btn-secondary">{% translate "Orders" %}</a>
+    <a href="{% url 'services:project_create' current_space.slug %}" class="btn-primary"><c-icon name="plus" class="size-4" />{% translate "New project" %}</a>
+  </c-page-header>
+  <div class="mb-3 flex flex-wrap items-center gap-2">
+    <a href="?offset={{ prev_offset }}{% if show_closed %}&closed=1{% endif %}" class="btn-secondary px-3" aria-label="{% translate 'Earlier' %}">←</a>
+    <a href="?offset=0{% if show_closed %}&closed=1{% endif %}" class="btn-secondary">{% translate "Today" %}</a>
+    <a href="?offset={{ next_offset }}{% if show_closed %}&closed=1{% endif %}" class="btn-secondary px-3" aria-label="{% translate 'Later' %}">→</a>
+    <span class="text-sm text-zinc-500">{{ chart.start|date:"F Y" }} – {{ chart.months.5.label|date:"F Y" }}</span>
+    <a href="?offset={{ offset }}{% if not show_closed %}&closed=1{% endif %}" class="btn-ghost ml-auto">{% if show_closed %}{% translate "Hide closed projects" %}{% else %}{% translate "Show closed projects" %}{% endif %}</a>
+  </div>
+  {% if chart.bars %}
+    <div class="card overflow-x-auto p-4">
+      <div class="grid min-w-[40rem] grid-cols-[12rem_1fr] gap-x-3">
+        <div></div>
+        <svg viewBox="0 0 100 6" preserveAspectRatio="none" class="h-6 w-full text-zinc-500" aria-hidden="true">
+          {% for tick in chart.months %}
+            <line x1="{{ tick.x|stringformat:'f' }}" y1="0" x2="{{ tick.x|stringformat:'f' }}" y2="6" stroke="currentColor" stroke-width="0.1" />
+          {% endfor %}
+        </svg>
+        <div></div>
+        <div class="relative -mt-6 mb-2 flex h-6 text-xs text-zinc-500">
+          {% for tick in chart.months %}<span class="flex-1 truncate pl-1">{{ tick.label|date:"M Y" }}</span>{% endfor %}
+        </div>
+        {% for bar in chart.bars %}
+          <a href="{% url 'services:project_update' current_space.slug bar.item.public_id %}" class="truncate py-1.5 text-sm">{{ bar.item.name }}<span class="block truncate text-xs text-zinc-500">{{ bar.item.client }}</span></a>
+          <svg viewBox="0 0 100 10" preserveAspectRatio="none" class="h-10 w-full" role="img" aria-label="{{ bar.item.name }}: {{ bar.item.start_date|date:'SHORT_DATE_FORMAT' }} – {{ bar.item.end_date|date:'SHORT_DATE_FORMAT' }}">
+            {% for tick in chart.months %}
+              <line x1="{{ tick.x|stringformat:'f' }}" y1="0" x2="{{ tick.x|stringformat:'f' }}" y2="10" class="stroke-zinc-200 dark:stroke-zinc-800" stroke-width="0.1" />
+            {% endfor %}
+            <rect x="{{ bar.x|stringformat:'f' }}" y="2" width="{{ bar.width|stringformat:'f' }}" height="6" rx="0.6"
+                  class="{% if bar.item.status == 'closed' %}fill-zinc-400{% elif bar.item.status == 'planned' %}fill-accent/50{% else %}fill-accent{% endif %}" />
+            {% if chart.today is not None %}
+              <line x1="{{ chart.today|stringformat:'f' }}" y1="0" x2="{{ chart.today|stringformat:'f' }}" y2="10" class="stroke-red-500" stroke-width="0.25" />
+            {% endif %}
+          </svg>
+        {% endfor %}
+      </div>
+      <p class="mt-3 flex gap-4 text-xs text-zinc-500">
+        <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-sm bg-accent/50"></span>{% translate "Planned" %}</span>
+        <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-sm bg-accent"></span>{% translate "In progress" %}</span>
+        <span class="flex items-center gap-1"><span class="inline-block h-3 w-0.5 bg-red-500"></span>{% translate "Today" %}</span>
+      </p>
+    </div>
+  {% else %}
+    <c-empty-state icon="calendar" title="{% translate 'No project in this period' %}" />
+  {% endif %}
+{% endblock content %}
