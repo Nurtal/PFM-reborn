@@ -1,0 +1,12 @@
+{% comment %}Renders a bound form field: <c-field :field="form.email" />{% endcomment %}
+<c-vars field />
+<div class="space-y-1">
+  {% if field.widget_type == "checkbox" %}
+    <div class="flex items-center gap-2">{{ field }} {{ field.label_tag }}</div>
+  {% else %}
+    {{ field.label_tag }}
+    {{ field }}
+  {% endif %}
+  {% if field.help_text %}<span class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>{% endif %}
+  {{ field.errors }}
+</div>

@@ -1,0 +1,10 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{{ current_space.name }}{% endblock title %}
+{% block content %}
+  <c-page-header :title="current_space.name" :subtitle="current_space.description" />
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <c-empty-state icon="calendar" title="{% translate 'Booking' %}" text="{% translate 'Equipment booking arrives with milestone M1.' %}" />
+    <c-empty-state icon="file-text" title="{% translate 'Invoicing' %}" text="{% translate 'Invoicing arrives with milestone M3.' %}" />
+  </div>
+{% endblock content %}

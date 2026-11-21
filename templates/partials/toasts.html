@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center gap-2 p-4 sm:items-end"
+     aria-live="polite"
+     id="toasts">
+  {% for message in messages %}
+    <div x-data="toast"
+         x-show="visible"
+         role="status"
+         class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border bg-white p-4 text-sm shadow-lg dark:bg-zinc-900 {% if message.level_tag == 'error' %}border-red-300 dark:border-red-800{% elif message.level_tag == 'success' %}border-emerald-300 dark:border-emerald-800{% elif message.level_tag == 'warning' %}border-amber-300 dark:border-amber-800{% else %}border-zinc-200 dark:border-zinc-700{% endif %}">
+      <p class="flex-1">{{ message }}</p>
+      <button type="button"
+              class="text-zinc-400 hover:text-zinc-600"
+              x-on:click="dismiss"
+              aria-label="{% translate 'Dismiss' %}">
+        <c-icon name="x" class="size-4" />
+      </button>
+    </div>
+  {% endfor %}
+</div>

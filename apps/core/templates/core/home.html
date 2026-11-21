@@ -1,0 +1,20 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "My platforms" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'My platforms' %}" />
+  {% if spaces %}
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for space in spaces %}
+        <li>
+          <a href="{% url 'core:space_dashboard' space.slug %}" class="card block text-inherit no-underline transition hover:border-accent hover:no-underline">
+            <h2 class="font-semibold">{{ space.name }}</h2>
+            {% if space.description %}<p class="mt-1 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">{{ space.description }}</p>{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <c-empty-state icon="building" title="{% translate 'No platform yet' %}" text="{% translate 'Ask a platform administrator to add you as a member.' %}" />
+  {% endif %}
+{% endblock content %}

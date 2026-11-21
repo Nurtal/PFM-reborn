@@ -1,0 +1,61 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Members" %} · {{ current_space.name }}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Members' %}" :subtitle="current_space.name" />
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="card overflow-x-auto p-0 lg:col-span-2">
+      <table class="w-full text-left text-sm">
+        <caption class="sr-only">{% translate "Members of this platform" %}</caption>
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "Name" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Role" %}</th>
+            <th scope="col" class="px-4 py-3"><span class="sr-only">{% translate "Actions" %}</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for m in memberships %}
+            <tr>
+              <td class="px-4 py-3">
+                <div class="font-medium">{{ m.user }}</div>
+                <div class="text-zinc-500">{{ m.user.email }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <form method="post" action="{% url 'core:member_detail' current_space.slug m.pk %}" class="flex items-center gap-2">
+                  {% csrf_token %}
+                  <label for="role-{{ m.pk }}" class="sr-only">{% translate "Role" %}</label>
+                  <select id="role-{{ m.pk }}" name="role" class="w-auto">
+                    {% for value, label in roles %}
+                      <option value="{{ value }}" {% if value == m.role %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn-secondary px-3 py-1.5">{% translate "Save" %}</button>
+                </form>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <form method="post" action="{% url 'core:member_detail' current_space.slug m.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="remove">
+                  <button type="submit" class="btn-ghost px-2 text-red-600" aria-label="{% blocktranslate with name=m.user %}Remove {{ name }}{% endblocktranslate %}">
+                    <c-icon name="trash" class="size-4" />
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" class="card space-y-4" novalidate>
+      {% csrf_token %}
+      <h2 class="font-semibold">{% translate "Add a member" %}</h2>
+      <c-field :field="form.email" />
+      <c-field :field="form.role" />
+      <button type="submit" class="btn-primary w-full">
+        <c-icon name="plus" class="size-4" />
+        {% translate "Add" %}
+      </button>
+    </form>
+  </div>
+{% endblock content %}

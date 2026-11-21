@@ -1,0 +1,306 @@
+# French translations for PFM-NG.
+# This file is distributed under the same license as PFM-NG (AGPL-3.0).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PFM-NG\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Two-factor authentication is mandatory for administrators."
+msgstr "L'authentification à deux facteurs est obligatoire pour les administrateurs."
+
+msgid "email address"
+msgstr "adresse e-mail"
+
+msgid "Accounts"
+msgstr "Comptes"
+
+msgid "Welcome! Last step: secure your administrator account with 2FA."
+msgstr "Bienvenue ! Dernière étape : sécurisez votre compte administrateur avec la double authentification."
+
+msgid "Invalid setup token."
+msgstr "Jeton d'installation invalide."
+
+msgid "Fill in the SMTP host, port and a recipient email."
+msgstr "Renseignez le serveur SMTP, le port et une adresse destinataire."
+
+msgid "PFM test email"
+msgstr "E-mail de test PFM"
+
+msgid "Your SMTP settings work."
+msgstr "Vos réglages SMTP fonctionnent."
+
+msgid "A space needs at least one administrator."
+msgstr "Une plateforme doit avoir au moins un administrateur."
+
+msgid "Member saved."
+msgstr "Membre enregistré."
+
+msgid "Member removed."
+msgstr "Membre retiré."
+
+msgid "Role updated."
+msgstr "Rôle mis à jour."
+
+msgid "Use a hex colour such as #4f46e5."
+msgstr "Utilisez une couleur hexadécimale, par exemple #4f46e5."
+
+msgid "Unknown time zone."
+msgstr "Fuseau horaire inconnu."
+
+msgid "Visitor"
+msgstr "Visiteur"
+
+msgid "User"
+msgstr "Utilisateur"
+
+msgid "Manager"
+msgstr "Gestionnaire"
+
+msgid "Space administrator"
+msgstr "Administrateur de la plateforme"
+
+msgid "None"
+msgstr "Aucune"
+
+msgid "name"
+msgstr "nom"
+
+msgid "short name"
+msgstr "nom court"
+
+msgid "description"
+msgstr "description"
+
+msgid "time zone"
+msgstr "fuseau horaire"
+
+msgid "currency"
+msgstr "devise"
+
+msgid "accent colour"
+msgstr "couleur d'accent"
+
+msgid "active"
+msgstr "active"
+
+msgid "space"
+msgstr "plateforme"
+
+msgid "spaces"
+msgstr "plateformes"
+
+msgid "role"
+msgstr "rôle"
+
+msgid "membership"
+msgstr "adhésion"
+
+msgid "memberships"
+msgstr "adhésions"
+
+msgid "site name"
+msgstr "nom du site"
+
+msgid "SMTP host"
+msgstr "Serveur SMTP"
+
+msgid "SMTP port"
+msgstr "Port SMTP"
+
+msgid "SMTP user"
+msgstr "Utilisateur SMTP"
+
+msgid "security"
+msgstr "sécurité"
+
+msgid "sender address"
+msgstr "adresse d'expédition"
+
+msgid "instance settings"
+msgstr "réglages de l'instance"
+
+msgid "Setup token"
+msgstr "Jeton d'installation"
+
+msgid "Printed in the container logs (docker logs pfm)."
+msgstr "Affiché dans les journaux du conteneur (docker logs pfm)."
+
+msgid "Site name"
+msgstr "Nom du site"
+
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Password (again)"
+msgstr "Mot de passe (confirmation)"
+
+msgid "Platform name"
+msgstr "Nom de la plateforme"
+
+msgid "Short name"
+msgstr "Nom court"
+
+msgid "Used in URLs, e.g. imaging."
+msgstr "Utilisé dans les adresses, par exemple imagerie."
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Security"
+msgstr "Sécurité"
+
+msgid "SMTP password"
+msgstr "Mot de passe SMTP"
+
+msgid "Sender address"
+msgstr "Adresse d'expédition"
+
+msgid "This short name is already used."
+msgstr "Ce nom court est déjà utilisé."
+
+msgid "The two passwords do not match."
+msgstr "Les deux mots de passe ne correspondent pas."
+
+msgid "User email"
+msgstr "E-mail de l'utilisateur"
+
+msgid "Role"
+msgstr "Rôle"
+
+msgid "No active account uses this email."
+msgstr "Aucun compte actif n'utilise cet e-mail."
+
+msgid "Core"
+msgstr "Noyau"
+
+msgid "French"
+msgstr "Français"
+
+msgid "English"
+msgstr "Anglais"
+
+msgid "Skip to content"
+msgstr "Aller au contenu"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "Members"
+msgstr "Membres"
+
+msgid "My platforms"
+msgstr "Mes plateformes"
+
+msgid "Instance"
+msgstr "Instance"
+
+msgid "Administration"
+msgstr "Administration"
+
+msgid "Email addresses"
+msgstr "Adresses e-mail"
+
+msgid "Two-factor authentication"
+msgstr "Double authentification"
+
+msgid "Sign out"
+msgstr "Se déconnecter"
+
+msgid "Main navigation"
+msgstr "Navigation principale"
+
+msgid "Open menu"
+msgstr "Ouvrir le menu"
+
+msgid "Toggle dark mode"
+msgstr "Basculer le mode sombre"
+
+msgid "Dismiss"
+msgstr "Fermer"
+
+msgid "First start"
+msgstr "Premier démarrage"
+
+msgid "Welcome to PFM"
+msgstr "Bienvenue dans PFM"
+
+msgid "Three things and you are done: the administrator account, your first platform and, if you want, the mail server."
+msgstr "Trois informations et c'est terminé : le compte administrateur, votre première plateforme et, si vous le souhaitez, le serveur de messagerie."
+
+msgid "1. Administrator"
+msgstr "1. Administrateur"
+
+msgid "2. First platform"
+msgstr "2. Première plateforme"
+
+msgid "3. Mail server (optional)"
+msgstr "3. Serveur de messagerie (facultatif)"
+
+msgid "You can also configure it later in the administration."
+msgstr "Vous pourrez aussi le configurer plus tard dans l'administration."
+
+msgid "Send a test email to"
+msgstr "Envoyer un e-mail de test à"
+
+msgid "Test"
+msgstr "Tester"
+
+msgid "Finish setup"
+msgstr "Terminer l'installation"
+
+msgid "No platform yet"
+msgstr "Aucune plateforme pour le moment"
+
+msgid "Ask a platform administrator to add you as a member."
+msgstr "Demandez à l'administrateur d'une plateforme de vous ajouter comme membre."
+
+msgid "Booking"
+msgstr "Réservation"
+
+msgid "Equipment booking arrives with milestone M1."
+msgstr "La réservation d'équipements arrive avec le jalon M1."
+
+msgid "Invoicing"
+msgstr "Facturation"
+
+msgid "Invoicing arrives with milestone M3."
+msgstr "La facturation arrive avec le jalon M3."
+
+msgid "Members of this platform"
+msgstr "Membres de cette plateforme"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Add a member"
+msgstr "Ajouter un membre"
+
+msgid "Add"
+msgstr "Ajouter"
+
+#, python-format
+msgid "Remove %(name)s"
+msgstr "Retirer %(name)s"
+
+msgid "Test email sent."
+msgstr "E-mail de test envoyé."
+
+msgid "Choose a platform"
+msgstr "Choisir une plateforme"

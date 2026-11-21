@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block body %}
+  <div x-data="sidebar" class="flex min-h-full">
+    {# Sidebar: off-canvas on small screens, fixed from lg up #}
+    <div x-show="open" x-on:click="close" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-hidden="true"></div>
+    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-zinc-200 bg-white transition-transform lg:static lg:translate-x-0 dark:border-zinc-800 dark:bg-zinc-900"
+           x-bind:class="open ? 'translate-x-0' : ''"
+           aria-label="{% translate 'Main navigation' %}">
+      <div class="flex h-16 items-center gap-2 border-b border-zinc-200 px-4 font-semibold dark:border-zinc-800">
+        <span class="grid size-8 place-items-center rounded-lg bg-accent text-accent-fg">P</span>
+        <a href="{% url 'core:home' %}" class="text-inherit no-underline hover:no-underline">PFM</a>
+      </div>
+      <nav class="flex-1 space-y-1 overflow-y-auto p-3">
+        {% if current_space %}
+          <p class="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">{{ current_space.name }}</p>
+          {% url 'core:space_dashboard' current_space.slug as dashboard_url %}
+          <a href="{{ dashboard_url }}" class="nav-link" {% if request.path == dashboard_url %}aria-current="page"{% endif %}>
+            <c-icon name="layout-dashboard" class="size-4" />
+            {% translate "Dashboard" %}
+          </a>
+          {% if can_administer_space %}
+            {% url 'core:members' current_space.slug as members_url %}
+            <a href="{{ members_url }}" class="nav-link" {% if request.path == members_url %}aria-current="page"{% endif %}>
+              <c-icon name="users" class="size-4" />
+              {% translate "Members" %}
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'core:home' %}" class="nav-link" aria-current="page">
+            <c-icon name="layout-grid" class="size-4" />
+            {% translate "My platforms" %}
+          </a>
+        {% endif %}
+        {% if user.is_superuser %}
+          <p class="px-3 pt-4 pb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">{% translate "Instance" %}</p>
+          <a href="{% url 'admin:index' %}" class="nav-link">
+            <c-icon name="settings" class="size-4" />
+            {% translate "Administration" %}
+          </a>
+        {% endif %}
+      </nav>
+      <div class="border-t border-zinc-200 p-3 dark:border-zinc-800">{% include "partials/language_switch.html" %}</div>
+    </aside>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/80 px-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
+        <button type="button" class="btn-ghost px-2 lg:hidden" x-on:click="toggle" aria-label="{% translate 'Open menu' %}">
+          <c-icon name="menu" class="size-5" />
+        </button>
+        {% with spaces=user_spaces %}
+          {% if spaces|length > 1 or current_space %}
+            <details class="relative">
+              <summary class="btn-secondary cursor-pointer list-none">
+                <c-icon name="building" class="size-4" />
+                {{ current_space.name|default:_("Choose a platform") }}
+                <c-icon name="chevron-down" class="size-4" />
+              </summary>
+              <ul class="absolute left-0 mt-2 w-64 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                {% for space in spaces %}
+                  <li>
+                    <a href="{% url 'core:space_dashboard' space.slug %}" class="nav-link" {% if space == current_space %}aria-current="page"{% endif %}>{{ space.name }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
+        {% endwith %}
+        <div class="ml-auto flex items-center gap-1">
+          <button type="button" x-data="themeToggle" x-on:click="toggle" class="btn-ghost px-2" aria-label="{% translate 'Toggle dark mode' %}">
+            <c-icon name="moon" class="size-5 dark:hidden" />
+            <c-icon name="sun" class="hidden size-5 dark:block" />
+          </button>
+          <details class="relative">
+            <summary class="btn-ghost cursor-pointer list-none">
+              <c-icon name="user" class="size-5" />
+              <span class="hidden sm:inline">{{ user }}</span>
+            </summary>
+            <ul class="absolute right-0 mt-2 w-56 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+              <li><a href="{% url 'account_email' %}" class="nav-link">{% translate "Email addresses" %}</a></li>
+              <li><a href="{% url 'account_change_password' %}" class="nav-link">{% translate "Password" %}</a></li>
+              <li><a href="{% url 'mfa_index' %}" class="nav-link">{% translate "Two-factor authentication" %}</a></li>
+              <li>
+                <form method="post" action="{% url 'account_logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="nav-link w-full">{% translate "Sign out" %}</button>
+                </form>
+              </li>
+            </ul>
+          </details>
+        </div>
+      </header>
+      <main id="main" class="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-6 lg:p-8">
+        {% block content %}{% endblock content %}
+      </main>
+    </div>
+  </div>
+{% endblock body %}
