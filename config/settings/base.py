@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     "apps.clients",
     "apps.invoices",
     "apps.services",
+    "apps.statistics",
+    "apps.documents",
 ]
 
 MIDDLEWARE = [
@@ -243,7 +245,7 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # non-file fields; files: core.uploads (20 MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 # --- Email --------------------------------------------------------------------------

@@ -1,0 +1,53 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Documents" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Documents' %}" :subtitle="current_space.name" />
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="card overflow-x-auto p-0 {% if can_manage %}lg:col-span-2{% else %}lg:col-span-3{% endif %}">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "Title" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Size" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Added" %}</th>
+            {% if can_manage %}<th scope="col" class="px-2 py-3"><span class="sr-only">{% translate "Actions" %}</span></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for d in documents %}
+            <tr>
+              <td class="px-4 py-3">
+                <a href="{% url 'documents:download' current_space.slug d.public_id %}" class="font-medium">{{ d.title }}</a>
+                {% if d.visibility == "managers" %}<span class="badge ml-1 bg-zinc-100 dark:bg-zinc-800">{% translate "Managers" %}</span>{% endif %}
+                {% if d.description %}<div class="text-zinc-500">{{ d.description }}</div>{% endif %}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ d.size|filesizeformat }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ d.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+              {% if can_manage %}
+                <td class="px-2 py-3 text-right">
+                  <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="delete" value="{{ d.public_id }}" class="btn-ghost px-2 text-red-600" data-confirm="{% translate 'Delete this document?' %}" aria-label="{% translate 'Delete' %}"><c-icon name="trash" class="size-4" /></button>
+                  </form>
+                </td>
+              {% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="px-4 py-8 text-center text-zinc-500">{% translate "No document." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if can_manage %}
+      <form method="post" enctype="multipart/form-data" class="card space-y-3" novalidate>
+        {% csrf_token %}
+        <h2 class="font-semibold">{% translate "Add a document" %}</h2>
+        {{ form.non_field_errors }}
+        {% for field in form %}<c-field :field="field" />{% endfor %}
+        <p class="text-xs text-zinc-500">{% translate "PDF, images, text, Office and OpenDocument files, 20 MB max." %}</p>
+        <button type="submit" class="btn-primary w-full">{% translate "Upload" %}</button>
+      </form>
+    {% endif %}
+  </div>
+{% endblock content %}
