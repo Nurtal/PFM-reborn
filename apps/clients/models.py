@@ -73,6 +73,15 @@ class Client(SpaceScopedModel):
         blank=True,
         help_text=_("Purchase order, cost centre..."),
     )
+    vat_rate = models.DecimalField(
+        _("VAT rate (%)"),
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=_("Leave empty to use the platform rate; 0 for VAT-exempt clients."),
+    )
     users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, blank=True, related_name="clients", verbose_name=_("users")
     )

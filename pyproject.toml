@@ -16,8 +16,10 @@ dependencies = [
     "django-environ>=0.14.0",
     "django-htmx>=1.29.0",
     "django-simple-history>=3.13.0",
+    "fpdf2>=2.9.0",
     "granian>=2.8.9",
     "huey>=3.5.4",
+    "openpyxl>=3.1.5",
     "rules>=3.5",
     "whitenoise[brotli]>=6.12.0",
 ]
@@ -56,7 +58,7 @@ extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM", "RUF", "BLE"]
-ignore = ["RUF012"]
+ignore = ["RUF012", "RUF001"]  # RUF001: French typography (– … ’ nbsp) is intended
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101", "S105", "S106"]

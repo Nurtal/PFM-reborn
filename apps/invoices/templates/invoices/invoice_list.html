@@ -1,0 +1,74 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Invoicing" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Invoicing' %}" :subtitle="current_space.name">
+    <a href="{% url 'invoices:settings' current_space.slug %}" class="btn-secondary">{% translate "Settings" %}</a>
+    <a href="{% url 'invoices:run' current_space.slug %}" class="btn-primary">
+      <c-icon name="plus" class="size-4" />
+      {% translate "Bill a period" %}
+    </a>
+  </c-page-header>
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <nav class="flex gap-1" aria-label="{% translate 'Invoice status' %}">
+      <a href="?status=issued" class="btn-ghost {% if status == 'issued' %}bg-zinc-100 dark:bg-zinc-800{% endif %}" {% if status == 'issued' %}aria-current="page"{% endif %}>{% translate "Issued" %}</a>
+      <a href="?status=draft" class="btn-ghost {% if status == 'draft' %}bg-zinc-100 dark:bg-zinc-800{% endif %}" {% if status == 'draft' %}aria-current="page"{% endif %}>
+        {% translate "Drafts" %}
+        {% if drafts_count %}<span class="badge bg-accent text-accent-fg">{{ drafts_count }}</span>{% endif %}
+      </a>
+    </nav>
+    <form method="get" class="ml-auto flex items-center gap-2">
+      <input type="hidden" name="status" value="{{ status }}">
+      <label for="inv-q" class="sr-only">{% translate "Search" %}</label>
+      <input id="inv-q" type="search" name="q" value="{{ request.GET.q }}" placeholder="{% translate 'Number or client' %}" class="w-56">
+      <label for="inv-year" class="sr-only">{% translate "Year" %}</label>
+      <input id="inv-year" type="number" name="year" value="{{ request.GET.year }}" placeholder="{% translate 'Year' %}" class="w-24">
+      <button type="submit" class="btn-secondary">{% translate "Filter" %}</button>
+    </form>
+    {% if status == "issued" %}
+      <a href="{% url 'invoices:export' current_space.slug 'csv' %}?{{ query }}" class="btn-secondary">CSV</a>
+      <a href="{% url 'invoices:export' current_space.slug 'xlsx' %}?{{ query }}" class="btn-secondary">Excel</a>
+    {% endif %}
+  </div>
+  {% if invoices %}
+    <div class="card overflow-x-auto p-0">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "Number" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Client" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Period" %}</th>
+            <th scope="col" class="px-4 py-3 text-right">{% translate "Total incl. tax" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Status" %}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for i in invoices %}
+            <tr>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <a href="{% url 'invoices:detail' current_space.slug i.public_id %}">{{ i.number|default:_("Draft") }}</a>
+                {% if i.kind == "credit" %}<span class="badge ml-1 bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300">{% translate "Credit note" %}</span>{% endif %}
+              </td>
+              <td class="px-4 py-3">{{ i.client_name|default:i.client.name }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ i.period_start|date:"SHORT_DATE_FORMAT" }} – {{ i.period_end|date:"SHORT_DATE_FORMAT" }}</td>
+              <td class="px-4 py-3 text-right whitespace-nowrap">{% if i.status == "issued" %}{{ i.total_incl_tax }} {{ i.currency }}{% else %}—{% endif %}</td>
+              <td class="px-4 py-3">
+                {% if i.status == "draft" %}
+                  <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{% translate "Draft" %}</span>
+                {% elif i.is_credited %}
+                  <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{% translate "Credited" %}</span>
+                {% elif i.paid_at %}
+                  <span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">{% translate "Paid" %}</span>
+                {% elif i.kind == "invoice" %}
+                  <span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{% translate "Awaiting payment" %}</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <c-empty-state icon="file-text" title="{% translate 'No invoice' %}" text="{% translate 'Bill a period to create drafts from the bookings of your clients.' %}" />
+  {% endif %}
+{% endblock content %}
