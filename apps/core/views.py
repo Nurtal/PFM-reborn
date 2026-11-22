@@ -74,10 +74,16 @@ def setup(request: HttpRequest) -> HttpResponse:
             return redirect("core:home")
         login(request, admin, backend="django.contrib.auth.backends.ModelBackend")
         _record_password_auth(request, admin)
+        if settings.PFM_REQUIRE_ADMIN_MFA:
+            messages.success(
+                request, _("Welcome! Last step: secure your administrator account with 2FA.")
+            )
+            return redirect("mfa_activate_totp")
         messages.success(
-            request, _("Welcome! Last step: secure your administrator account with 2FA.")
+            request,
+            _("Welcome! Two-factor authentication is recommended: enable it in your account."),
         )
-        return redirect("mfa_activate_totp")
+        return redirect("core:home")
     if request.method == "GET":
         services.log_setup_token()
     return render(request, "core/setup.html", {"form": form})

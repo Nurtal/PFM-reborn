@@ -2195,3 +2195,6 @@ msgstr "Pour les scripts et intégrations : envoyez-le dans l’en-tête Authori
 
 msgid "Revoke this token?"
 msgstr "Révoquer ce jeton ?"
+
+msgid "Welcome! Two-factor authentication is recommended: enable it in your account."
+msgstr "Bienvenue ! La double authentification est recommandée : activez-la dans votre compte."
