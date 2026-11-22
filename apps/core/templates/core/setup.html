@@ -1,0 +1,66 @@
+{% extends "layouts/auth.html" %}
+{% load i18n %}
+{% block title %}{% translate "First start" %}{% endblock title %}
+{% block card_width %}max-w-2xl{% endblock card_width %}
+{% block content %}
+  <h1 class="text-xl font-semibold">{% translate "Welcome to PFM" %}</h1>
+  <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+    {% translate "Three things and you are done: the administrator account, your first platform and, if you want, the mail server." %}
+  </p>
+  <form method="post" class="mt-6 space-y-8" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% if form.token %}
+      <fieldset class="space-y-4">
+        <legend class="mb-2 font-medium">{% translate "Security" %}</legend>
+        <c-field :field="form.token" />
+      </fieldset>
+    {% endif %}
+    <fieldset class="space-y-4">
+      <legend class="mb-2 font-medium">{% translate "1. Administrator" %}</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <c-field :field="form.username" />
+        <c-field :field="form.email" />
+        <c-field :field="form.password1" />
+        <c-field :field="form.password2" />
+      </div>
+    </fieldset>
+    <fieldset class="space-y-4">
+      <legend class="mb-2 font-medium">{% translate "2. First platform" %}</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <c-field :field="form.space_name" />
+        <c-field :field="form.space_slug" />
+        <c-field :field="form.site_name" />
+      </div>
+    </fieldset>
+    <fieldset class="space-y-4">
+      <legend class="mb-2 font-medium">{% translate "3. Mail server (optional)" %}</legend>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">{% translate "You can also configure it later in the administration." %}</p>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="sm:col-span-2"><c-field :field="form.smtp_host" /></div>
+        <c-field :field="form.smtp_port" />
+        <c-field :field="form.smtp_security" />
+        <c-field :field="form.smtp_username" />
+        <c-field :field="form.smtp_password" />
+        <div class="sm:col-span-2"><c-field :field="form.smtp_from_email" /></div>
+      </div>
+      <div class="flex flex-wrap items-end gap-2">
+        <div class="min-w-48 flex-1">
+          <label for="smtp_test_email">{% translate "Send a test email to" %}</label>
+          <input type="email" id="smtp_test_email" name="email" autocomplete="email">
+        </div>
+        <button type="button"
+                class="btn-secondary"
+                hx-post="{% url 'core:setup_test_smtp' %}"
+                hx-include="closest form"
+                hx-target="#smtp-result"
+                hx-disabled-elt="this">
+          <c-icon name="mail" class="size-4" />
+          {% translate "Test" %}
+        </button>
+      </div>
+      <div id="smtp-result" aria-live="polite"></div>
+    </fieldset>
+    <button type="submit" class="btn-primary w-full">{% translate "Finish setup" %}</button>
+  </form>
+{% endblock content %}

@@ -1,0 +1,12 @@
+{% load i18n %}
+{% if ok %}
+  <p class="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400">
+    <c-icon name="check" class="size-4" />
+    {% translate "Test email sent." %}
+  </p>
+{% else %}
+  <p class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+    <c-icon name="alert" class="size-4" />
+    {{ error }}
+  </p>
+{% endif %}

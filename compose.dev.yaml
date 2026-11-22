@@ -1,0 +1,5 @@
+# Development helpers: docker compose -f compose.dev.yaml up mailpit
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["8025:8025", "1025:1025"]

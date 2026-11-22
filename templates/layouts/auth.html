@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block body %}
+  <main id="main" class="flex min-h-full flex-col items-center justify-center px-4 py-12">
+    <div class="mb-8 flex items-center gap-2 text-xl font-semibold">
+      <span class="grid size-9 place-items-center rounded-lg bg-accent text-accent-fg">P</span>
+      PFM
+    </div>
+    <div class="card w-full {% block card_width %}max-w-md{% endblock card_width %}">
+      {% block content %}{% endblock content %}
+    </div>
+    <div class="mt-6">{% include "partials/language_switch.html" %}</div>
+  </main>
+{% endblock body %}

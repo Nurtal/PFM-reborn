@@ -1,0 +1,27 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" class="h-full">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="htmx-config"
+          content='{"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false}'>
+    <title>
+      {% block title %}{% endblock title %}
+    · PFM</title>
+    <script src="{% static 'js/theme.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'dist/app.css' %}">
+    {% if current_space %}
+      <style nonce="{{ CSP_NONCE }}">:root { --accent: {{ current_space.accent_color }}; }</style>
+    {% endif %}
+    <script src="{% static 'vendor/htmx-2.0.11.min.js' %}" defer></script>
+    <script src="{% static 'js/app.js' %}" defer></script>
+    <script src="{% static 'vendor/alpine-csp-3.17.5.min.js' %}" defer></script>
+    {% block extra_head %}{% endblock extra_head %}
+  </head>
+  <body class="h-full" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn-primary">{% translate "Skip to content" %}</a>
+    {% block body %}{% endblock body %}
+    {% include "partials/toasts.html" %}
+  </body>
+</html>

@@ -1,0 +1,3 @@
+{$PFM_DOMAIN} {
+	reverse_proxy pfm:8000
+}

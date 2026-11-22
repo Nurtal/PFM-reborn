@@ -1,0 +1,28 @@
+#!/bin/bash
+# Admin CLI inside the container: docker exec -it pfm pfm <command>
+set -euo pipefail
+cd /app
+cmd="${1:-help}"
+shift || true
+case "$cmd" in
+  createadmin)   exec python manage.py createsuperuser "$@" ;;
+  backup)        exec python manage.py pfm_backup "$@" ;;
+  restore)       exec python manage.py pfm_restore "$@" ;;
+  check)         exec python manage.py check --deploy "$@" ;;
+  migrate)       exec python manage.py pfm_init "$@" ;;
+  shell)         exec python manage.py shell "$@" ;;
+  manage)        exec python manage.py "$@" ;;
+  import-legacy) echo "import-legacy ships with milestone M5 (image tag :legacy-import)." >&2; exit 2 ;;
+  *)
+    cat <<USAGE
+Usage: pfm <command>
+  createadmin   create a super-administrator
+  backup        snapshot the database into /data/backups
+  restore FILE  restore a snapshot (a safety backup is taken first)
+  check         run Django's deployment checks
+  migrate       apply migrations (with a pre-migration backup)
+  shell         Django shell
+  manage ...    any manage.py command
+USAGE
+    ;;
+esac

@@ -1,0 +1,49 @@
+# Production: one service, one volume.
+#   docker compose up -d                      # app only
+#   docker compose --profile tls up -d        # + Caddy (automatic HTTPS)
+#   docker compose --profile postgres up -d   # + PostgreSQL (set DATABASE_URL; image
+#     built with --build-arg PFM_EXTRAS="--extra postgres")
+services:
+  pfm:
+    image: ghcr.io/OWNER/pfm-ng:latest
+    build: { context: ., dockerfile: docker/Dockerfile }
+    restart: unless-stopped
+    ports: ["8000:8000"]
+    volumes: ["pfm-data:/data"]
+    environment:
+      PFM_URL: ${PFM_URL:-http://localhost:8000}
+      PFM_BEHIND_PROXY: ${PFM_BEHIND_PROXY:-false}
+      DATABASE_URL: ${DATABASE_URL:-}
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 384m
+    cpus: 1
+
+  caddy:
+    profiles: [tls]
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      PFM_DOMAIN: ${PFM_DOMAIN:-localhost}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [pfm]
+
+  postgres:
+    profiles: [postgres]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pfm
+      POSTGRES_USER: pfm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes: ["pg-data:/var/lib/postgresql/data"]
+
+volumes:
+  pfm-data:
+  caddy-data:
+  pg-data:

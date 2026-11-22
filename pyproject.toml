@@ -1,0 +1,87 @@
+[project]
+name = "pfm-ng"
+version = "0.1.0"
+description = "Platform Manager, next generation: booking, services and invoicing for technology platforms."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.13"
+dependencies = [
+    "argon2-cffi>=25.1.0",
+    "cryptography>=50.0.2",
+    "django>=5.2,<5.3",
+    "django-allauth[mfa]>=65.22.1",
+    "django-axes>=9.0.0",
+    "django-cotton>=2.9.0",
+    "django-csp>=4",
+    "django-environ>=0.14.0",
+    "django-htmx>=1.29.0",
+    "django-simple-history>=3.13.0",
+    "granian>=2.8.9",
+    "huey>=3.5.4",
+    "rules>=3.5",
+    "whitenoise[brotli]>=6.12.0",
+]
+
+[project.optional-dependencies]
+# Only for instances that set DATABASE_URL=postgres://... (+ ~10 MB in the image).
+postgres = ["psycopg[binary]>=3.2"]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.2",
+    "djlint>=1.54.0",
+    "factory-boy>=3.3.3",
+    "mypy>=2.4.1",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.7.0",
+    "pytailwindcss>=0.4.2",
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+testpaths = ["apps", "tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM", "RUF", "BLE"]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]
+"tests/**" = ["S101", "S105", "S106"]
+"config/settings/*" = ["F405"]
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+exclude = ["migrations/", "tests/"]
+
+# README §8: strict typing on business logic.
+[[tool.mypy.overrides]]
+module = ["apps.*.services"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_generics = true
+warn_return_any = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
+[tool.djlint]
+profile = "django"
+ignore = "H006,H021,H030,T002,T003"
+custom_blocks = "slot"
+max_line_length = 200
