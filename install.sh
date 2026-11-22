@@ -127,7 +127,8 @@ case "\${1:-help}" in
   update)  $SUDO docker compose -p pfm pull && exec $SUDO docker compose -p pfm up -d ;;
   stop)    exec $SUDO docker compose -p pfm stop ;;
   start)   exec $SUDO docker compose -p pfm up -d ;;
-  *)       exec $SUDO docker exec -it pfm pfm "\$@" ;;
+  *)       if [ -t 0 ]; then t=-it; else t=-i; fi  # works from cron/scripts too
+           exec $SUDO docker exec \$t pfm pfm "\$@" ;;
 esac
 SH
 $SUDO chmod +x "$DIR/pfm"
