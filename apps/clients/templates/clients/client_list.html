@@ -1,0 +1,46 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Clients" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Clients' %}" subtitle="{% translate 'Billing accounts and the users who book for them.' %}">
+    <a href="{% url 'clients:prices' current_space.slug %}" class="btn-secondary">{% translate "Prices" %}</a>
+    {% if grids %}
+      <a href="{% url 'clients:create' current_space.slug %}" class="btn-primary">
+        <c-icon name="plus" class="size-4" />
+        {% translate "New client" %}
+      </a>
+    {% endif %}
+  </c-page-header>
+  {% if not grids %}
+    <c-empty-state icon="file-text" title="{% translate 'Create a pricing grid first' %}" text="{% translate 'Every client is billed with a grid (academic, industrial...).' %}">
+      <a href="{% url 'clients:grid_create' current_space.slug %}" class="btn-primary">{% translate "New pricing grid" %}</a>
+    </c-empty-state>
+  {% else %}
+    <div class="mb-4 max-w-sm">
+      <label for="client-search" class="sr-only">{% translate "Search" %}</label>
+      <input id="client-search"
+             type="search"
+             name="q"
+             value="{{ request.GET.q }}"
+             placeholder="{% translate 'Search a client' %}"
+             hx-get="{% url 'clients:list' current_space.slug %}"
+             hx-trigger="input changed delay:300ms, search"
+             hx-target="#client-rows"
+             hx-push-url="true">
+    </div>
+    <div class="card overflow-x-auto p-0">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "Name" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Pricing grid" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Contact" %}</th>
+          </tr>
+        </thead>
+        <tbody id="client-rows" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% include "clients/_client_rows.html" %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock content %}

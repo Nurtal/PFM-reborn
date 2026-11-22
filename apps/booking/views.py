@@ -172,6 +172,8 @@ class BookingCreateView(ResourceMixin, TemplateView):
                     d["start"],
                     d["end"],
                     for_user=d.get("for_user"),
+                    client=d.get("client"),
+                    package=d.get("package"),
                     title=d["title"],
                     note=d["note"],
                 )
@@ -230,6 +232,8 @@ class BookingDetailView(SpaceViewMixin, TemplateView):
                     d["end"],
                     title=d["title"],
                     note=d["note"],
+                    client=d.get("client"),
+                    package=d.get("package"),
                 )
                 return _hx_done(_("Booking updated."))
         except services.BookingError as exc:
@@ -320,3 +324,31 @@ class ClosureListView(SpaceViewMixin, TemplateView):
             messages.success(request, _("Closure saved."))
             return redirect("booking:closures", space_slug=self.space.slug)
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class QuoteView(ResourceMixin, View):
+    """HTMX partial: estimated price for the values currently in the dialog."""
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        from django.shortcuts import render
+
+        from apps.clients.services import booking_quote
+
+        self.setup_resource()
+        form = BookingForm(request.GET, actor=request.user, resource=self.resource)
+        quote = None
+        if form.is_valid():
+            d = form.cleaned_data
+            quote = booking_quote(
+                self.resource, d.get("client"), d["start"], d["end"], d.get("package")
+            )
+        return render(
+            request,
+            "booking/_quote.html",
+            {
+                "quote": quote,
+                "currency": self.space.currency,
+                "has_client": "client" in form.fields,
+                "client_chosen": bool(request.GET.get("client")),
+            },
+        )

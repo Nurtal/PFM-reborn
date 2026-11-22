@@ -1,0 +1,27 @@
+{% load i18n l10n %}
+{% if quote %}
+  <div class="rounded-lg bg-zinc-50 p-3 text-sm dark:bg-zinc-800/60">
+    <dl class="space-y-1">
+      {% for line in quote.lines %}
+        <div class="flex justify-between gap-4 text-zinc-600 dark:text-zinc-400">
+          <dt>
+            {% if line.period == "package" %}{% translate "Package" %}
+            {% elif line.period == "night" %}{% translate "Night" %}
+            {% elif line.period == "weekend" %}{% translate "Weekend" %}
+            {% else %}{% translate "Day" %}{% endif %}
+            {% if line.period != "package" %}· {{ line.minutes }} min × {{ line.unit_price }}/h{% endif %}
+          </dt>
+          <dd>{{ line.amount }} {{ currency }}</dd>
+        </div>
+      {% endfor %}
+      <div class="flex justify-between gap-4 border-t border-zinc-200 pt-1 font-semibold dark:border-zinc-700">
+        <dt>{% translate "Estimated price" %}</dt>
+        <dd>{{ quote.total }} {{ currency }}</dd>
+      </div>
+    </dl>
+  </div>
+{% elif has_client and not client_chosen %}
+  <p class="text-sm text-zinc-500">{% translate "Choose a client account to see the estimated price." %}</p>
+{% elif has_client %}
+  <p class="text-sm text-zinc-500">{% translate "No price defined for this client and resource." %}</p>
+{% endif %}

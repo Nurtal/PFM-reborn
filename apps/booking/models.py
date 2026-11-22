@@ -39,6 +39,22 @@ class Booking(SpaceScopedModel):
     )
     start = models.DateTimeField(_("start"), db_index=True)
     end = models.DateTimeField(_("end"), db_index=True)
+    client = models.ForeignKey(
+        "clients.Client",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bookings",
+        verbose_name=_("client"),
+    )
+    package = models.ForeignKey(
+        "clients.Package",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bookings",
+        verbose_name=_("package"),
+    )
     title = models.CharField(_("title"), max_length=200, blank=True)
     note = models.TextField(_("note"), blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.CONFIRMED)

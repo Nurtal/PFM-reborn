@@ -1,0 +1,18 @@
+{% load i18n %}
+{% for c in clients %}
+  <tr>
+    <td class="px-4 py-3">
+      <a href="{% url 'clients:update' current_space.slug c.public_id %}" class="font-medium">{{ c.name }}</a>
+      {% if c.organization %}<div class="text-zinc-500">{{ c.organization }}</div>{% endif %}
+    </td>
+    <td class="px-4 py-3">{{ c.pricing_grid }}</td>
+    <td class="px-4 py-3">
+      {{ c.contact_name|default:"—" }}
+      {% if not c.is_active %}<span class="badge ml-2 bg-zinc-100 dark:bg-zinc-800">{% translate "Inactive" %}</span>{% endif %}
+    </td>
+  </tr>
+{% empty %}
+  <tr>
+    <td colspan="3" class="px-4 py-8 text-center text-zinc-500">{% translate "No client." %}</td>
+  </tr>
+{% endfor %}

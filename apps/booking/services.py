@@ -26,6 +26,7 @@ from django.utils.translation import ngettext
 
 from apps.accounts.models import User
 from apps.booking.models import Booking, Closure, Status
+from apps.clients.models import Client, Package
 from apps.core.models import Role, user_role
 from apps.resources.models import Access, Area, Resource
 from apps.resources.models import Authorization as ResourceAuthorization
@@ -313,6 +314,29 @@ def _validate(
         raise BookingError(errors)
 
 
+def _validate_billing(
+    actor: User, user: User, resource: Resource, client: Client | None, package: Package | None
+) -> None:
+    from apps.clients.services import clients_for
+
+    errors = []
+    if client is None:
+        if clients_for(user, resource.space).exists() and not is_resource_manager(actor, resource):
+            errors.append(_("Choose the client account to bill."))
+    elif not (
+        clients_for(actor, resource.space).filter(pk=client.pk).exists()
+        and (
+            clients_for(user, resource.space).filter(pk=client.pk).exists()
+            or is_resource_manager(actor, resource)
+        )
+    ):
+        errors.append(_("You cannot bill this client account."))
+    if package is not None and (package.resource_id != resource.pk or not package.is_active):
+        errors.append(_("This package does not apply to this resource."))
+    if errors:
+        raise BookingError(errors)
+
+
 def reserve(
     actor: User,
     resource: Resource,
@@ -320,6 +344,8 @@ def reserve(
     end: dt.datetime,
     *,
     for_user: User | None = None,
+    client: Client | None = None,
+    package: Package | None = None,
     title: str = "",
     note: str = "",
     now: dt.datetime | None = None,
@@ -330,7 +356,10 @@ def reserve(
     with transaction.atomic():
         _lock(resource)
         _validate(actor, resource, user, start, end, now, exclude=None)
+        _validate_billing(actor, user, resource, client, package)
         booking = Booking.objects.create(
+            client=client,
+            package=package,
             space=resource.space,
             resource=resource,
             user=user,
@@ -352,8 +381,11 @@ def modify(
     *,
     title: str | None = None,
     note: str | None = None,
+    client: Client | object | None = ...,
+    package: Package | object | None = ...,
     now: dt.datetime | None = None,
 ) -> Booking:
+    """Change a booking. ``client``/``package`` left as ``...`` stay unchanged."""
     now = now or timezone.now()
     if not can_change(actor, booking, now):
         raise BookingError([_("This booking can no longer be changed.")])
@@ -361,6 +393,10 @@ def modify(
     with transaction.atomic():
         _lock(booking.resource)
         _validate(actor, booking.resource, booking.user, start, end, now, exclude=booking.pk)
+        new_client = booking.client if client is ... else client
+        new_package = booking.package if package is ... else package
+        _validate_billing(actor, booking.user, booking.resource, new_client, new_package)  # type: ignore[arg-type]
+        booking.client, booking.package = new_client, new_package  # type: ignore[assignment]
         booking.start, booking.end = start, end
         if title is not None:
             booking.title = title

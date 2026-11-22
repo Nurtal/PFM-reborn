@@ -5,6 +5,7 @@ Refuses to run with DEBUG off so it never touches a production database.
 
 import datetime as dt
 import zoneinfo
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -13,6 +14,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.booking import services as booking
+from apps.clients.models import Client, Package, PackagePrice, PricingGrid, ResourcePrice
 from apps.core.models import InstanceSettings, Role, Space, SpaceMembership
 from apps.resources.models import (
     ALL_WEEKDAYS,
@@ -107,6 +109,45 @@ class Command(BaseCommand):
         )
         r1.managers.add(manager)
         Authorization.objects.create(space=space, user=alice, category=confocal, granted_by=manager)
+
+        academic = PricingGrid.objects.create(
+            space=space, name="Académique", night_rate_enabled=True, weekend_rate_enabled=True
+        )
+        industry = PricingGrid.objects.create(space=space, name="Industriel", order=1)
+        martin = Client.objects.create(
+            space=space,
+            name="Équipe Martin (UMR 1234)",
+            organization="Université",
+            pricing_grid=academic,
+        )
+        martin.users.add(alice, bob)
+        startup = Client.objects.create(space=space, name="BioStart SAS", pricing_grid=industry)
+        startup.users.add(bob)
+        for res, day_rate, night_rate, weekend_rate, industry_rate in [
+            (r1, "45.00", "60.00", "70.00", "180.00"),
+            (r2, "20.00", "25.00", "30.00", "90.00"),
+            (r3, "35.00", "35.00", "40.00", "150.00"),
+        ]:
+            ResourcePrice.objects.create(
+                space=space,
+                resource=res,
+                grid=academic,
+                day_rate=Decimal(day_rate),
+                night_rate=Decimal(night_rate),
+                weekend_rate=Decimal(weekend_rate),
+            )
+            ResourcePrice.objects.create(
+                space=space, resource=res, grid=industry, day_rate=Decimal(industry_rate)
+            )
+        half_day = Package.objects.create(
+            space=space, resource=r1, name="Demi-journée", duration_minutes=240
+        )
+        PackagePrice.objects.create(
+            space=space, package=half_day, grid=academic, price=Decimal("150.00")
+        )
+        PackagePrice.objects.create(
+            space=space, package=half_day, grid=industry, price=Decimal("600.00")
+        )
 
         tz = zoneinfo.ZoneInfo(space.timezone)
         today = timezone.localdate(timezone=tz)

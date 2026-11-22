@@ -1,0 +1,87 @@
+{% extends "layouts/app.html" %}
+{% load i18n l10n %}
+{% block title %}{% translate "Prices" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Prices' %}" subtitle="{% blocktranslate with c=current_space.currency %}Hourly rates in {{ c }}, excluding tax. Leave empty for no price.{% endblocktranslate %}">
+    <a href="{% url 'clients:grid_create' current_space.slug %}" class="btn-secondary">{% translate "New pricing grid" %}</a>
+    <a href="{% url 'clients:package_create' current_space.slug %}" class="btn-secondary">{% translate "New package" %}</a>
+  </c-page-header>
+  {% if not grids %}
+    <c-empty-state icon="file-text" title="{% translate 'No pricing grid yet' %}" />
+  {% else %}
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      <div class="card overflow-x-auto p-0">
+        <table class="w-full text-left text-sm">
+          <caption class="sr-only">{% translate "Hourly rates per resource and pricing grid" %}</caption>
+          <thead class="border-b border-zinc-200 text-xs text-zinc-500 dark:border-zinc-800">
+            <tr>
+              <th scope="col" class="px-4 py-3 uppercase">{% translate "Resource" %}</th>
+              {% for g in grids %}
+                <th scope="col" class="px-4 py-3">
+                  <a href="{% url 'clients:grid_update' current_space.slug g.pk %}" class="font-semibold uppercase">{{ g.name }}</a>
+                  <div class="font-normal normal-case">
+                    {% translate "day" %}{% if g.night_rate_enabled %} / {% translate "night" %}{% endif %}{% if g.weekend_rate_enabled %} / {% translate "weekend" %}{% endif %}
+                  </div>
+                </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {% for resource, cells in rows %}
+              <tr>
+                <th scope="row" class="px-4 py-3 font-medium">{{ resource.name }}</th>
+                {% for grid, price in cells %}
+                  <td class="px-4 py-2">
+                    <div class="flex gap-1">
+                      {% localize off %}
+                        <input name="rate-{{ resource.pk }}-{{ grid.pk }}-day" value="{{ price.day_rate|default_if_none:'' }}" inputmode="decimal" class="w-24" aria-label="{{ resource.name }}, {{ grid.name }}, {% translate 'day' %}">
+                        {% if grid.night_rate_enabled %}
+                          <input name="rate-{{ resource.pk }}-{{ grid.pk }}-night" value="{{ price.night_rate|default_if_none:'' }}" inputmode="decimal" class="w-24" aria-label="{{ resource.name }}, {{ grid.name }}, {% translate 'night' %}">
+                        {% endif %}
+                        {% if grid.weekend_rate_enabled %}
+                          <input name="rate-{{ resource.pk }}-{{ grid.pk }}-weekend" value="{{ price.weekend_rate|default_if_none:'' }}" inputmode="decimal" class="w-24" aria-label="{{ resource.name }}, {{ grid.name }}, {% translate 'weekend' %}">
+                        {% endif %}
+                      {% endlocalize %}
+                    </div>
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if package_rows %}
+        <div class="card overflow-x-auto p-0">
+          <table class="w-full text-left text-sm">
+            <caption class="sr-only">{% translate "Package prices" %}</caption>
+            <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+              <tr>
+                <th scope="col" class="px-4 py-3">{% translate "Package" %}</th>
+                {% for g in grids %}<th scope="col" class="px-4 py-3">{{ g.name }}</th>{% endfor %}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              {% for package, cells in package_rows %}
+                <tr>
+                  <th scope="row" class="px-4 py-3 font-medium">
+                    <a href="{% url 'clients:package_update' current_space.slug package.pk %}">{{ package.name }}</a>
+                    <div class="font-normal text-zinc-500">{{ package.resource }} · {{ package.duration_minutes }} min</div>
+                  </th>
+                  {% for grid, price in cells %}
+                    <td class="px-4 py-2">
+                      {% localize off %}
+                        <input name="package-{{ package.pk }}-{{ grid.pk }}" value="{{ price.price|default_if_none:'' }}" inputmode="decimal" class="w-28" aria-label="{{ package.name }}, {{ grid.name }}">
+                      {% endlocalize %}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+      <button type="submit" class="btn-primary">{% translate "Save prices" %}</button>
+    </form>
+  {% endif %}
+{% endblock content %}
