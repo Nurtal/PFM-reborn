@@ -65,7 +65,7 @@ On ne corrige pas cet existant : on le **réécrit** sur un socle qui règle str
 | **Accessibilité** | WCAG 2.2 AA. Lighthouse Accessibility ≥ 95. Tout est navigable au clavier. |
 | **Qualité** | Couverture de tests ≥ 80 % sur la logique métier (tarification, facturation, règles de réservation). CI verte obligatoire pour fusionner. |
 | **Déploiement** | **1 conteneur, 1 volume (`/data`), 0 service externe obligatoire.** Installation avec un seul `docker run` ou `docker compose up -d`. Zéro configuration requise pour démarrer : la clé secrète est générée et stockée dans `/data` au premier lancement, les migrations s'appliquent automatiquement, et un assistant web de premier démarrage crée l'admin et le premier espace. Mise à jour = `pull` + redémarrage. |
-| **Sobriété** | RAM au repos **< 150 Mo** pour l'ensemble, **< 256 Mo** en charge normale. Tourne sur **1 vCPU / 512 Mo**, ou sur un Raspberry Pi 4. Image **< 150 Mo** (compressée < 60 Mo). Démarrage à froid < 5 s. Images amd64 et arm64. |
+| **Sobriété** | RAM au repos **< 150 Mo** pour l'ensemble, **< 256 Mo** en charge normale. Tourne sur **1 vCPU / 512 Mo**, ou sur un Raspberry Pi 4. Image **compressée < 60 Mo** (≈ 180 Mo sur disque : les 150 Mo initialement visés ne sont pas atteignables avec CPython + Django + les bibliothèques natives). Démarrage à froid < 5 s. Images amd64 et arm64. |
 | **Sauvegarde** | Sauvegarder = copier le dossier `/data` (base + fichiers). Restaurer = le remettre en place. |
 | **i18n** | Français et anglais dès le départ, comme l'existant. |
 
@@ -88,7 +88,7 @@ Second fil conducteur : **tout tient dans un processus**. Une plateforme, c'est 
 | Gestion des dépendances | **uv** | Rapide, avec lockfile reproductible. |
 | Serveur applicatif | **Granian** (serveur HTTP en Rust) | Très faible empreinte mémoire, rapide, sert aussi bien du WSGI que de l'ASGI. 1 processus × 4 threads par défaut (budget RAM), réglable. |
 | Fichiers statiques | **WhiteNoise** (compression brotli/gzip, cache immuable) | Servis directement par l'appli : pas besoin de nginx pour fonctionner. |
-| Supervision des processus | Petit entrypoint qui lance Granian et le consumer Huey et relaie les signaux (`tini` en PID 1) | Un seul conteneur, pas de s6 ni de supervisord. |
+| Supervision des processus | `tini` en PID 1, Granian, et le consommateur Huey **dans le processus web** (threads) : Django n'est chargé qu'une fois (~70 Mo économisés). `PFM_TASKS=separate` relance un `run_huey` dédié pour les grosses charges de tâches. | Un seul conteneur, pas de s6 ni de supervisord. |
 
 ### Frontend
 
@@ -350,6 +350,7 @@ Options : `docker compose --profile tls up -d` ajoute Caddy (HTTPS automatique),
 | `PFM_SECRET_KEY` | générée dans `/data/secret_key` | Clé Django |
 | `DATABASE_URL` | `sqlite:////data/db.sqlite3` | Mettre `postgres://...` pour PostgreSQL |
 | `PFM_WORKERS` | `1` | Nombre de processus Granian (~55 Mo chacun) |
+| `PFM_TASKS` | `embedded` | `embedded` : tâches Huey dans le processus web ; `separate` : processus `run_huey` dédié |
 | `PFM_THREADS` | `4` | Threads WSGI par processus |
 | `PFM_BEHIND_PROXY` | `false` | Active `SECURE_PROXY_SSL_HEADER` / `X-Forwarded-*` |
 | `EMAIL_URL` | vide (réglable dans l'UI) | `smtp+tls://user:pass@host:587` |
@@ -422,7 +423,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 | Jalon | État |
 |---|---|
-| M0 Socle | ✅ (image Docker écrite mais pas encore construite) ; + demandes d'adhésion, export/suppression RGPD |
+| M0 Socle | ✅ image mesurée (Alpine) : 59 Mo compressée, démarrage à froid 4,6 s, RAM 82 Mo au repos / 85 Mo en charge, p95 11 ms (1 client) et 71 ms (2 clients) sur 1 vCPU ; + demandes d'adhésion, export/suppression RGPD |
 | M1 Ressources & réservation | ✅ |
 | M2 Clients & tarification | ✅ |
 | M3 Facturation | ✅ (+ devis) |

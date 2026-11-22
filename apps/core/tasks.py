@@ -1,7 +1,7 @@
 import logging
 
 from huey import crontab
-from huey.contrib.djhuey import db_periodic_task, db_task
+from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
 from apps.core import backups
 
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @db_periodic_task(crontab(hour="3", minute="15"))
+@lock_task("nightly-backup")  # one run even with several web workers
 def nightly_backup() -> None:
     if not backups.is_sqlite():
         return
