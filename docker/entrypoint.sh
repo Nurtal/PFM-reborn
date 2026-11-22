@@ -10,7 +10,14 @@ mkdir -p "$PFM_DATA_DIR/media" "$PFM_DATA_DIR/backups"
 if [ -z "${DATABASE_URL:-}" ] && [ ! -e "$PFM_DATA_DIR/db.sqlite3" ] && [ -e /app/seed.sqlite3 ]; then
   install -m 600 /app/seed.sqlite3 "$PFM_DATA_DIR/db.sqlite3"
 fi
-python manage.py pfm_init
+# Migrations etc. run inside the web process (Django loads once: faster
+# start). A separate consumer must not start before them: prepare first.
+if [ "${PFM_TASKS:-embedded}" = "separate" ]; then
+  python manage.py pfm_init
+else
+  export PFM_PREPARE=wsgi PFM_RUNTIME_DIR="${PFM_RUNTIME_DIR:-/tmp}"
+  rm -f "$PFM_RUNTIME_DIR/pfm-prepared"
+fi
 
 granian --interface wsgi --host 0.0.0.0 --port 8000 \
   --workers "${PFM_WORKERS:-1}" --blocking-threads "${PFM_THREADS:-4}" --respawn-failed-workers \
@@ -36,4 +43,5 @@ stop
 wait || true
 # A requested stop (docker stop) is a clean exit; anything else is a failure.
 [ "$stopping" = 1 ] && exit 0
+[ "$status" = 0 ] && status=1 # the server stopped on its own (e.g. start-up failed)
 exit "$status"

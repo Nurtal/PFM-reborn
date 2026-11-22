@@ -432,7 +432,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 | Jalon | État |
 |---|---|
-| M0 Socle | ✅ image mesurée (Alpine) : 59 Mo compressée, démarrage à froid 4,6 s, RAM 82 Mo au repos / 85 Mo en charge, p95 11 ms (1 client) et 71 ms (2 clients) sur 1 vCPU ; + demandes d'adhésion, export/suppression RGPD |
+| M0 Socle | ✅ image mesurée (Alpine) : 59 Mo compressée, démarrage à froid 2,9 s (migrations faites dans le processus web : Django chargé une seule fois), RAM 82 Mo au repos / 85 Mo en charge, p95 11 ms (1 client) et 71 ms (2 clients) sur 1 vCPU ; + demandes d'adhésion, export/suppression RGPD |
 | M1 Ressources & réservation | ✅ |
 | M2 Clients & tarification | ✅ |
 | M3 Facturation | ✅ (+ devis) |
