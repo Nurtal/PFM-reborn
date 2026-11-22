@@ -13,10 +13,21 @@ name="pfm-budget-$$"
 trap 'docker rm -f "$name" >/dev/null 2>&1 || true' EXIT
 # Create first: with the containerd image store (GitHub runners) the image is
 # kept compressed and unpacked when the first container is created, a one-off
-# cost of the download, not of a start. The rootfs size is the on-disk size
-# (image inspect reports the compressed size there).
+# cost of the download, not of a start. On-disk size = total size of the
+# image's files, which every storage driver agrees on (image inspect reports
+# the compressed size with containerd, and block usage varies by driver).
 docker create --name "$name" -p 18000:8000 --read-only --tmpfs /tmp --cap-drop ALL "$IMAGE" >/dev/null
-size_mb=$(( $(docker container inspect --size -f '{{.SizeRootFs}}' "$name") / 1024 / 1024 ))
+size_mb=$(docker run --rm --entrypoint python "$IMAGE" -c '
+import os
+total = 0
+for root, dirs, files in os.walk("/"):
+    dirs[:] = [d for d in dirs if os.path.join(root, d) not in ("/proc", "/sys", "/dev")]
+    for f in files:
+        try:
+            total += os.lstat(os.path.join(root, f)).st_size
+        except OSError:
+            pass
+print(total // 1048576)')
 echo "image size: ${size_mb} MB (max ${MAX_IMAGE_MB})"
 
 start=$(date +%s.%N)
