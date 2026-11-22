@@ -107,8 +107,8 @@ class InvoiceRunView(InvoicingMixin, TemplateView):
             messages.warning(
                 request,
                 ngettext(
-                    "%(n)d booking has no price for its client and was left out.",
-                    "%(n)d bookings have no price for their client and were left out.",
+                    "%(n)d booking or service has no price for its client and was left out.",
+                    "%(n)d bookings or services have no price for their client and were left out.",
                     unpriced,
                 )
                 % {"n": unpriced},

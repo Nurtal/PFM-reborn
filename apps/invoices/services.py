@@ -18,7 +18,7 @@ from apps.accounts.models import User
 from apps.booking.models import Booking
 from apps.booking.models import Status as BookingStatus
 from apps.clients.models import Client
-from apps.clients.pricing import Period
+from apps.clients.pricing import Period, service_amount
 from apps.clients.services import booking_quote
 from apps.core.models import Space
 from apps.invoices.models import (
@@ -29,6 +29,8 @@ from apps.invoices.models import (
     NumberCounter,
     Status,
 )
+from apps.services.models import OrderLine, OrderStatus
+from apps.services.services import unit_price
 
 CENT = Decimal("0.01")
 
@@ -74,6 +76,42 @@ def billable_bookings(
         qs = qs.filter(client=client)
     return qs.select_related("resource", "user", "client__pricing_grid", "package").order_by(
         "start"
+    )
+
+
+def billable_order_lines(
+    space: Space, client: Client | None, start: dt.date, end: dt.date
+) -> QuerySet[OrderLine]:
+    """Lines of open or completed orders performed in the period, not billed yet."""
+    covered = InvoiceLine.objects.filter(
+        invoice__kind=Kind.INVOICE, invoice__credit_note__isnull=True, order_line__isnull=False
+    ).values("order_line_id")
+    qs = OrderLine.objects.filter(
+        order__space=space,
+        order__status__in=[OrderStatus.OPEN, OrderStatus.DONE],
+        performed_on__gte=start,
+        performed_on__lte=end,
+    ).exclude(pk__in=covered)
+    if client is not None:
+        qs = qs.filter(order__client=client)
+    return qs.select_related("order__client", "item").order_by("performed_on", "pk")
+
+
+def _order_line(line: OrderLine) -> InvoiceLine | None:
+    price = unit_price(line.item, line.order.client)
+    if price is None:
+        return None
+    when = date_format(line.performed_on, "SHORT_DATE_FORMAT")
+    description = f"{line.item.name} — {line.order.title} — {when}"
+    if line.comment:
+        description += f" — {line.comment}"
+    return InvoiceLine(
+        description=description[:300],
+        quantity=line.quantity,
+        unit=line.item.unit[:20],
+        unit_price=price,
+        amount=service_amount(price, line.quantity),
+        order_line=line,
     )
 
 
@@ -136,7 +174,7 @@ def _booking_lines(booking: Booking) -> list[InvoiceLine] | None:
 @dataclass
 class DraftResult:
     invoice: Invoice | None
-    unpriced: list[Booking] = field(default_factory=list)
+    unpriced: list[Booking | OrderLine] = field(default_factory=list)
 
 
 @transaction.atomic
@@ -152,13 +190,19 @@ def create_draft(
     if end < start:
         raise InvoicingError(_("The period end must be after its start."))
     lines: list[InvoiceLine] = []
-    unpriced: list[Booking] = []
+    unpriced: list[Booking | OrderLine] = []
     for booking in billable_bookings(space, client, start, end):
         booking_lines = _booking_lines(booking)
         if booking_lines is None:
             unpriced.append(booking)
         else:
             lines += booking_lines
+    for order_line in billable_order_lines(space, client, start, end):
+        invoice_line = _order_line(order_line)
+        if invoice_line is None:
+            unpriced.append(order_line)
+        else:
+            lines.append(invoice_line)
     if not lines:
         return DraftResult(None, unpriced)
     invoice = Invoice.objects.create(
@@ -180,8 +224,10 @@ def create_drafts_for_period(
     actor: User, space: Space, start: dt.date, end: dt.date
 ) -> list[DraftResult]:
     """Monthly run: one draft per client with billable bookings."""
-    client_ids = (
-        billable_bookings(space, None, start, end).values_list("client_id", flat=True).distinct()
+    client_ids = set(
+        billable_bookings(space, None, start, end).values_list("client_id", flat=True)
+    ) | set(
+        billable_order_lines(space, None, start, end).values_list("order__client_id", flat=True)
     )
     return [
         create_draft(actor, space, client, start, end)

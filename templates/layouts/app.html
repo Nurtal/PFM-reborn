@@ -40,6 +40,21 @@
               <c-icon name="file-text" class="size-4" />
               {% translate "Authorizations" %}
             </a>
+            {% url 'services:orders' current_space.slug as orders_url %}
+            <a href="{{ orders_url }}" class="nav-link" {% if "/services/" in request.path and "/projects/" not in request.path and "/stock/" not in request.path %}aria-current="page"{% endif %}>
+              <c-icon name="check" class="size-4" />
+              {% translate "Services & orders" %}
+            </a>
+            {% url 'services:projects' current_space.slug as projects_url %}
+            <a href="{{ projects_url }}" class="nav-link" {% if "/projects/" in request.path %}aria-current="page"{% endif %}>
+              <c-icon name="calendar" class="size-4" />
+              {% translate "Projects" %}
+            </a>
+            {% url 'services:stock' current_space.slug as stock_url %}
+            <a href="{{ stock_url }}" class="nav-link" {% if request.path == stock_url %}aria-current="page"{% endif %}>
+              <c-icon name="layout-grid" class="size-4" />
+              {% translate "Stock" %}
+            </a>
             {% url 'invoices:list' current_space.slug as invoices_url %}
             <a href="{{ invoices_url }}" class="nav-link" {% if "/invoices/" in request.path %}aria-current="page"{% endif %}>
               <c-icon name="file-text" class="size-4" />

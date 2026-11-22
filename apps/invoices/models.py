@@ -208,6 +208,13 @@ class InvoiceLine(models.Model):
         blank=True,
         related_name="invoice_lines",
     )
+    order_line = models.ForeignKey(
+        "services.OrderLine",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="invoice_lines",
+    )
 
     class Meta:
         ordering = ["position", "pk"]

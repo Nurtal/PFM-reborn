@@ -1,0 +1,40 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Orders" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Orders' %}" :subtitle="current_space.name">
+    <a href="{% url 'services:catalogue' current_space.slug %}" class="btn-secondary">{% translate "Service catalogue" %}</a>
+    <a href="{% url 'services:order_create' current_space.slug %}" class="btn-primary"><c-icon name="plus" class="size-4" />{% translate "New order" %}</a>
+  </c-page-header>
+  <nav class="mb-4 flex gap-1" aria-label="{% translate 'Order status' %}">
+    {% for value, label in statuses %}
+      <a href="?status={{ value }}" class="btn-ghost {% if status == value %}bg-zinc-100 dark:bg-zinc-800{% endif %}" {% if status == value %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  {% if orders %}
+    <div class="card overflow-x-auto p-0">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr>
+            <th scope="col" class="px-4 py-3">{% translate "Title" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Client" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Lines" %}</th>
+            <th scope="col" class="px-4 py-3">{% translate "Created" %}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for o in orders %}
+            <tr>
+              <td class="px-4 py-3"><a href="{% url 'services:order_detail' current_space.slug o.public_id %}" class="font-medium">{{ o.title }}</a></td>
+              <td class="px-4 py-3">{{ o.client }}</td>
+              <td class="px-4 py-3">{{ o.line_count }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ o.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <c-empty-state icon="check" title="{% translate 'No order' %}" />
+  {% endif %}
+{% endblock content %}

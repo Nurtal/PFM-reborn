@@ -1300,3 +1300,283 @@ msgstr[1] "%(n)d réservations n'ont pas de tarif pour leur client et ont été 
 #, python-format
 msgid "Reference: %(ref)s"
 msgstr "Référence : %(ref)s"
+
+msgid "Line added."
+msgstr "Ligne ajoutée."
+
+msgid "Line removed."
+msgstr "Ligne supprimée."
+
+msgid "Order updated."
+msgstr "Commande mise à jour."
+
+msgid "This order is closed."
+msgstr "Cette commande est close."
+
+msgid "This service is not available on this platform."
+msgstr "Cette prestation n'est pas disponible sur cette plateforme."
+
+msgid "The quantity must be positive."
+msgstr "La quantité doit être positive."
+
+msgid "This line is already invoiced."
+msgstr "Cette ligne est déjà facturée."
+
+msgid "Unknown status."
+msgstr "Statut inconnu."
+
+msgid "An order with invoiced lines cannot be cancelled."
+msgstr "Une commande dont des lignes sont facturées ne peut pas être annulée."
+
+msgid "sample, hour, slide..."
+msgstr "échantillon, heure, lame…"
+
+msgid "service"
+msgstr "prestation"
+
+msgid "services"
+msgstr "prestations"
+
+msgid "Open"
+msgstr "En cours"
+
+msgid "Completed"
+msgstr "Terminée"
+
+msgid "requested by"
+msgstr "demandée par"
+
+msgid "status"
+msgstr "statut"
+
+msgid "order"
+msgstr "commande"
+
+msgid "orders"
+msgstr "commandes"
+
+msgid "performed on"
+msgstr "réalisée le"
+
+msgid "Service"
+msgstr "Prestation"
+
+msgid "Performed on"
+msgstr "Réalisée le"
+
+msgid "Comment"
+msgstr "Commentaire"
+
+msgid "Services"
+msgstr "Prestations"
+
+msgid "Services & orders"
+msgstr "Prestations et commandes"
+
+msgid "Orders"
+msgstr "Commandes"
+
+msgid "New service"
+msgstr "Nouvelle prestation"
+
+msgid "Edit service"
+msgstr "Modifier la prestation"
+
+msgid "No service yet."
+msgstr "Aucune prestation pour le moment."
+
+msgid "What the platform sells besides equipment time. Prices per grid are set on the Prices page."
+msgstr "Ce que la plateforme vend en plus du temps machine. Les prix par grille se règlent sur la page Tarifs."
+
+msgid "Service catalogue"
+msgstr "Catalogue des prestations"
+
+msgid "New order"
+msgstr "Nouvelle commande"
+
+msgid "Lines"
+msgstr "Lignes"
+
+msgid "Created"
+msgstr "Créée le"
+
+msgid "Order status"
+msgstr "Statut des commandes"
+
+msgid "No order"
+msgstr "Aucune commande"
+
+msgid "no price"
+msgstr "sans tarif"
+
+msgid "No line yet."
+msgstr "Aucune ligne pour le moment."
+
+msgid "Record a service"
+msgstr "Saisir une prestation"
+
+msgid "Open and completed orders are billed with the platform's invoicing run."
+msgstr "Les commandes en cours et terminées sont facturées lors de la facturation de la période."
+
+msgid "Service prices"
+msgstr "Prix des prestations"
+
+#, python-format
+msgid "%(n)d booking or service has no price for its client and was left out."
+msgid_plural "%(n)d bookings or services have no price for their client and were left out."
+msgstr[0] "%(n)d réservation ou prestation n'a pas de tarif pour son client et a été écartée."
+msgstr[1] "%(n)d réservations ou prestations n'ont pas de tarif pour leur client et ont été écartées."
+
+#, python-format
+msgid "Not enough room on this shelf (%(free)d left)."
+msgstr "Plus assez de place sur cette étagère (%(free)d restantes)."
+
+msgid "Already withdrawn."
+msgstr "Déjà retiré."
+
+msgid "Withdrawal cannot precede storage."
+msgstr "Le retrait ne peut pas précéder le dépôt."
+
+msgid "project"
+msgstr "projet"
+
+msgid "Planned"
+msgstr "Prévu"
+
+msgid "In progress"
+msgstr "En cours"
+
+msgid "Closed"
+msgstr "Clos"
+
+msgid "lead"
+msgstr "responsable"
+
+msgid "start date"
+msgstr "date de début"
+
+msgid "planned end"
+msgstr "fin prévue"
+
+msgid "projects"
+msgstr "projets"
+
+msgid "location"
+msgstr "emplacement"
+
+msgid "cabinet"
+msgstr "armoire"
+
+msgid "cabinets"
+msgstr "armoires"
+
+msgid "capacity"
+msgstr "capacité"
+
+msgid "shelf"
+msgstr "étagère"
+
+msgid "shelves"
+msgstr "étagères"
+
+msgid "label"
+msgstr "libellé"
+
+msgid "stored on"
+msgstr "déposé le"
+
+msgid "removed on"
+msgstr "retiré le"
+
+msgid "stock entry"
+msgstr "élément en stock"
+
+msgid "stock entries"
+msgstr "éléments en stock"
+
+msgid "Cabinet"
+msgstr "Armoire"
+
+msgid "Capacity"
+msgstr "Capacité"
+
+msgid "Shelf"
+msgstr "Étagère"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Projects"
+msgstr "Projets"
+
+msgid "Stock"
+msgstr "Stock"
+
+msgid "Since"
+msgstr "Depuis"
+
+msgid "Withdraw"
+msgstr "Retirer"
+
+msgid "Nothing in stock."
+msgstr "Rien en stock."
+
+msgid "No shelf yet."
+msgstr "Aucune étagère pour le moment."
+
+msgid "Store material"
+msgstr "Déposer du matériel"
+
+msgid "Store"
+msgstr "Déposer"
+
+msgid "New shelf"
+msgstr "Nouvelle étagère"
+
+msgid "New cabinet"
+msgstr "Nouvelle armoire"
+
+msgid "Client material stored in the platform cabinets."
+msgstr "Matériel des clients stocké dans les armoires de la plateforme."
+
+msgid "Label or client"
+msgstr "Libellé ou client"
+
+msgid "Mark as withdrawn?"
+msgstr "Marquer comme retiré ?"
+
+msgid "New project"
+msgstr "Nouveau projet"
+
+msgid "Edit project"
+msgstr "Modifier le projet"
+
+msgid "Today"
+msgstr "Aujourd'hui"
+
+msgid "Hide closed projects"
+msgstr "Masquer les projets clos"
+
+msgid "Show closed projects"
+msgstr "Afficher les projets clos"
+
+msgid "Earlier"
+msgstr "Plus tôt"
+
+msgid "Later"
+msgstr "Plus tard"
+
+msgid "No project in this period"
+msgstr "Aucun projet sur cette période"
+
+msgid "Orders of this project"
+msgstr "Commandes du projet"
+
+msgid "No order linked yet. Choose this project when creating an order."
+msgstr "Aucune commande liée. Choisissez ce projet en créant une commande."
+
+#, python-format
+msgid "%(n)s line without price"
+msgid_plural "%(n)s lines without price"
+msgstr[0] "%(n)s ligne sans tarif"
+msgstr[1] "%(n)s lignes sans tarif"

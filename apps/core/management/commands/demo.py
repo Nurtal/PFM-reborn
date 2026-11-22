@@ -179,6 +179,46 @@ class Command(BaseCommand):
                 now=start - dt.timedelta(days=30),
             )
 
+        from apps.services import services as svc
+        from apps.services.models import Cabinet, Order, Project, ServiceItem, ServicePrice, Shelf
+
+        prep = ServiceItem.objects.create(
+            space=space, name="Préparation d'échantillon", unit="échantillon"
+        )
+        ServicePrice.objects.create(space=space, item=prep, grid=academic, price=Decimal("12.00"))
+        ServicePrice.objects.create(space=space, item=prep, grid=industry, price=Decimal("40.00"))
+        projects = []
+        for name, client, start_m, length, status in [
+            ("Atlas cérébral", martin, -2, 5, "active"),
+            ("Criblage BioStart", startup, 0, 3, "active"),
+            ("Formation imagerie 2027", martin, 2, 2, "planned"),
+        ]:
+            m = today.month - 1 + start_m
+            start_d = dt.date(today.year + m // 12, m % 12 + 1, 1)
+            e = m + length
+            end_d = dt.date(today.year + e // 12, e % 12 + 1, 1) - dt.timedelta(days=1)
+            projects.append(
+                Project.objects.create(
+                    space=space,
+                    name=name,
+                    client=client,
+                    lead=manager,
+                    start_date=start_d,
+                    end_date=end_d,
+                    status=status,
+                )
+            )
+        order = Order.objects.create(
+            space=space, client=martin, project=projects[0], title="Coupes série A", requester=alice
+        )
+        svc.add_line(order, prep, Decimal("6"), today)
+        freezer = Cabinet.objects.create(
+            space=space, name="Congélateur -80 °C", location="Salle 101"
+        )
+        rack = Shelf.objects.create(cabinet=freezer, name="Étagère 1", capacity=20)
+        Shelf.objects.create(cabinet=freezer, name="Étagère 2", capacity=20)
+        svc.store(rack, martin, "Cerveaux de souris fixés", 4)
+
         instance = InstanceSettings.load()
         instance.setup_completed_at = timezone.now()
         instance.save()
