@@ -396,6 +396,8 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 - Ordre d'import : espaces → utilisateurs → clients et grilles → ressources → habilitations → réservations → prestations et commandes → factures (importées **figées**, avec leur numéro d'origine) → le reste.
 - **Mots de passe** : les anciens hachages ne sont pas repris. Les utilisateurs reçoivent un lien de réinitialisation, ou passent par LDAP/SSO.
 - Un rapport de migration (comptes par table, anomalies) est produit pour chaque exécution.
+- Sans serveur MySQL sous la main : `python scripts/mysql_dump_to_sqlite.py dump.sql legacy.sqlite3`, puis `--source sqlite:///legacy.sqlite3`.
+- Les ressources supprimées dans l'ancien système sont reprises comme inactives (avec leur historique de réservations) ; celles dont la zone ou la catégorie a disparu sont rangées dans « Archives (import) ». Les noms en double reçoivent le suffixe ` (#id legacy)`.
 - Bascule recommandée : exécution en parallèle sur un environnement de préprod, vérification croisée des totaux facturés par mois, puis bascule.
 
 ---
@@ -425,7 +427,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 | M2 Clients & tarification | ✅ |
 | M3 Facturation | ✅ (+ devis) |
 | M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
-| M5 Migration legacy | ✅ (voir §12) — à valider sur une vraie base |
+| M5 Migration legacy | ✅ (voir §12) — validé sur un dump de prod (1 plateforme, 12 k lignes) : totaux facturés identiques au centime, moteur de prix conforme sur 35 factures sur 42 (écarts restants dus aux prix legacy non historisés) |
 | M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer, helpdesk IMAP, SSO OpenID Connect, LDAP (ldap3, sans dépendance système) |
 | M7 Modules P3 | à faire (en attente de l'élagage avec les utilisateurs) |
 | M8 API | ✅ REST v1 (django-ninja) : jetons personnels hachés, espaces, ressources, réservations (création/annulation via les règles métier), factures ; schéma OpenAPI sur `/api/v1/openapi.json` |

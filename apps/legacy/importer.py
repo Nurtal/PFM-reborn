@@ -40,6 +40,7 @@ from apps.services.models import (
     ServicePrice,
 )
 
+ARCHIVE = "Archives (import)"
 LEGACY_ROLES = {1: Role.VISITOR, 2: Role.USER, 3: Role.MANAGER, 4: Role.ADMIN}
 WEEKDAY_COLUMNS = (
     "is_monday",
@@ -115,11 +116,11 @@ class Importer:
 
     # --- helpers -----------------------------------------------------------------
 
-    def rows(self, table: str) -> list[dict[str, Any]]:
+    def rows(self, table: str, keep_deleted: bool = False) -> list[dict[str, Any]]:
         if not self.source.has_table(table):
             self.report.warn(f"Table {table} not found: skipped.")
             return []
-        rows = [r for r in self.source.rows(table) if _live(r)]
+        rows = [r for r in self.source.rows(table) if keep_deleted or _live(r)]
         if self.space_ids is not None and table != "core_users":
             rows = [r for r in rows if "id_space" not in r or _int(r["id_space"]) in self.space_ids]
         return rows
@@ -130,6 +131,15 @@ class Importer:
     def get(self, model: Any, table: str, legacy_id: Any) -> Any:
         pk = self.new_id(table, legacy_id)
         return model.objects.filter(pk=pk).first() if pk else None
+
+    def unique_name(
+        self, model: Any, table: str, row: dict[str, Any], space: Space, label: str
+    ) -> str:
+        """Legacy names may repeat (a deleted item and its replacement): suffix the id."""
+        name = (row.get("name") or f"{label} {row['id']}")[:120]
+        mine = self.new_id(table, row["id"])
+        clash = model.objects.filter(space=space, name=name).exclude(pk=mine).exists()
+        return f"{name[:100]} (#{row['id']})" if clash else name
 
     def upsert(self, table: str, legacy_id: Any, model: Any, values: dict[str, Any]) -> Any:
         legacy_id = _int(legacy_id)
@@ -341,14 +351,16 @@ class Importer:
 
     def resources(self) -> None:
         schedules = {_int(r.get("id_rearea")): r for r in self.rows("bk_schedulings")}
-        for row in self.rows("re_area"):
+        # Deleted areas, categories and resources are kept (resources inactive):
+        # they carry the booking history of retired equipment.
+        for row in self.rows("re_area", keep_deleted=True):
             space = self.get(Space, "core_spaces", row["id_space"])
             if space is None:
                 continue
             sched = schedules.get(_int(row["id"]))
             values: dict[str, Any] = {
                 "space": space,
-                "name": (row.get("name") or f"Area {row['id']}")[:120],
+                "name": self.unique_name(Area, "re_area", row, space, "Area"),
                 "is_restricted": bool(_int(row.get("restricted"))),
             }
             if sched:
@@ -363,21 +375,39 @@ class Importer:
                     slot_minutes=max(5, _int(sched.get("size_bloc_resa"), 3600) // 60),
                 )
             self.upsert("re_area", row["id"], Area, values)
-        for row in self.rows("re_category"):
+        for row in self.rows("re_category", keep_deleted=True):
             space = self.get(Space, "core_spaces", row["id_space"])
             if space:
                 self.upsert(
                     "re_category",
                     row["id"],
                     ResourceCategory,
-                    {"space": space, "name": (row.get("name") or f"Category {row['id']}")[:120]},
+                    {
+                        "space": space,
+                        "name": self.unique_name(
+                            ResourceCategory, "re_category", row, space, "Category"
+                        ),
+                    },
                 )
-        for row in self.rows("re_info"):
+        for row in self.rows("re_info", keep_deleted=True):
             space = self.get(Space, "core_spaces", row["id_space"])
             area = self.get(Area, "re_area", row.get("id_area"))
             category = self.get(ResourceCategory, "re_category", row.get("id_category"))
+            if space and not (area and category):
+                # Its area or category is gone from the legacy database: keep the
+                # resource (and its bookings) under an archive area/category.
+                area = (
+                    area
+                    or Area.objects.get_or_create(
+                        space=space, name=ARCHIVE, defaults={"is_restricted": True}
+                    )[0]
+                )
+                category = (
+                    category or ResourceCategory.objects.get_or_create(space=space, name=ARCHIVE)[0]
+                )
+                self.report.warn(f"Resource #{row['id']}: area or category missing, archived.")
             if not (space and area and category):
-                self.report.warn(f"Resource {row.get('name')}: missing area or category, skipped.")
+                self.report.warn(f"Resource #{row['id']}: unknown space, skipped.")
                 self.report.skipped["re_info"] += 1
                 continue
             description = "\n\n".join(
@@ -389,13 +419,14 @@ class Importer:
                 Resource,
                 {
                     "space": space,
-                    "name": (row.get("name") or f"Resource {row['id']}")[:120],
+                    "name": self.unique_name(Resource, "re_info", row, space, "Resource"),
                     "brand": (row.get("brand") or "")[:120],
                     "model": (row.get("type") or "")[:120],
                     "description": description,
                     "area": area,
                     "category": category,
                     "order": _int(row.get("display_order")),
+                    "is_active": not row.get("deleted"),
                 },
             )
 
@@ -480,6 +511,7 @@ class Importer:
 
     def bookings(self) -> None:
         busy: dict[int, list[tuple[dt.datetime, dt.datetime]]] = defaultdict(list)
+        reasons: Counter[str] = Counter()
         for row in sorted(self.rows("bk_calendar_entry"), key=lambda r: _int(r["id"])):
             resource = self.get(Resource, "re_info", row.get("resource_id"))
             user = self.get(User, "core_users", row.get("recipient_id")) or self.get(
@@ -487,6 +519,7 @@ class Importer:
             )
             if not (resource and user):
                 self.report.skipped["bk_calendar_entry"] += 1
+                reasons["unknown resource" if resource is None else "unknown user"] += 1
                 continue
             start = dt.datetime.fromtimestamp(_int(row.get("start_time")), tz=dt.UTC)
             end = dt.datetime.fromtimestamp(_int(row.get("end_time")), tz=dt.UTC)
@@ -523,6 +556,8 @@ class Importer:
                     "billed_externally": _int(row.get("invoice_id")) > 0,
                 },
             )
+        for reason, count in sorted(reasons.items()):
+            self.report.warn(f"{count} booking(s) skipped: {reason} (not in the dump or deleted).")
 
     def services(self) -> None:
         for row in self.rows("se_services"):

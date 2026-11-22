@@ -38,7 +38,7 @@ SCHEMA = {
     "bk_authorization": "id, user_id, resource_id, date, date_desactivation, is_active, id_space, deleted",
     "bk_prices": "id, id_resource, id_package, day_night_we, id_belonging, price, id_space, deleted",
     "bk_packages": "id, id_package, id_resource, duration, name, id_space, deleted",
-    "bk_j_packages_prices": "id, id_package, id_pricing, price, id_space, deleted",
+    "bk_j_packages_prices": "id_package, id_pricing, price, id_space, deleted",  # no id, as in prod
     "bk_calendar_entry": "id, start_time, end_time, resource_id, booked_by_id, recipient_id, short_description, full_description, package_id, responsible_id, invoice_id, id_space, deleted",
     "in_invoice": "id, number, id_space, period_begin, period_end, date_generated, date_paid, is_paid, id_responsible, total_ht, title, deleted",
     "in_invoice_item": "id, id_invoice, module, details, total_ht, id_space, deleted",
@@ -72,7 +72,11 @@ ROWS = {
     "re_area": [(1, "Salle 101", 1, 0, 0)],
     "bk_schedulings": [(1, 1, 1, 1, 1, 1, 0, 0, 8, 19, 1800, 1, 1, 0)],
     "re_category": [(1, "Confocaux", 1, 0)],
-    "re_info": [(1, "LSM 980", "Zeiss", "Confocal", "Short", "Long text", 1, 1, 1, 0, 0)],
+    "re_info": [
+        (1, "LSM 980", "Zeiss", "Confocal", "Short", "Long text", 1, 1, 1, 0, 0),
+        (2, "LSM 980", "Zeiss", "Old one", "", "", 1, 1, 1, 0, 1),  # deleted, same name
+        (3, "Retired scope", "", "", "", "", 99, 98, 1, 0, 1),  # deleted, area/category gone
+    ],
     "bk_authorization": [
         (1, 1, 1, "2020-01-01", "2021-01-01", 0, 1, 0),
         (2, 1, 1, "2023-05-01", "0000-00-00", 1, 1, 0),  # latest wins
@@ -83,12 +87,14 @@ ROWS = {
         (3, 1, 0, "we", 1, "70", 1, 0),
     ],
     "bk_packages": [(1, 1, 1, "4.00", "Demi-journée", 1, 0)],
-    "bk_j_packages_prices": [(1, 1, 1, "150.00", 1, 0)],
+    "bk_j_packages_prices": [(1, 1, "150.00", 1, 0)],
     "bk_calendar_entry": [
         (1, T0, T0 + 2 * H, 1, 1, 1, "Run 1", "", 0, 1, 7, 1, 0),  # already invoiced
         (2, T0 + H, T0 + 3 * H, 1, 2, 2, "Overlap", "", 0, 1, 0, 1, 0),  # overlaps #1
         (3, T0 + 24 * H, T0 + 26 * H, 1, 2, 2, "Run 3", "", 0, 1, 0, 1, 0),
         (4, T0, T0 + H, 99, 1, 1, "Unknown resource", "", 0, 0, 0, 1, 0),
+        (5, T0 - 48 * H, T0 - 46 * H, 2, 1, 1, "On retired", "", 0, 1, 0, 1, 0),
+        (6, T0 - 96 * H, T0 - 95 * H, 3, 1, 1, "On orphan", "", 0, 1, 0, 1, 0),
     ],
     "in_invoice": [
         (
@@ -163,14 +169,14 @@ def test_full_import(legacy_db, admin):
     client = Client.objects.get(space=space)
     assert "Rennes" in client.invoice_address and set(client.users.all()) == {alice, bob}
 
-    area = Area.objects.get(space=space)
+    area = Area.objects.get(space=space, name="Salle 101")
     assert (area.open_weekdays, area.day_start, area.day_end, area.slot_minutes) == (
         0b0011111,
         dt.time(8),
         dt.time(19),
         30,
     )
-    resource = Resource.objects.get(space=space)
+    resource = Resource.objects.get(space=space, name="LSM 980")
     assert resource.description == "Short\n\nLong text"
     auth = Authorization.objects.get(user=alice)
     assert auth.granted_on == dt.date(2023, 5, 1) and auth.is_active
@@ -294,3 +300,16 @@ def test_services_orders_and_projects(legacy_db, admin):
     assert amounts == [D("25.00"), D("50.00")]  # order 2 (2 x 12.50) and project (4 x 12.50)
     run(legacy_db)
     assert OrderLine.objects.count() == 3  # idempotent
+
+
+def test_retired_resources_keep_their_history(legacy_db, admin):
+    report = run(legacy_db)
+    retired = Resource.objects.get(name="LSM 980 (#2)")  # same name as the live one
+    assert not retired.is_active
+    assert Booking.objects.filter(resource=retired, title="On retired").exists()
+    orphan = Resource.objects.get(name="Retired scope")
+    assert orphan.area.name == "Archives (import)" and orphan.area.is_restricted
+    assert Booking.objects.filter(resource=orphan).exists()
+    assert any("1 booking(s) skipped: unknown resource" in a for a in report.anomalies)
+    run(legacy_db)  # names stay stable on re-run
+    assert Resource.objects.filter(name__startswith="LSM 980").count() == 2

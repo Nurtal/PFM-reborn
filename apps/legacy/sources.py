@@ -67,7 +67,10 @@ class SQLiteSource:
         return row is not None
 
     def rows(self, table: str) -> Iterator[dict[str, Any]]:
-        for row in self.conn.execute(f"SELECT * FROM {_check(table)} ORDER BY id"):  # noqa: S608 - allow-listed name
+        name = _check(table)
+        columns = {r[1] for r in self.conn.execute(f"PRAGMA table_info({name})")}
+        order = " ORDER BY id" if "id" in columns else ""  # some join tables have no id
+        for row in self.conn.execute(f"SELECT * FROM {name}{order}"):  # noqa: S608 - allow-listed name
             yield dict(row)
 
 
@@ -100,8 +103,13 @@ class MySQLSource:
             return cur.fetchone() is not None
 
     def rows(self, table: str) -> Iterator[dict[str, Any]]:
+        name = _check(table)
         with self.conn.cursor() as cur:
-            cur.execute(f"SELECT * FROM `{_check(table)}` ORDER BY id")  # noqa: S608 - allow-listed name
+            cur.execute("SHOW COLUMNS FROM `" + name + "` LIKE 'id'")  # allow-listed name
+            has_id = cur.fetchone() is not None
+        order = " ORDER BY id" if has_id else ""  # some join tables have no id
+        with self.conn.cursor() as cur:
+            cur.execute(f"SELECT * FROM `{name}`{order}")  # noqa: S608 - allow-listed name
             yield from cur
 
 
