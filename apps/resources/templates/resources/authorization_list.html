@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Authorizations" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Authorizations' %}" subtitle="{% translate 'Users trained to book a category of resources.' %}">
+    <a href="{% url 'resources:authorization_create' current_space.slug %}" class="btn-primary">
+      <c-icon name="plus" class="size-4" />
+      {% translate "New authorization" %}
+    </a>
+  </c-page-header>
+  <div class="mb-4 max-w-sm">
+    <label for="auth-search" class="sr-only">{% translate "Search" %}</label>
+    <input id="auth-search"
+           type="search"
+           name="q"
+           value="{{ request.GET.q }}"
+           placeholder="{% translate 'Search a user or a category' %}"
+           hx-get="{% url 'resources:authorizations' current_space.slug %}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#auth-rows"
+           hx-push-url="true">
+  </div>
+  <div class="card overflow-x-auto p-0">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+        <tr>
+          <th scope="col" class="px-4 py-3">{% translate "User" %}</th>
+          <th scope="col" class="px-4 py-3">{% translate "Category" %}</th>
+          <th scope="col" class="px-4 py-3">{% translate "Valid" %}</th>
+          <th scope="col" class="px-4 py-3">{% translate "Trainer" %}</th>
+        </tr>
+      </thead>
+      <tbody id="auth-rows" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+        {% include "resources/_authorization_rows.html" %}
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}

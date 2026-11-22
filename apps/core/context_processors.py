@@ -13,9 +13,11 @@ def pfm(request: HttpRequest) -> dict[str, Any]:
     space: Space | None = getattr(request, "space", None)
     user = request.user
     can_administer = bool(space and user.has_perm("core.administer_space", space))
+    can_manage = bool(space and user.has_perm("core.manage_space", space))
     return {
         "current_space": space,
         "can_administer_space": can_administer,
+        "can_manage_space": can_manage,
         # Lazy: only queried by templates that render the space switcher.
         "user_spaces": SimpleLazyObject(
             lambda: services.spaces_for(user) if user.is_authenticated else []  # type: ignore[arg-type]

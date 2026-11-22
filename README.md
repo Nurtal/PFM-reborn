@@ -363,7 +363,7 @@ Prérequis : [uv](https://docs.astral.sh/uv/). Docker est facultatif en dev.
 git clone <repo> pfm-ng && cd pfm-ng
 uv sync
 uv run manage.py migrate
-uv run manage.py loaddata demo        # données de démo
+uv run manage.py demo                 # données de démo (DEBUG uniquement)
 uv run manage.py runserver            # http://localhost:8000
 uv run tailwindcss -i static/src/app.css -o static/dist/app.css --watch
 uv run manage.py run_huey             # tâches (ou HUEY_IMMEDIATE=1 pour tout exécuter en synchrone)

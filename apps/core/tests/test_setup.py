@@ -88,8 +88,8 @@ def test_smtp_test_endpoint_needs_token_before_setup(client):
     assert b"Invalid setup token" in response.content or "invalide" in response.content.decode()
 
 
-def test_setup_page_is_french_by_default(client):
-    response = client.get(reverse("core:setup"))
+def test_setup_page_in_french(client):
+    response = client.get(reverse("core:setup"), HTTP_ACCEPT_LANGUAGE="fr")
     assert response.status_code == 200
     assert "Bienvenue dans PFM" in response.content.decode() or not _french_compiled()
 

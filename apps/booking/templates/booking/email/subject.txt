@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}[{{ booking.space.name }}] {% if event == "created" %}{% translate "Booking confirmed" %}{% elif event == "modified" %}{% translate "Booking changed" %}{% else %}{% translate "Booking cancelled" %}{% endif %}: {{ booking.resource.name }} {{ start|date:"SHORT_DATETIME_FORMAT" }}{% endautoescape %}

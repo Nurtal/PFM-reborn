@@ -6,6 +6,8 @@ from typing import Any
 
 from django.http import Http404, HttpRequest, HttpResponseBase
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
+from django.utils import timezone
 from django.views import View
 
 from apps.core.models import Space
@@ -28,4 +30,10 @@ class SpaceViewMixin(View):
         if not request.user.has_perm(self.permission_required, self.space):
             raise Http404
         request.space = self.space  # type: ignore[attr-defined]
-        return super().dispatch(request, *args, **kwargs)
+        # Forms parse and templates display datetimes in the platform's zone.
+        # TemplateResponses render lazily, so render them inside the override too.
+        with timezone.override(self.space.timezone):
+            response = super().dispatch(request, *args, **kwargs)
+            if isinstance(response, TemplateResponse) and not response.is_rendered:
+                response.render()
+        return response

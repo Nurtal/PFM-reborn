@@ -1,0 +1,54 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Resources" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'Resources' %}" :subtitle="current_space.name">
+    {% if can_manage %}
+      <a href="{% url 'resources:settings' current_space.slug %}" class="btn-secondary">{% translate "Areas & categories" %}</a>
+      <a href="{% url 'resources:create' current_space.slug %}" class="btn-primary">
+        <c-icon name="plus" class="size-4" />
+        {% translate "New resource" %}
+      </a>
+    {% endif %}
+  </c-page-header>
+  {% if resources %}
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for r in resources %}
+        <li class="card flex flex-col gap-3">
+          <div class="flex items-start gap-3">
+            <span class="mt-1 size-3 shrink-0 rounded-full bg-accent"
+                  data-color="{{ r.color }}"
+                  aria-hidden="true"></span>
+            <div class="min-w-0 flex-1">
+              <h2 class="font-semibold">{{ r.name }}</h2>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                {{ r.category }} · {{ r.area }}
+                {% if r.brand %}· {{ r.brand }} {{ r.model }}{% endif %}
+              </p>
+            </div>
+            {% if not r.is_active %}
+              <span class="badge bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{% translate "Inactive" %}</span>
+            {% elif r.access == "authorized" %}
+              <span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{% translate "Authorization" %}</span>
+            {% endif %}
+          </div>
+          <div class="mt-auto flex gap-2">
+            <a href="{% url 'booking:calendar' current_space.slug r.public_id %}" class="btn-primary flex-1">
+              <c-icon name="calendar" class="size-4" />
+              {% translate "Calendar" %}
+            </a>
+            {% if can_manage %}
+              <a href="{% url 'resources:update' current_space.slug r.public_id %}" class="btn-secondary">{% translate "Edit" %}</a>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <c-empty-state icon="calendar" title="{% translate 'No resource yet' %}" text="{% translate 'Create an area and a category first, then add your equipment.' %}">
+      {% if can_manage %}
+        <a href="{% url 'resources:settings' current_space.slug %}" class="btn-primary">{% translate "Set up areas & categories" %}</a>
+      {% endif %}
+    </c-empty-state>
+  {% endif %}
+{% endblock content %}

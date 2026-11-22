@@ -15,3 +15,8 @@ STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.Static
 AXES_ENABLED = False
 ACCOUNT_RATE_LIMITS = False  # type: ignore[assignment]
 WHITENOISE_AUTOREFRESH = True
+# A file (not :memory:) so the concurrency tests exercise real SQLite locking.
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"]["TEST"] = {"NAME": str(DATA_DIR / "test.sqlite3")}
+# Assertions match English messages; French rendering is tested explicitly.
+LANGUAGE_CODE = "en"
