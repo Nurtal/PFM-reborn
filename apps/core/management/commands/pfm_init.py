@@ -18,5 +18,13 @@ class Command(BaseCommand):
         if plan and has_tables and backups.is_sqlite():
             path = backups.backup("pre-migrate")
             self.stdout.write(f"Pending migrations: database backed up to {path}")
-        call_command("migrate", interactive=False, verbosity=1)
+        if plan:  # nothing to do on most starts: skip the second migrate pass
+            call_command("migrate", interactive=False, verbosity=1)
+        # Locks left by a crash would block periodic tasks forever: clear them
+        # before any worker starts (they run inside the web process).
+        from huey.contrib.djhuey import HUEY
+
+        flushed = HUEY.flush_locks()
+        if flushed:
+            self.stdout.write(f"Cleared stale task locks: {', '.join(sorted(flushed))}")
         services.log_setup_token()

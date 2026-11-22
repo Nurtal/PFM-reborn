@@ -15,7 +15,7 @@ SESSION_KEY = "pfm_mfa_checked_until"
 # their authenticator, is caught within minutes instead of at the next login.
 RECHECK_SECONDS = 300
 # Paths an admin without MFA may still reach (to set it up or to leave).
-ALLOWED_PREFIXES = ("/accounts/", "/static/", "/healthz", "/i18n/", "/setup/")
+ALLOWED_PREFIXES = ("/accounts/", "/static/", "/healthz", "/i18n/", "/setup/", "/api/")
 
 
 class AdminMFARequiredMiddleware:

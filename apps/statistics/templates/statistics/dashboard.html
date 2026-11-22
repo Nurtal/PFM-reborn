@@ -1,0 +1,59 @@
+{% extends "layouts/app.html" %}
+{% load i18n static %}
+{% block title %}{% translate "Statistics" %}{% endblock title %}
+{% block extra_head %}
+  <script src="{% static 'vendor/chart-4.6.1.umd.min.js' %}" defer></script>
+  <script src="{% static 'js/statistics.js' %}" defer></script>
+{% endblock extra_head %}
+{% block content %}
+  <c-page-header title="{% translate 'Statistics' %}" :subtitle="current_space.name" />
+  <form method="get" class="mb-6 flex flex-wrap items-end gap-3">
+    <div><c-field :field="form.start" /></div>
+    <div><c-field :field="form.end" /></div>
+    <button type="submit" class="btn-secondary">{% translate "Apply" %}</button>
+  </form>
+
+  <dl class="mb-6 grid gap-4 sm:grid-cols-3">
+    <div class="card"><dt class="text-sm text-zinc-500">{% translate "Bookings" %}</dt><dd class="mt-1 text-2xl font-semibold">{{ total_bookings }}</dd></div>
+    <div class="card"><dt class="text-sm text-zinc-500">{% translate "Booked hours" %}</dt><dd class="mt-1 text-2xl font-semibold">{{ total_hours|floatformat:"0" }} h</dd></div>
+    <div class="card"><dt class="text-sm text-zinc-500">{% translate "Invoiced (excl. tax)" %}</dt><dd class="mt-1 text-2xl font-semibold">{{ total_revenue|floatformat:"2g" }} {{ current_space.currency }}</dd></div>
+  </dl>
+
+  {{ charts|json_script:"charts-data" }}
+  <div class="grid gap-6 lg:grid-cols-2">
+    <section class="card">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="font-semibold">{% translate "Hours per resource" %}</h2>
+        <a href="{% url 'statistics:export' current_space.slug 'resources' %}?{{ request.GET.urlencode }}" class="btn-ghost text-sm">CSV</a>
+      </div>
+      <div class="h-64"><canvas id="chart-usage" role="img" aria-label="{% translate 'Hours per resource' %}"></canvas></div>
+      <table class="mt-4 w-full text-sm">
+        <caption class="sr-only">{% translate "Hours per resource" %}</caption>
+        <thead class="text-left text-xs text-zinc-500 uppercase"><tr><th scope="col" class="py-1">{% translate "Resource" %}</th><th scope="col" class="py-1 text-right">{% translate "Bookings" %}</th><th scope="col" class="py-1 text-right">{% translate "Hours" %}</th><th scope="col" class="py-1 text-right">{% translate "Occupancy" %}</th></tr></thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for u in usage %}
+            <tr><td class="py-1.5">{{ u.resource.name }}</td><td class="py-1.5 text-right">{{ u.bookings }}</td><td class="py-1.5 text-right">{{ u.hours|floatformat:"1" }}</td><td class="py-1.5 text-right">{% if u.occupancy is not None %}{{ u.occupancy }} %{% else %}—{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    <section class="card">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="font-semibold">{% translate "Invoiced per month" %}</h2>
+        <a href="{% url 'statistics:export' current_space.slug 'revenue' %}?{{ request.GET.urlencode }}" class="btn-ghost text-sm">CSV</a>
+      </div>
+      <div class="h-64"><canvas id="chart-revenue" role="img" aria-label="{% translate 'Invoiced per month' %}"></canvas></div>
+      <div class="mt-6 mb-3 flex items-center justify-between">
+        <h2 class="font-semibold">{% translate "Top clients by booked hours" %}</h2>
+        <a href="{% url 'statistics:export' current_space.slug 'clients' %}?{{ request.GET.urlencode }}" class="btn-ghost text-sm">CSV</a>
+      </div>
+      <ul class="divide-y divide-zinc-100 text-sm dark:divide-zinc-800">
+        {% for c in clients %}
+          <li class="flex justify-between py-1.5"><span>{{ c.name }}</span><span class="text-zinc-500">{{ c.hours|floatformat:"1" }} h · {{ c.bookings }}</span></li>
+        {% empty %}
+          <li class="py-1.5 text-zinc-500">{% translate "No booking over this period." %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+{% endblock content %}

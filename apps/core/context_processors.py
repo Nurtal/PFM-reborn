@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from django.utils.functional import SimpleLazyObject
 
 from apps.core import services
-from apps.core.models import Space
+from apps.core.models import InstanceSettings, Space
 
 
 def pfm(request: HttpRequest) -> dict[str, Any]:
@@ -19,6 +19,7 @@ def pfm(request: HttpRequest) -> dict[str, Any]:
         "can_administer_space": can_administer,
         "can_manage_space": can_manage,
         # Lazy: only queried by templates that render the space switcher.
+        "signup_open": SimpleLazyObject(lambda: InstanceSettings.load().allow_signup),
         "user_spaces": SimpleLazyObject(
             lambda: services.spaces_for(user) if user.is_authenticated else []  # type: ignore[arg-type]
         ),

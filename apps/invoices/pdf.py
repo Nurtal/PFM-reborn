@@ -93,7 +93,9 @@ def _render(invoice: Invoice, conf: InvoiceSettings) -> bytes:
     pdf.set_xy(pdf.l_margin + width / 2, top)
     pdf.set_text_color(*INK)
     pdf.set_font("Noto", "B", 18)
-    title = _("Credit note") if invoice.kind == Kind.CREDIT else _("Invoice")
+    title = {Kind.CREDIT: _("Credit note"), Kind.QUOTE: _("Quote")}.get(
+        Kind(invoice.kind), _("Invoice")
+    )
     pdf.cell(width / 2, 9, title, align="R", new_x="LEFT", new_y="NEXT")
     pdf.set_font("Noto", "", 9)
     meta = [
@@ -103,17 +105,19 @@ def _render(invoice: Invoice, conf: InvoiceSettings) -> bytes:
             formats.date_format(invoice.issue_date or invoice.created_at, "SHORT_DATE_FORMAT"),
         ),
     ]
-    if invoice.kind == Kind.INVOICE and invoice.due_date:
-        meta.append((_("Due date"), formats.date_format(invoice.due_date, "SHORT_DATE_FORMAT")))
+    if invoice.due_date and invoice.kind != Kind.CREDIT:
+        label = _("Valid until") if invoice.kind == Kind.QUOTE else _("Due date")
+        meta.append((label, formats.date_format(invoice.due_date, "SHORT_DATE_FORMAT")))
     if invoice.credited_invoice:
         meta.append((_("Cancels invoice"), invoice.credited_invoice.number or ""))
-    meta.append(
-        (
-            _("Period"),
-            f"{formats.date_format(invoice.period_start, 'SHORT_DATE_FORMAT')} – "
-            f"{formats.date_format(invoice.period_end, 'SHORT_DATE_FORMAT')}",
+    if invoice.kind != Kind.QUOTE:
+        meta.append(
+            (
+                _("Period"),
+                f"{formats.date_format(invoice.period_start, 'SHORT_DATE_FORMAT')} – "
+                f"{formats.date_format(invoice.period_end, 'SHORT_DATE_FORMAT')}",
+            )
         )
-    )
     for label, value in meta:
         pdf.set_x(pdf.l_margin + width / 2)
         pdf.set_text_color(*MUTED)

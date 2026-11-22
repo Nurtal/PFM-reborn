@@ -52,6 +52,16 @@ class Space(models.Model):
         _("accent colour"), max_length=7, default="#4f46e5", validators=[hex_color]
     )
     is_active = models.BooleanField(_("active"), default=True)
+    accepts_join_requests = models.BooleanField(
+        _("accepts access requests"),
+        default=True,
+        help_text=_("Signed-in users can ask to join; an administrator approves."),
+    )
+    catalogue_public = models.BooleanField(
+        _("public catalogue"),
+        default=False,
+        help_text=_("Publish the equipment and services list at /c/<short name>/."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()
@@ -108,6 +118,11 @@ class InstanceSettings(models.Model):
 
     site_name = models.CharField(_("site name"), max_length=120, default="PFM")
     setup_completed_at = models.DateTimeField(null=True, blank=True)
+    allow_signup = models.BooleanField(
+        _("open sign-up"),
+        default=False,
+        help_text=_("Let people create an account and request access to platforms."),
+    )
 
     smtp_host = models.CharField(_("SMTP host"), max_length=255, blank=True)
     smtp_port = models.PositiveIntegerField(_("SMTP port"), default=587)
@@ -121,7 +136,36 @@ class InstanceSettings(models.Model):
     )
     smtp_from_email = models.EmailField(_("sender address"), blank=True)
 
-    history = HistoricalRecords(excluded_fields=["smtp_password_encrypted"])
+    ldap_url = models.CharField(
+        _("LDAP server"), max_length=255, blank=True, help_text=_("e.g. ldaps://ldap.univ.fr")
+    )
+    ldap_start_tls = models.BooleanField(_("STARTTLS"), default=False)
+    ldap_bind_dn = models.CharField(
+        _("service account DN"),
+        max_length=255,
+        blank=True,
+        help_text=_("Leave empty to bind directly with the user DN template."),
+    )
+    ldap_bind_password_encrypted = models.TextField(blank=True, editable=False)
+    ldap_user_dn_template = models.CharField(
+        _("user DN template"),
+        max_length=255,
+        blank=True,
+        help_text=_("e.g. uid={username},ou=people,dc=univ,dc=fr (direct bind)."),
+    )
+    ldap_search_base = models.CharField(_("user search base"), max_length=255, blank=True)
+    ldap_search_filter = models.CharField(
+        _("user search filter"), max_length=255, default="(uid={username})"
+    )
+    ldap_attr_email = models.CharField(_("e-mail attribute"), max_length=64, default="mail")
+    ldap_attr_first_name = models.CharField(
+        _("first name attribute"), max_length=64, default="givenName"
+    )
+    ldap_attr_last_name = models.CharField(_("last name attribute"), max_length=64, default="sn")
+
+    history = HistoricalRecords(
+        excluded_fields=["smtp_password_encrypted", "ldap_bind_password_encrypted"]
+    )
 
     class Meta:
         verbose_name = _("instance settings")
@@ -144,10 +188,57 @@ class InstanceSettings(models.Model):
 
         self.smtp_password_encrypted = encrypt(raw) if raw else ""
 
+    def set_ldap_bind_password(self, raw: str) -> None:
+        from apps.core.crypto import encrypt
+
+        self.ldap_bind_password_encrypted = encrypt(raw) if raw else ""
+
+    def get_ldap_bind_password(self) -> str:
+        from apps.core.crypto import decrypt
+
+        if not self.ldap_bind_password_encrypted:
+            return ""
+        return decrypt(self.ldap_bind_password_encrypted)
+
     def get_smtp_password(self) -> str:
         from apps.core.crypto import decrypt
 
         return decrypt(self.smtp_password_encrypted) if self.smtp_password_encrypted else ""
+
+
+class JoinStatus(models.TextChoices):
+    PENDING = "pending", _("Pending")
+    APPROVED = "approved", _("Approved")
+    REJECTED = "rejected", _("Rejected")
+
+
+class JoinRequest(models.Model):
+    """A user asks to become a member of a space (legacy "demande d'adhésion")."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="join_requests"
+    )
+    space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name="join_requests")
+    message = models.TextField(_("message"), blank=True)
+    status = models.CharField(max_length=10, choices=JoinStatus.choices, default=JoinStatus.PENDING)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "space"],
+                condition=models.Q(status="pending"),
+                name="one_pending_request",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} -> {self.space}"
 
 
 def user_role(user: User, space: Space) -> int | None:

@@ -15,10 +15,12 @@ from django.views import View
 from django.views.generic import ListView, TemplateView, UpdateView
 
 from apps.accounts.models import User
+from apps.clients.models import Client
+from apps.core.csvsafe import csv_safe
 from apps.core.permissions import SpaceViewMixin
 from apps.invoices import services
 from apps.invoices.forms import InvoiceRunForm, InvoiceSettingsForm, LineForm
-from apps.invoices.models import Invoice, InvoiceLine, InvoiceSettings, Status
+from apps.invoices.models import Invoice, InvoiceLine, InvoiceSettings, Kind, Status
 
 
 class InvoicingMixin(SpaceViewMixin):
@@ -37,8 +39,8 @@ class InvoicingMixin(SpaceViewMixin):
 
 
 def _filtered(space: Any, params: Any) -> Any:
-    qs = services.space_invoices(space)
     status = params.get("status", "issued")
+    qs = services.space_invoices(space, quotes=status == "quotes")
     if status in {Status.DRAFT, Status.ISSUED}:
         qs = qs.filter(status=status)
     year = params.get("year", "")
@@ -62,8 +64,12 @@ class InvoiceListView(InvoicingMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["status"] = self.request.GET.get("status", "issued")
         ctx["drafts_count"] = (
-            Invoice.objects.for_space(self.space).filter(status=Status.DRAFT).count()
+            Invoice.objects.for_space(self.space)
+            .filter(status=Status.DRAFT)
+            .exclude(kind=Kind.QUOTE)
+            .count()
         )
+        ctx["clients"] = Client.objects.filter(space=self.space, is_active=True)
         ctx["query"] = self.request.GET.urlencode()
         return ctx
 
@@ -176,6 +182,15 @@ class InvoiceDetailView(InvoicingMixin, TemplateView):
                 return redirect(
                     "invoices:detail", space_slug=self.space.slug, invoice_id=note.public_id
                 )
+            elif action == "answer":
+                services.answer_quote(invoice, request.POST.get("quote_status", ""))
+                messages.success(request, _("Quote updated."))
+            elif action == "convert":
+                draft = services.convert_quote(self.actor(), invoice)
+                messages.success(request, _("Draft invoice created from the quote."))
+                return redirect(
+                    "invoices:detail", space_slug=self.space.slug, invoice_id=draft.public_id
+                )
             elif action == "paid":
                 raw = request.POST.get("paid_at", "")
                 services.mark_paid(invoice, dt.date.fromisoformat(raw) if raw else None)
@@ -261,26 +276,11 @@ class InvoiceExportView(InvoicingMixin, View):
         writer = csv.writer(text, delimiter=";")
         writer.writerow(EXPORT_HEADERS)
         for row in rows:
-            writer.writerow(["" if v is None else _csv_safe(str(v)) for v in row])
+            writer.writerow([csv_safe(v) for v in row])
         bom = chr(0xFEFF)  # lets Excel detect UTF-8
         response = HttpResponse(bom + text.getvalue(), content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="invoices-{stamp}.csv"'
         return response
-
-
-def _csv_safe(value: str) -> str:
-    """Neutralise spreadsheet formulas (CSV injection) in user-provided text."""
-    if value and value[0] in "=+-@\t\r" and not _is_number(value):
-        return "'" + value
-    return value
-
-
-def _is_number(value: str) -> bool:
-    try:
-        Decimal(value)
-    except ArithmeticError:
-        return False
-    return True
 
 
 class InvoiceSettingsView(InvoicingMixin, UpdateView):
@@ -302,3 +302,12 @@ class InvoiceSettingsView(InvoicingMixin, UpdateView):
         ctx["title"] = _("Invoicing settings")
         ctx["cancel_url"] = self.get_success_url()
         return ctx
+
+
+class QuoteCreateView(InvoicingMixin, View):
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        client = get_object_or_404(
+            Client.objects.filter(space=self.space, is_active=True), pk=request.POST.get("client")
+        )
+        quote = services.create_quote(self.actor(), self.space, client)
+        return redirect("invoices:detail", space_slug=self.space.slug, invoice_id=quote.public_id)

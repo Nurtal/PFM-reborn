@@ -15,6 +15,36 @@
       {% endfor %}
     </ul>
   {% else %}
-    <c-empty-state icon="building" title="{% translate 'No platform yet' %}" text="{% translate 'Ask a platform administrator to add you as a member.' %}" />
+    <c-empty-state icon="building" title="{% translate 'No platform yet' %}" text="{% translate 'Ask to join a platform below, or ask an administrator to add you.' %}" />
+  {% endif %}
+  {% if pending %}
+    <section class="mt-8">
+      <h2 class="mb-3 font-semibold">{% translate "Pending requests" %}</h2>
+      <ul class="space-y-2 text-sm">
+        {% for j in pending %}<li class="card py-3">{{ j.space.name }} · <span class="text-zinc-500">{% translate "awaiting approval" %}</span></li>{% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+  {% if joinable %}
+    <section class="mt-8">
+      <h2 class="mb-3 font-semibold">{% translate "Join a platform" %}</h2>
+      {% if not email_verified %}
+        <p class="mb-3 text-sm text-amber-700 dark:text-amber-400">{% translate "Confirm your e-mail address before asking to join." %} <a href="{% url 'account_email' %}">{% translate "E-mail settings" %}</a></p>
+      {% endif %}
+      <ul class="grid gap-4 sm:grid-cols-2">
+        {% for space in joinable %}
+          <li>
+            <form method="post" action="{% url 'core:join' space.slug %}" class="card space-y-3">
+              {% csrf_token %}
+              <h3 class="font-semibold">{{ space.name }}</h3>
+              {% if space.description %}<p class="text-sm text-zinc-500">{{ space.description|truncatewords:30 }}</p>{% endif %}
+              <label for="join-msg-{{ space.pk }}">{% translate "Message to the administrators (optional)" %}</label>
+              <textarea id="join-msg-{{ space.pk }}" name="message" rows="2" maxlength="2000"></textarea>
+              <button type="submit" class="btn-secondary" {% if not email_verified %}disabled{% endif %}>{% translate "Request access" %}</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
   {% endif %}
 {% endblock content %}

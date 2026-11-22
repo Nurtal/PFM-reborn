@@ -3,6 +3,28 @@
 {% block title %}{% translate "Members" %} · {{ current_space.name }}{% endblock title %}
 {% block content %}
   <c-page-header title="{% translate 'Members' %}" :subtitle="current_space.name" />
+  {% if join_requests %}
+    <section class="card mb-6">
+      <h2 class="mb-3 font-semibold">{% translate "Access requests" %}</h2>
+      <ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
+        {% for j in join_requests %}
+          <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+            <div>
+              <div class="font-medium">{{ j.user }} <span class="font-normal text-zinc-500">{{ j.user.email }}</span></div>
+              {% if j.message %}<p class="text-sm text-zinc-600 dark:text-zinc-400">{{ j.message }}</p>{% endif %}
+              <p class="text-xs text-zinc-500">{{ j.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+            </div>
+            <form method="post" class="flex gap-2">
+              {% csrf_token %}
+              <input type="hidden" name="join_request" value="{{ j.pk }}">
+              <button type="submit" name="decision" value="approve" class="btn-primary">{% translate "Approve" %}</button>
+              <button type="submit" name="decision" value="reject" class="btn-secondary">{% translate "Decline" %}</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
   <div class="grid gap-6 lg:grid-cols-3">
     <div class="card overflow-x-auto p-0 lg:col-span-2">
       <table class="w-full text-left text-sm">

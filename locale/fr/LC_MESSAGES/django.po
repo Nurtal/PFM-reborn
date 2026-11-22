@@ -1580,3 +1580,618 @@ msgid "%(n)s line without price"
 msgid_plural "%(n)s lines without price"
 msgstr[0] "%(n)s ligne sans tarif"
 msgstr[1] "%(n)s lignes sans tarif"
+
+msgid "The period is limited to three years."
+msgstr "La période est limitée à trois ans."
+
+msgid "Statistics"
+msgstr "Statistiques"
+
+msgid "Quote updated."
+msgstr "Devis mis à jour."
+
+msgid "Draft invoice created from the quote."
+msgstr "Brouillon de facture créé à partir du devis."
+
+msgid "Only sent quotes can be answered."
+msgstr "Seuls les devis émis peuvent recevoir une réponse."
+
+msgid "Only accepted quotes can be invoiced."
+msgstr "Seuls les devis acceptés peuvent être facturés."
+
+msgid "This quote has already been invoiced."
+msgstr "Ce devis a déjà été facturé."
+
+#, python-format
+msgid "According to quote %(number)s"
+msgstr "Selon le devis %(number)s"
+
+msgid "Only invoices can be paid."
+msgstr "Seules les factures peuvent être réglées."
+
+msgid "Quote"
+msgstr "Devis"
+
+msgid "Valid until"
+msgstr "Valable jusqu'au"
+
+msgid "quote prefix"
+msgstr "préfixe des devis"
+
+msgid "quote validity (days)"
+msgstr "validité des devis (jours)"
+
+msgid "Awaiting answer"
+msgstr "En attente de réponse"
+
+msgid "Accepted"
+msgstr "Accepté"
+
+msgid "Refused"
+msgstr "Refusé"
+
+msgid "quote status"
+msgstr "statut du devis"
+
+msgid "invoice created from this quote"
+msgstr "facture issue de ce devis"
+
+msgid "Document deleted."
+msgstr "Document supprimé."
+
+msgid "Document uploaded."
+msgstr "Document ajouté."
+
+msgid "Every member of the platform"
+msgstr "Tous les membres de la plateforme"
+
+msgid "visible to"
+msgstr "visible par"
+
+msgid "document"
+msgstr "document"
+
+msgid "documents"
+msgstr "documents"
+
+msgid "Documents"
+msgstr "Documents"
+
+msgid "Platform settings"
+msgstr "Réglages de la plateforme"
+
+#, python-format
+msgid "File type not allowed. Accepted: %(types)s."
+msgstr "Type de fichier non autorisé. Acceptés : %(types)s."
+
+msgid "The file is larger than 20 MB."
+msgstr "Le fichier dépasse 20 Mo."
+
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+msgid "The file content does not match its extension."
+msgstr "Le contenu du fichier ne correspond pas à son extension."
+
+msgid "Text files must be UTF-8."
+msgstr "Les fichiers texte doivent être en UTF-8."
+
+msgid "public catalogue"
+msgstr "catalogue public"
+
+msgid "Publish the equipment and services list at /c/<short name>/."
+msgstr "Publie la liste des équipements et prestations à l’adresse /c/<nom court>/."
+
+msgid "Time zone"
+msgstr "Fuseau horaire"
+
+msgid "Use a three-letter ISO code such as EUR."
+msgstr "Utilisez un code ISO à trois lettres, par exemple EUR."
+
+msgid "The subject must fit on one line."
+msgstr "L'objet doit tenir sur une ligne."
+
+msgid "Choose the resource."
+msgstr "Choisissez la ressource."
+
+#, python-format
+msgid "Message queued for %(n)d recipients."
+msgstr "Message mis en file pour %(n)d destinataires."
+
+msgid "Every member"
+msgstr "Tous les membres"
+
+msgid "Users and above (not visitors)"
+msgstr "Utilisateurs et plus (hors visiteurs)"
+
+msgid "Managers and administrators"
+msgstr "Gestionnaires et administrateurs"
+
+msgid "Users who booked a resource recently"
+msgstr "Utilisateurs ayant réservé une ressource récemment"
+
+msgid "subject"
+msgstr "objet"
+
+msgid "message"
+msgstr "message"
+
+msgid "recipients"
+msgstr "destinataires"
+
+msgid "mailing"
+msgstr "envoi"
+
+msgid "mailings"
+msgstr "envois"
+
+msgid "Mailer"
+msgstr "Envoi de mails"
+
+msgid "Public catalogue"
+msgstr "Catalogue public"
+
+msgid "Technology platform"
+msgstr "Plateforme technologique"
+
+msgid "No equipment listed yet."
+msgstr "Aucun équipement listé pour le moment."
+
+msgid "Sign in to book"
+msgstr "Se connecter pour réserver"
+
+msgid "Confirm and send"
+msgstr "Confirmer et envoyer"
+
+msgid "Preview recipients"
+msgstr "Voir les destinataires"
+
+msgid "History"
+msgstr "Historique"
+
+msgid "queued"
+msgstr "en file"
+
+msgid "No message sent yet."
+msgstr "Aucun message envoyé pour le moment."
+
+msgid "Write to the members of the platform. Each recipient gets their own message."
+msgstr "Écrivez aux membres de la plateforme. Chaque destinataire reçoit son propre message."
+
+msgid "Size"
+msgstr "Taille"
+
+msgid "Added"
+msgstr "Ajouté le"
+
+msgid "Managers"
+msgstr "Gestionnaires"
+
+msgid "No document."
+msgstr "Aucun document."
+
+msgid "Add a document"
+msgstr "Ajouter un document"
+
+msgid "PDF, images, text, Office and OpenDocument files, 20 MB max."
+msgstr "PDF, images, texte, fichiers Office et OpenDocument, 20 Mo max."
+
+msgid "Upload"
+msgstr "Envoyer"
+
+msgid "Delete this document?"
+msgstr "Supprimer ce document ?"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Quotes"
+msgstr "Devis"
+
+msgid "New quote for"
+msgstr "Nouveau devis pour"
+
+msgid "Create the quote"
+msgstr "Créer le devis"
+
+msgid "Issue the quote"
+msgstr "Émettre le devis"
+
+msgid "Client answer"
+msgstr "Réponse du client"
+
+msgid "Invoiced in"
+msgstr "Facturé dans"
+
+msgid "Create the invoice"
+msgstr "Créer la facture"
+
+msgid "Issue this quote? It cannot be changed afterwards."
+msgstr "Émettre ce devis ? Il ne pourra plus être modifié."
+
+msgid "a draft"
+msgstr "un brouillon"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Bookings"
+msgstr "Réservations"
+
+msgid "Booked hours"
+msgstr "Heures réservées"
+
+msgid "Invoiced (excl. tax)"
+msgstr "Facturé (HT)"
+
+msgid "Hours per resource"
+msgstr "Heures par ressource"
+
+msgid "Hours"
+msgstr "Heures"
+
+msgid "Occupancy"
+msgstr "Occupation"
+
+msgid "Invoiced per month"
+msgstr "Facturé par mois"
+
+msgid "Top clients by booked hours"
+msgstr "Principaux clients (heures réservées)"
+
+msgid "No booking over this period."
+msgstr "Aucune réservation sur cette période."
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "Visible to"
+msgstr "Visible par"
+
+msgid "Hello"
+msgstr "Bonjour"
+
+#, python-format
+msgid "This message will be sent to %(n)s person."
+msgid_plural "This message will be sent to %(n)s people."
+msgstr[0] "Ce message sera envoyé à %(n)s personne."
+msgstr[1] "Ce message sera envoyé à %(n)s personnes."
+
+msgid "Wrong password: your account was not deleted."
+msgstr "Mot de passe incorrect : votre compte n'a pas été supprimé."
+
+msgid "Super-administrators must be removed by another administrator."
+msgstr "Un super-administrateur doit être supprimé par un autre administrateur."
+
+msgid "Your account and personal data have been deleted."
+msgstr "Votre compte et vos données personnelles ont été supprimés."
+
+msgid "Request sent. An administrator will review it."
+msgstr "Demande envoyée. Un administrateur va l’examiner."
+
+msgid "Request approved."
+msgstr "Demande acceptée."
+
+msgid "Request declined."
+msgstr "Demande refusée."
+
+#, python-format
+msgid "[%(space)s] Access request from %(user)s"
+msgstr "[%(space)s] Demande d'accès de %(user)s"
+
+#, python-format
+msgid "%(user)s (%(email)s) asks to join %(space)s."
+msgstr "%(user)s (%(email)s) demande à rejoindre %(space)s."
+
+#, python-format
+msgid "Your access to %(space)s has been approved."
+msgstr "Votre accès à %(space)s a été accepté."
+
+#, python-format
+msgid "Your access request to %(space)s was declined."
+msgstr "Votre demande d'accès à %(space)s a été refusée."
+
+msgid "This platform does not accept requests."
+msgstr "Cette plateforme n'accepte pas de demandes."
+
+msgid "You are already a member of this platform."
+msgstr "Vous êtes déjà membre de cette plateforme."
+
+msgid "Your request is already pending."
+msgstr "Votre demande est déjà en attente."
+
+msgid "Confirm your e-mail address first."
+msgstr "Confirmez d'abord votre adresse e-mail."
+
+msgid "This request has already been handled."
+msgstr "Cette demande a déjà été traitée."
+
+msgid "accepts access requests"
+msgstr "accepte les demandes d'accès"
+
+msgid "Signed-in users can ask to join; an administrator approves."
+msgstr "Les utilisateurs connectés peuvent demander à rejoindre ; un administrateur valide."
+
+msgid "open sign-up"
+msgstr "inscription ouverte"
+
+msgid "Let people create an account and request access to platforms."
+msgstr "Permet de créer un compte puis de demander l'accès aux plateformes."
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "Approved"
+msgstr "Acceptée"
+
+msgid "Rejected"
+msgstr "Refusée"
+
+msgid "Management"
+msgstr "Gestion"
+
+msgid "My data"
+msgstr "Mes données"
+
+msgid "Pending requests"
+msgstr "Demandes en attente"
+
+msgid "awaiting approval"
+msgstr "en attente de validation"
+
+msgid "Join a platform"
+msgstr "Rejoindre une plateforme"
+
+msgid "Confirm your e-mail address before asking to join."
+msgstr "Confirmez votre adresse e-mail avant de demander à rejoindre une plateforme."
+
+msgid "E-mail settings"
+msgstr "Réglages e-mail"
+
+msgid "Message to the administrators (optional)"
+msgstr "Message aux administrateurs (facultatif)"
+
+msgid "Request access"
+msgstr "Demander l'accès"
+
+msgid "Ask to join a platform below, or ask an administrator to add you."
+msgstr "Demandez à rejoindre une plateforme ci-dessous, ou demandez à un administrateur de vous ajouter."
+
+msgid "Access requests"
+msgstr "Demandes d'accès"
+
+msgid "Approve"
+msgstr "Accepter"
+
+msgid "Decline"
+msgstr "Refuser"
+
+msgid "Download my data"
+msgstr "Télécharger mes données"
+
+msgid "Profile, memberships, authorizations, bookings and requests, as a JSON file."
+msgstr "Profil, adhésions, habilitations, réservations et demandes, dans un fichier JSON."
+
+msgid "Download"
+msgstr "Télécharger"
+
+msgid "Delete my account"
+msgstr "Supprimer mon compte"
+
+msgid "Your name, e-mail and notes are erased and you lose every access. Bookings and invoices stay, anonymised, because the platforms must keep their accounts."
+msgstr "Vos nom, e-mail et notes sont effacés et vous perdez tout accès. Les réservations et factures restent, anonymisées, car les plateformes doivent conserver leur comptabilité."
+
+msgid "What PFM keeps about you, and how to take it or erase it."
+msgstr "Ce que PFM conserve sur vous, et comment le récupérer ou l’effacer."
+
+msgid "Delete your account for good?"
+msgstr "Supprimer définitivement votre compte ?"
+
+msgid "Access request"
+msgstr "Demande d'accès"
+
+msgid "No account yet? Sign up, then ask to join a platform."
+msgstr "Pas encore de compte ? Inscrivez-vous, puis demandez à rejoindre une plateforme."
+
+msgid "LDAP server"
+msgstr "Serveur LDAP"
+
+msgid "e.g. ldaps://ldap.univ.fr"
+msgstr "par exemple ldaps://ldap.univ.fr"
+
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
+msgid "service account DN"
+msgstr "DN du compte de service"
+
+msgid "Leave empty to bind directly with the user DN template."
+msgstr "Laisser vide pour se connecter directement avec le modèle de DN utilisateur."
+
+msgid "user DN template"
+msgstr "modèle de DN utilisateur"
+
+msgid "e.g. uid={username},ou=people,dc=univ,dc=fr (direct bind)."
+msgstr "par exemple uid={username},ou=people,dc=univ,dc=fr (connexion directe)."
+
+msgid "user search base"
+msgstr "base de recherche des utilisateurs"
+
+msgid "user search filter"
+msgstr "filtre de recherche des utilisateurs"
+
+msgid "e-mail attribute"
+msgstr "attribut e-mail"
+
+msgid "first name attribute"
+msgstr "attribut prénom"
+
+msgid "last name attribute"
+msgstr "attribut nom"
+
+msgid "Legacy import"
+msgstr "Import de l'ancien système"
+
+msgid "Reply sent."
+msgstr "Réponse envoyée."
+
+msgid "Ticket updated."
+msgstr "Ticket mis à jour."
+
+msgid "Helpdesk mailbox"
+msgstr "Boîte mail du support"
+
+msgid "support address"
+msgstr "adresse du support"
+
+msgid "IMAP host"
+msgstr "serveur IMAP"
+
+msgid "IMAP port"
+msgstr "port IMAP"
+
+msgid "SSL/TLS"
+msgstr "SSL/TLS"
+
+msgid "IMAP user"
+msgstr "utilisateur IMAP"
+
+msgid "folder"
+msgstr "dossier"
+
+msgid "helpdesk mailbox"
+msgstr "boîte mail du support"
+
+msgid "helpdesk mailboxes"
+msgstr "boîtes mail du support"
+
+msgid "Waiting for the requester"
+msgstr "En attente du demandeur"
+
+msgid "requester"
+msgstr "demandeur"
+
+msgid "assigned to"
+msgstr "assigné à"
+
+msgid "ticket"
+msgstr "ticket"
+
+msgid "tickets"
+msgstr "tickets"
+
+msgid "Helpdesk"
+msgstr "Support"
+
+msgid "Reply"
+msgstr "Répondre"
+
+msgid "Send"
+msgstr "Envoyer"
+
+msgid "Close the ticket"
+msgstr "Clore le ticket"
+
+msgid "Assigned to"
+msgstr "Assigné à"
+
+msgid "Mailbox"
+msgstr "Boîte mail"
+
+msgid "Last check failed:"
+msgstr "Dernière relève en échec :"
+
+msgid "Subject"
+msgstr "Objet"
+
+msgid "Requester"
+msgstr "Demandeur"
+
+msgid "Updated"
+msgstr "Mis à jour"
+
+msgid "No mailbox configured yet."
+msgstr "Aucune boîte mail configurée pour le moment."
+
+msgid "Ticket status"
+msgstr "Statut des tickets"
+
+msgid "No ticket"
+msgstr "Aucun ticket"
+
+msgid "IMAP password"
+msgstr "Mot de passe IMAP"
+
+msgid "Leave empty to keep the current one."
+msgstr "Laisser vide pour conserver l'actuel."
+
+msgid "Confirmation failed: your account was not deleted."
+msgstr "Confirmation incorrecte : votre compte n'a pas été supprimé."
+
+#, python-format
+msgid "You are the only administrator of %(spaces)s: name another one first."
+msgstr "Vous êtes le seul administrateur de %(spaces)s : nommez-en un autre d'abord."
+
+#, python-format
+msgid "Type your username (%(name)s) to confirm"
+msgstr "Saisissez votre nom d'utilisateur (%(name)s) pour confirmer"
+
+msgid "Token revoked."
+msgstr "Jeton révoqué."
+
+msgid "API token"
+msgstr "Jeton d'API"
+
+msgid "expires"
+msgstr "expire"
+
+msgid "API tokens"
+msgstr "Jetons d'API"
+
+msgid "API"
+msgstr "API"
+
+msgid "Copy your token now: it will not be shown again."
+msgstr "Copiez votre jeton maintenant : il ne sera plus affiché."
+
+msgid "Token"
+msgstr "Jeton"
+
+msgid "Last used"
+msgstr "Dernière utilisation"
+
+msgid "Expires"
+msgstr "Expire"
+
+msgid "Revoke"
+msgstr "Révoquer"
+
+msgid "No token."
+msgstr "Aucun jeton."
+
+msgid "New token"
+msgstr "Nouveau jeton"
+
+msgid "Valid for"
+msgstr "Valable"
+
+msgid "30 days"
+msgstr "30 jours"
+
+msgid "90 days"
+msgstr "90 jours"
+
+msgid "1 year"
+msgstr "1 an"
+
+msgid "No expiry"
+msgstr "Sans expiration"
+
+msgid "Create"
+msgstr "Créer"
+
+msgid "For scripts and integrations: send it as Authorization: Bearer <token>. It acts with your rights."
+msgstr "Pour les scripts et intégrations : envoyez-le dans l’en-tête Authorization: Bearer <jeton>. Il agit avec vos droits."
+
+msgid "Revoke this token?"
+msgstr "Révoquer ce jeton ?"

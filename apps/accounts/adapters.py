@@ -1,14 +1,28 @@
 from __future__ import annotations
 
+from typing import Any
+
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.http import HttpRequest
 
 
-class AccountAdapter(DefaultAccountAdapter):
-    """Self sign-up is closed: accounts are created by space administrators.
+class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    """SSO users may always create their account: the institution vouches for
+    them. They still get no access until a space administrator approves them."""
 
-    Joining requests (legacy "demandes d'adhésion") will reopen this per space.
+    def is_open_for_signup(self, request: HttpRequest, sociallogin: Any) -> bool:
+        return True
+
+
+class AccountAdapter(DefaultAccountAdapter):
+    """Self sign-up follows the instance setting (closed by default).
+
+    Signing up gives no access by itself: users then send a join request
+    that a space administrator approves.
     """
 
     def is_open_for_signup(self, request: HttpRequest) -> bool:
-        return False
+        from apps.core.models import InstanceSettings
+
+        return InstanceSettings.load().allow_signup

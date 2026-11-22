@@ -65,7 +65,7 @@ On ne corrige pas cet existant : on le **réécrit** sur un socle qui règle str
 | **Accessibilité** | WCAG 2.2 AA. Lighthouse Accessibility ≥ 95. Tout est navigable au clavier. |
 | **Qualité** | Couverture de tests ≥ 80 % sur la logique métier (tarification, facturation, règles de réservation). CI verte obligatoire pour fusionner. |
 | **Déploiement** | **1 conteneur, 1 volume (`/data`), 0 service externe obligatoire.** Installation avec un seul `docker run` ou `docker compose up -d`. Zéro configuration requise pour démarrer : la clé secrète est générée et stockée dans `/data` au premier lancement, les migrations s'appliquent automatiquement, et un assistant web de premier démarrage crée l'admin et le premier espace. Mise à jour = `pull` + redémarrage. |
-| **Sobriété** | RAM au repos **< 150 Mo** pour l'ensemble, **< 256 Mo** en charge normale. Tourne sur **1 vCPU / 512 Mo**, ou sur un Raspberry Pi 4. Image **< 150 Mo** (compressée < 60 Mo). Démarrage à froid < 5 s. Images amd64 et arm64. |
+| **Sobriété** | RAM au repos **< 150 Mo** pour l'ensemble, **< 256 Mo** en charge normale. Tourne sur **1 vCPU / 512 Mo**, ou sur un Raspberry Pi 4. Image **compressée < 60 Mo** (≈ 180 Mo sur disque : les 150 Mo initialement visés ne sont pas atteignables avec CPython + Django + les bibliothèques natives). Démarrage à froid < 5 s. Images amd64 et arm64. |
 | **Sauvegarde** | Sauvegarder = copier le dossier `/data` (base + fichiers). Restaurer = le remettre en place. |
 | **i18n** | Français et anglais dès le départ, comme l'existant. |
 
@@ -88,7 +88,7 @@ Second fil conducteur : **tout tient dans un processus**. Une plateforme, c'est 
 | Gestion des dépendances | **uv** | Rapide, avec lockfile reproductible. |
 | Serveur applicatif | **Granian** (serveur HTTP en Rust) | Très faible empreinte mémoire, rapide, sert aussi bien du WSGI que de l'ASGI. 1 processus × 4 threads par défaut (budget RAM), réglable. |
 | Fichiers statiques | **WhiteNoise** (compression brotli/gzip, cache immuable) | Servis directement par l'appli : pas besoin de nginx pour fonctionner. |
-| Supervision des processus | Petit entrypoint qui lance Granian et le consumer Huey et relaie les signaux (`tini` en PID 1) | Un seul conteneur, pas de s6 ni de supervisord. |
+| Supervision des processus | `tini` en PID 1, Granian, et le consommateur Huey **dans le processus web** (threads) : Django n'est chargé qu'une fois (~70 Mo économisés). `PFM_TASKS=separate` relance un `run_huey` dédié pour les grosses charges de tâches. | Un seul conteneur, pas de s6 ni de supervisord. |
 
 ### Frontend
 
@@ -350,6 +350,7 @@ Options : `docker compose --profile tls up -d` ajoute Caddy (HTTPS automatique),
 | `PFM_SECRET_KEY` | générée dans `/data/secret_key` | Clé Django |
 | `DATABASE_URL` | `sqlite:////data/db.sqlite3` | Mettre `postgres://...` pour PostgreSQL |
 | `PFM_WORKERS` | `1` | Nombre de processus Granian (~55 Mo chacun) |
+| `PFM_TASKS` | `embedded` | `embedded` : tâches Huey dans le processus web ; `separate` : processus `run_huey` dédié |
 | `PFM_THREADS` | `4` | Threads WSGI par processus |
 | `PFM_BEHIND_PROXY` | `false` | Active `SECURE_PROXY_SSL_HEADER` / `X-Forwarded-*` |
 | `EMAIL_URL` | vide (réglable dans l'UI) | `smtp+tls://user:pass@host:587` |
@@ -388,11 +389,16 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 ## 12. Migration depuis l'ancien Platform-Manager
 
-- La commande `python manage.py import_legacy --mysql-url=... --space=<id|all>` lit directement la base MySQL legacy (en lecture seule) et peuple la base PFM-NG. Elle est accessible aussi via `docker exec pfm pfm import-legacy`. Le pilote MySQL n'est installé que dans une variante d'image `:legacy-import`, pour ne pas alourdir l'image principale.
+- La commande `python manage.py import_legacy --source mysql://user:pass@hôte/base --space <id[,id]|all> [--dry-run]` lit directement la base MySQL legacy (en lecture seule) et peuple la base PFM-NG. Elle est accessible aussi via `docker exec pfm pfm import-legacy …`. `--dry-run` exécute tout puis annule, pour lire le rapport sans rien écrire. Le pilote MySQL (PyMySQL) n'est installé que dans une variante d'image, construite avec `--build-arg PFM_EXTRAS="--extra legacy"` (tag `:legacy-import`), pour ne pas alourdir l'image principale. Une copie SQLite de la base (`--source sqlite:///chemin`) marche aussi.
+- Tables reprises : espaces, utilisateurs, rôles, grilles et règles nuit/week-end, clients et adresses, zones et horaires, catégories, ressources, habilitations, tarifs et forfaits, réservations, factures. Aussi : catalogue de prestations et prix, commandes et leurs lignes, projets et leurs prestations (les lignes déjà facturées par l'ancien système ne sont jamais refacturées). Pas encore : achats, stock, documents, helpdesk.
+- Réservations : celles déjà facturées par l'ancien système sont marquées et ne seront jamais refacturées. Les chevauchements hérités sont importés comme annulés et signalés dans le rapport.
+- Factures : l'ancien système ne stockait que le HT ; elles sont importées figées à TVA 0, avec une ligne d'ajustement quand la somme des lignes diffère du total (remises).
 - Elle est **idempotente et rejouable** : la correspondance des anciens IDs est conservée dans une table `LegacyIdMap`.
 - Ordre d'import : espaces → utilisateurs → clients et grilles → ressources → habilitations → réservations → prestations et commandes → factures (importées **figées**, avec leur numéro d'origine) → le reste.
 - **Mots de passe** : les anciens hachages ne sont pas repris. Les utilisateurs reçoivent un lien de réinitialisation, ou passent par LDAP/SSO.
 - Un rapport de migration (comptes par table, anomalies) est produit pour chaque exécution.
+- Sans serveur MySQL sous la main : `python scripts/mysql_dump_to_sqlite.py dump.sql legacy.sqlite3`, puis `--source sqlite:///legacy.sqlite3`.
+- Les ressources supprimées dans l'ancien système sont reprises comme inactives (avec leur historique de réservations) ; celles dont la zone ou la catégorie a disparu sont rangées dans « Archives (import) ». Les noms en double reçoivent le suffixe ` (#id legacy)`.
 - Bascule recommandée : exécution en parallèle sur un environnement de préprod, vérification croisée des totaux facturés par mois, puis bascule.
 
 ---
@@ -412,6 +418,20 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 | **M8 — API** | API REST (django-ninja) avec tokens par utilisateur. |
 
 ---
+
+## État d'avancement (novembre 2026)
+
+| Jalon | État |
+|---|---|
+| M0 Socle | ✅ image mesurée (Alpine) : 59 Mo compressée, démarrage à froid 4,6 s, RAM 82 Mo au repos / 85 Mo en charge, p95 11 ms (1 client) et 71 ms (2 clients) sur 1 vCPU ; + demandes d'adhésion, export/suppression RGPD |
+| M1 Ressources & réservation | ✅ |
+| M2 Clients & tarification | ✅ |
+| M3 Facturation | ✅ (+ devis) |
+| M4 Prestations | ✅ catalogue, commandes, projets (Gantt), stock — achats et origines à faire |
+| M5 Migration legacy | ✅ (voir §12) — validé sur un dump de prod (1 plateforme, 12 k lignes) : totaux facturés identiques au centime, moteur de prix conforme sur 35 factures sur 42 (écarts restants dus aux prix legacy non historisés) |
+| M6 Modules P2 | ✅ devis, catalogue, documents, statistiques, mailer, helpdesk IMAP, SSO OpenID Connect, LDAP (ldap3, sans dépendance système) |
+| M7 Modules P3 | à faire (en attente de l'élagage avec les utilisateurs) |
+| M8 API | ✅ REST v1 (django-ninja) : jetons personnels hachés, espaces, ressources, réservations (création/annulation via les règles métier), factures ; schéma OpenAPI sur `/api/v1/openapi.json` |
 
 ## 14. Licence
 

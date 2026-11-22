@@ -1,0 +1,44 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}#{{ ticket.number }} {{ ticket.subject }}{% endblock title %}
+{% block content %}
+  <c-page-header title="#{{ ticket.number }} {{ ticket.subject }}" subtitle="{{ ticket.requester_email }} · {{ ticket.get_status_display }}">
+    <a href="{% url 'helpdesk:list' current_space.slug %}" class="btn-ghost">{% translate "Back" %}</a>
+  </c-page-header>
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="space-y-4 lg:col-span-2">
+      {% for m in thread %}
+        <article class="card {% if not m.incoming %}border-accent/40{% endif %}">
+          <header class="mb-2 flex justify-between text-sm text-zinc-500">
+            <span>{% if m.incoming %}{{ m.sender }}{% else %}{{ m.author|default:m.sender }}{% endif %}</span>
+            <time datetime="{{ m.created_at|date:'c' }}">{{ m.created_at|date:"SHORT_DATETIME_FORMAT" }}</time>
+          </header>
+          <div class="text-sm whitespace-pre-line">{{ m.body }}</div>
+        </article>
+      {% endfor %}
+      <form method="post" class="card space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reply">
+        <label for="reply-body">{% translate "Reply" %}</label>
+        <textarea id="reply-body" name="body" rows="6" required></textarea>
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="submit" class="btn-primary">{% translate "Send" %}</button>
+          <label class="flex items-center gap-2 text-sm font-normal"><input type="checkbox" name="close"> {% translate "Close the ticket" %}</label>
+        </div>
+      </form>
+    </div>
+    <form method="post" class="card h-fit space-y-3">
+      {% csrf_token %}
+      <label for="ticket-status">{% translate "Status" %}</label>
+      <select id="ticket-status" name="status">
+        {% for value, label in statuses %}<option value="{{ value }}" {% if value == ticket.status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <label for="ticket-assignee">{% translate "Assigned to" %}</label>
+      <select id="ticket-assignee" name="assignee">
+        <option value="">—</option>
+        {% for u in staff %}<option value="{{ u.pk }}" {% if u.pk == ticket.assignee_id %}selected{% endif %}>{{ u }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn-secondary w-full">{% translate "Save" %}</button>
+    </form>
+  </div>
+{% endblock content %}

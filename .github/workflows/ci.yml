@@ -24,6 +24,14 @@ jobs:
       - run: uv run djlint templates apps --lint
       - run: uv run mypy .
       - run: uv run python manage.py makemigrations --check --dry-run
+      - name: Static files build with the production storage (manifest, compression)
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          PFM_DATA_DIR: /tmp/pfm-static
+          PFM_SECRET_KEY: ci-only
+        run: |
+          uv run tailwindcss -i static/src/app.css -o static/dist/app.css --minify
+          uv run python manage.py collectstatic --noinput -v0 --ignore src
 
   test:
     runs-on: ubuntu-latest

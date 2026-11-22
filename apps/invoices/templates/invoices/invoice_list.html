@@ -16,6 +16,7 @@
         {% translate "Drafts" %}
         {% if drafts_count %}<span class="badge bg-accent text-accent-fg">{{ drafts_count }}</span>{% endif %}
       </a>
+      <a href="?status=quotes" class="btn-ghost {% if status == 'quotes' %}bg-zinc-100 dark:bg-zinc-800{% endif %}" {% if status == 'quotes' %}aria-current="page"{% endif %}>{% translate "Quotes" %}</a>
     </nav>
     <form method="get" class="ml-auto flex items-center gap-2">
       <input type="hidden" name="status" value="{{ status }}">
@@ -30,6 +31,18 @@
       <a href="{% url 'invoices:export' current_space.slug 'xlsx' %}?{{ query }}" class="btn-secondary">Excel</a>
     {% endif %}
   </div>
+  {% if status == "quotes" %}
+    <form method="post" action="{% url 'invoices:quote_create' current_space.slug %}" class="card mb-4 flex flex-wrap items-end gap-3">
+      {% csrf_token %}
+      <div class="min-w-64 flex-1">
+        <label for="quote-client">{% translate "New quote for" %}</label>
+        <select id="quote-client" name="client" required>
+          {% for c in clients %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary"><c-icon name="plus" class="size-4" />{% translate "Create the quote" %}</button>
+    </form>
+  {% endif %}
   {% if invoices %}
     <div class="card overflow-x-auto p-0">
       <table class="w-full text-left text-sm">
@@ -48,12 +61,15 @@
               <td class="px-4 py-3 font-medium whitespace-nowrap">
                 <a href="{% url 'invoices:detail' current_space.slug i.public_id %}">{{ i.number|default:_("Draft") }}</a>
                 {% if i.kind == "credit" %}<span class="badge ml-1 bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300">{% translate "Credit note" %}</span>{% endif %}
+                {% if i.kind == "quote" %}<span class="badge ml-1 bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">{% translate "Quote" %}</span>{% endif %}
               </td>
               <td class="px-4 py-3">{{ i.client_name|default:i.client.name }}</td>
               <td class="px-4 py-3 whitespace-nowrap">{{ i.period_start|date:"SHORT_DATE_FORMAT" }} – {{ i.period_end|date:"SHORT_DATE_FORMAT" }}</td>
               <td class="px-4 py-3 text-right whitespace-nowrap">{% if i.status == "issued" %}{{ i.total_incl_tax }} {{ i.currency }}{% else %}—{% endif %}</td>
               <td class="px-4 py-3">
-                {% if i.status == "draft" %}
+                {% if i.kind == "quote" and i.status == "issued" %}
+                  <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{{ i.get_quote_status_display }}</span>
+                {% elif i.status == "draft" %}
                   <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{% translate "Draft" %}</span>
                 {% elif i.is_credited %}
                   <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{% translate "Credited" %}</span>

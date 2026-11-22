@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import smtplib
-from typing import Any
+from typing import Any, cast
 
 from django.conf import settings
 from django.contrib import messages
@@ -12,16 +12,31 @@ from django.core.mail import EmailMessage
 from django.db import connection
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import TemplateView
 
+from apps.accounts.models import User
 from apps.core import services
 from apps.core.email import smtp_backend_from
-from apps.core.forms import AddMemberForm, RoleForm, SetupForm, SMTPTestForm
-from apps.core.models import InstanceSettings, Role, SpaceMembership
+from apps.core.forms import (
+    AddMemberForm,
+    RoleForm,
+    SetupForm,
+    SMTPTestForm,
+    SpaceSettingsForm,
+)
+from apps.core.models import (
+    InstanceSettings,
+    JoinRequest,
+    JoinStatus,
+    Role,
+    Space,
+    SpaceMembership,
+)
 from apps.core.permissions import SpaceViewMixin
 
 logger = logging.getLogger(__name__)
@@ -126,10 +141,37 @@ def setup_test_smtp(request: HttpRequest) -> HttpResponse:
 
 
 def home(request: HttpRequest) -> HttpResponse:
-    spaces = services.spaces_for(request.user)  # type: ignore[arg-type]
-    if len(spaces) == 1 and not request.user.is_superuser:
+    user = cast(User, request.user)
+    spaces = services.spaces_for(user)
+    pending = list(
+        JoinRequest.objects.filter(user=user, status=JoinStatus.PENDING).select_related("space")
+    )
+    if len(spaces) == 1 and not user.is_superuser and not pending and not request.GET.get("all"):
         return redirect("core:space_dashboard", space_slug=spaces[0].slug)
-    return render(request, "core/home.html", {"spaces": spaces})
+    pending_ids = {j.space_id for j in pending}
+    joinable = [s for s in services.joinable_spaces(user) if s.pk not in pending_ids]
+    return render(
+        request,
+        "core/home.html",
+        {
+            "spaces": spaces,
+            "joinable": joinable,
+            "pending": pending,
+            "email_verified": services.has_verified_email(user),
+        },
+    )
+
+
+@require_POST
+def join_space(request: HttpRequest, space_slug: str) -> HttpResponse:
+    space = get_object_or_404(Space, slug=space_slug)
+    try:
+        services.request_join(cast(User, request.user), space, request.POST.get("message", ""))
+    except services.JoinError as exc:
+        messages.error(request, exc.message)
+    else:
+        messages.success(request, _("Request sent. An administrator will review it."))
+    return redirect(f"{reverse('core:home')}?all=1")
 
 
 class SpaceDashboardView(SpaceViewMixin, TemplateView):
@@ -150,9 +192,24 @@ class MemberListView(SpaceViewMixin, TemplateView):
         )
         ctx["form"] = kwargs.get("form") or AddMemberForm()
         ctx["roles"] = Role.choices
+        ctx["join_requests"] = JoinRequest.objects.filter(
+            space=self.space, status=JoinStatus.PENDING
+        ).select_related("user")
         return ctx
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if "join_request" in request.POST:
+            join = get_object_or_404(JoinRequest, space=self.space, pk=request.POST["join_request"])
+            approve = request.POST.get("decision") == "approve"
+            try:
+                services.decide_join(cast(User, request.user), join, approve)
+            except services.JoinError as exc:
+                messages.error(request, exc.message)
+            else:
+                messages.success(
+                    request, _("Request approved.") if approve else _("Request declined.")
+                )
+            return redirect("core:members", space_slug=self.space.slug)
         form = AddMemberForm(request.POST)
         if form.is_valid():
             try:
@@ -185,3 +242,26 @@ class MemberDetailView(SpaceViewMixin, View):
         except services.LastAdminError:
             messages.error(request, _("A space needs at least one administrator."))
         return redirect("core:members", space_slug=self.space.slug)
+
+
+class SpaceSettingsView(SpaceViewMixin, View):
+    permission_required = "core.administer_space"
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        return self._render(SpaceSettingsForm(instance=self.space))
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        form = SpaceSettingsForm(request.POST, instance=self.space)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Saved."))
+            return redirect("core:space_settings", space_slug=self.space.slug)
+        return self._render(form)
+
+    def _render(self, form: SpaceSettingsForm) -> HttpResponse:
+        context = {
+            "form": form,
+            "title": _("Platform settings"),
+            "cancel_url": f"/s/{self.space.slug}/",
+        }
+        return render(self.request, "resources/form.html", context)

@@ -29,6 +29,8 @@ class InvoiceSettings(models.Model):
     space = models.OneToOneField(Space, on_delete=models.CASCADE, related_name="invoice_settings")
     number_prefix = models.CharField(_("invoice prefix"), max_length=10, default="F")
     credit_prefix = models.CharField(_("credit note prefix"), max_length=10, default="A")
+    quote_prefix = models.CharField(_("quote prefix"), max_length=10, default="D")
+    quote_validity_days = models.PositiveSmallIntegerField(_("quote validity (days)"), default=30)
     vat_rate = models.DecimalField(
         _("VAT rate (%)"),
         max_digits=5,
@@ -65,6 +67,17 @@ class InvoiceSettings(models.Model):
 class Kind(models.TextChoices):
     INVOICE = "invoice", _("Invoice")
     CREDIT = "credit", _("Credit note")
+    QUOTE = "quote", _("Quote")
+
+
+# Kinds that are accounting documents (revenue, exports, re-invoicing rules).
+ACCOUNTING_KINDS = (Kind.INVOICE, Kind.CREDIT)
+
+
+class QuoteStatus(models.TextChoices):
+    PENDING = "pending", _("Awaiting answer")
+    ACCEPTED = "accepted", _("Accepted")
+    REFUSED = "refused", _("Refused")
 
 
 class Status(models.TextChoices):
@@ -94,7 +107,7 @@ class ImmutableInvoiceError(Exception):
 
 
 # Fields that may still change once an invoice is issued.
-MUTABLE_AFTER_ISSUE = {"paid_at", "pdf", "updated_at"}
+MUTABLE_AFTER_ISSUE = {"paid_at", "pdf", "updated_at", "quote_status", "converted_to"}
 
 
 def _pdf_path(instance: Invoice, filename: str) -> str:
@@ -125,6 +138,17 @@ class Invoice(SpaceScopedModel):
         verbose_name=_("credited invoice"),
     )
     note = models.TextField(_("note"), blank=True)
+    quote_status = models.CharField(
+        _("quote status"), max_length=10, choices=QuoteStatus.choices, default=QuoteStatus.PENDING
+    )
+    converted_to = models.OneToOneField(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="from_quote",
+        verbose_name=_("invoice created from this quote"),
+    )
 
     # Frozen at issue time.
     issue_date = models.DateField(_("issue date"), null=True, blank=True)
@@ -173,6 +197,10 @@ class Invoice(SpaceScopedModel):
     @property
     def is_issued(self) -> bool:
         return self.status == Status.ISSUED
+
+    @property
+    def is_quote(self) -> bool:
+        return self.kind == Kind.QUOTE
 
     @property
     def is_credited(self) -> bool:

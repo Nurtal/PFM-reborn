@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.mfa",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "axes",
     "csp",
     "django_cotton",
@@ -69,6 +71,13 @@ INSTALLED_APPS = [
     "apps.clients",
     "apps.invoices",
     "apps.services",
+    "apps.statistics",
+    "apps.documents",
+    "apps.catalog",
+    "apps.mailer",
+    "apps.legacy",
+    "apps.helpdesk",
+    "apps.api",
 ]
 
 MIDDLEWARE = [
@@ -85,7 +94,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "apps.core.middleware.SetupRequiredMiddleware",
     # Deny by default: every view needs a login unless marked @login_not_required.
-    "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    "apps.core.middleware.LoginRequiredMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "apps.accounts.middleware.AdminMFARequiredMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
@@ -147,6 +156,7 @@ AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "rules.permissions.ObjectPermissionBackend",
+    "apps.accounts.ldap.LDAPBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
@@ -176,6 +186,15 @@ ACCOUNT_SESSION_REMEMBER = None
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = False
 ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,5/5m/key"}
 ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+# Institutional SSO (OpenID Connect: Renater, Keycloak, Azure AD...). Each provider
+# is a "Social application" configured in the admin (provider: OpenID Connect).
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_PROVIDERS = {"openid_connect": {"OAUTH_PKCE_ENABLED": True}}
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"  # trust the IdP's verified e-mail claim
+# Never link an SSO login to an existing local account just because e-mails match:
+# that would let a misconfigured IdP take over accounts.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_STORE_TOKENS = False
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes", "webauthn"]
 MFA_PASSKEY_LOGIN_ENABLED = True
 MFA_TOTP_ISSUER = "PFM"
@@ -243,7 +262,7 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # non-file fields; files: core.uploads (20 MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 # --- Email --------------------------------------------------------------------------

@@ -1,0 +1,50 @@
+{% extends "layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "API tokens" %}{% endblock title %}
+{% block content %}
+  <c-page-header title="{% translate 'API tokens' %}" subtitle="{% translate 'For scripts and integrations: send it as Authorization: Bearer <token>. It acts with your rights.' %}" />
+  {% if new_key %}
+    <div class="card mb-6 border-amber-300 dark:border-amber-800" role="alert">
+      <p class="font-semibold">{% translate "Copy your token now: it will not be shown again." %}</p>
+      <label for="new-key" class="sr-only">{% translate "Token" %}</label>
+      <input id="new-key" type="text" readonly value="{{ new_key }}" class="mt-2 font-mono text-xs" data-select-on-focus>
+    </div>
+  {% endif %}
+  <div class="grid max-w-4xl gap-6 md:grid-cols-3">
+    <div class="card overflow-x-auto p-0 md:col-span-2">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-zinc-200 text-xs text-zinc-500 uppercase dark:border-zinc-800">
+          <tr><th scope="col" class="px-4 py-3">{% translate "Name" %}</th><th scope="col" class="px-4 py-3">{% translate "Last used" %}</th><th scope="col" class="px-4 py-3">{% translate "Expires" %}</th><th scope="col" class="px-2 py-3"><span class="sr-only">{% translate "Actions" %}</span></th></tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {% for t in tokens %}
+            <tr>
+              <td class="px-4 py-3">{{ t.name }} <span class="font-mono text-xs text-zinc-500">{{ t.hint }}…</span></td>
+              <td class="px-4 py-3">{{ t.last_used_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
+              <td class="px-4 py-3">{{ t.expires_at|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+              <td class="px-2 py-3 text-right">
+                <form method="post">{% csrf_token %}<button type="submit" name="revoke" value="{{ t.pk }}" class="btn-ghost px-2 text-red-600" data-confirm="{% translate 'Revoke this token?' %}">{% translate "Revoke" %}</button></form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="px-4 py-8 text-center text-zinc-500">{% translate "No token." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" class="card space-y-3">
+      {% csrf_token %}
+      <h2 class="font-semibold">{% translate "New token" %}</h2>
+      <label for="token-name">{% translate "Name" %}</label>
+      <input id="token-name" type="text" name="name" maxlength="100" required>
+      <label for="token-days">{% translate "Valid for" %}</label>
+      <select id="token-days" name="days">
+        <option value="30">{% translate "30 days" %}</option>
+        <option value="90" selected>{% translate "90 days" %}</option>
+        <option value="365">{% translate "1 year" %}</option>
+        <option value="0">{% translate "No expiry" %}</option>
+      </select>
+      <button type="submit" class="btn-primary w-full">{% translate "Create" %}</button>
+    </form>
+  </div>
+{% endblock content %}

@@ -12,3 +12,8 @@ static/dist/
 htmlcov/
 .coverage
 locale/**/*.mo
+
+# Production dumps: personal data, never commit
+*.zip
+*.sql
+*.sql.gz

@@ -120,6 +120,9 @@ class OrderLine(models.Model):
     )
     performed_on = models.DateField(_("performed on"), default=timezone.localdate)
     comment = models.CharField(_("comment"), max_length=200, blank=True)
+    billed_externally = models.BooleanField(
+        default=False, help_text="Already invoiced outside PFM-NG (e.g. by the legacy system)."
+    )
 
     history = HistoricalRecords()
 
