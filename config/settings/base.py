@@ -196,6 +196,9 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = "none"  # trust the IdP's verified e-mail cla
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
 SOCIALACCOUNT_STORE_TOKENS = False
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes", "webauthn"]
+# Second factor available to everyone; PFM_REQUIRE_ADMIN_MFA=true makes it
+# mandatory for administrators (enforced by AdminMFARequiredMiddleware).
+PFM_REQUIRE_ADMIN_MFA = env.bool("PFM_REQUIRE_ADMIN_MFA", default=False)
 MFA_PASSKEY_LOGIN_ENABLED = True
 MFA_TOTP_ISSUER = "PFM"
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = False

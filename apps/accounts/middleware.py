@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -19,7 +20,7 @@ ALLOWED_PREFIXES = ("/accounts/", "/static/", "/healthz", "/i18n/", "/setup/", "
 
 
 class AdminMFARequiredMiddleware:
-    """Force privileged users to enrol a second factor before using the app."""
+    """Force privileged users to enrol a second factor (PFM_REQUIRE_ADMIN_MFA)."""
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
         self.get_response = get_response
@@ -27,7 +28,8 @@ class AdminMFARequiredMiddleware:
     def __call__(self, request: HttpRequest) -> HttpResponse:
         user = request.user
         if (
-            user.is_authenticated
+            settings.PFM_REQUIRE_ADMIN_MFA
+            and user.is_authenticated
             and request.session.get(SESSION_KEY, 0) < time.time()
             and not request.path.startswith(ALLOWED_PREFIXES)
         ):

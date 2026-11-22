@@ -1,5 +1,6 @@
 import pytest
 from django.conf import settings
+from django.test import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -45,7 +46,7 @@ def test_setup_creates_admin_space_and_membership(client, django_capture_on_comm
         response = client.post(reverse("core:setup"), {**VALID, "token": token})
 
     assert response.status_code == 302
-    assert response["Location"] == reverse("mfa_activate_totp")
+    assert response["Location"] == reverse("core:home")  # 2FA optional by default
     admin = User.objects.get(username="admin")
     assert admin.is_superuser
     assert admin.check_password(VALID["password1"])
@@ -96,3 +97,9 @@ def test_setup_page_in_french(client):
 
 def _french_compiled():
     return (settings.BASE_DIR / "locale/fr/LC_MESSAGES/django.mo").exists()
+
+
+@override_settings(PFM_REQUIRE_ADMIN_MFA=True)
+def test_setup_sends_admin_to_2fa_when_mandatory(client):
+    response = client.post(reverse("core:setup"), {**VALID, "token": services.setup_token()})
+    assert response["Location"] == reverse("mfa_activate_totp")

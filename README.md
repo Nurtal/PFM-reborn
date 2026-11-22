@@ -248,7 +248,7 @@ Priorité : **P1** = usage principal (facturation et réservation d'équipements
 Ces règles ne sont pas négociables.
 
 1. **Pas de SQL brut.** On passe par l'ORM. Si `raw()` ou `cursor.execute()` est vraiment nécessaire, la requête est paramétrée et un commentaire justifie le choix en revue.
-2. **Authentification** : hachage Argon2 (`argon2-cffi`, premier de `PASSWORD_HASHERS`). MFA disponible pour tous et obligatoire pour les admins. django-axes bloque après N échecs. Politique de mot de passe via les validateurs Django + vérification Have I Been Pwned optionnelle.
+2. **Authentification** : hachage Argon2 (`argon2-cffi`, premier de `PASSWORD_HASHERS`). MFA (TOTP, WebAuthn) disponible pour tous ; obligatoire pour les admins avec `PFM_REQUIRE_ADMIN_MFA=true` (optionnelle par défaut pour l'instant). django-axes bloque après N échecs. Politique de mot de passe via les validateurs Django + vérification Have I Been Pwned optionnelle.
 3. **Sessions et cookies** : `Secure`, `HttpOnly`, `SameSite=Lax`, expiration raisonnable, rotation à la connexion.
 4. **CSRF** actif partout, y compris pour les requêtes HTMX (token injecté via `hx-headers`).
 5. **Autorisation** : chaque vue déclare sa permission, et tout est refusé par défaut. Des tests vérifient l'isolation entre espaces : un utilisateur de l'espace A ne voit **rien** de l'espace B, même en devinant des IDs (IDOR). Les URLs publiques utilisent des UUID ou des identifiants courts non séquentiels.
@@ -362,6 +362,7 @@ docker run -d --name pfm --restart unless-stopped \
 | `PFM_TASKS` | `embedded` | `embedded` : tâches Huey dans le processus web ; `separate` : processus `run_huey` dédié |
 | `PFM_THREADS` | `4` | Threads WSGI par processus |
 | `PFM_BEHIND_PROXY` | `false` | Active `SECURE_PROXY_SSL_HEADER` / `X-Forwarded-*` |
+| `PFM_REQUIRE_ADMIN_MFA` | `false` | `true` : double authentification (TOTP/WebAuthn) obligatoire pour les administrateurs |
 | `EMAIL_URL` | vide (réglable dans l'UI) | `smtp+tls://user:pass@host:587` |
 | `SENTRY_DSN` | vide | Optionnel |
 

@@ -1,5 +1,6 @@
 import pytest
 from allauth.mfa.models import Authenticator
+from django.test import override_settings
 from django.urls import reverse
 
 from apps.core.models import Role
@@ -8,6 +9,7 @@ from apps.core.tests.factories import MembershipFactory, UserFactory
 pytestmark = pytest.mark.django_db
 
 
+@override_settings(PFM_REQUIRE_ADMIN_MFA=True)
 def test_superuser_without_mfa_is_forced_to_enrol(client, setup_done):
     root = UserFactory(is_superuser=True, is_staff=True)
     client.force_login(root)
@@ -16,6 +18,7 @@ def test_superuser_without_mfa_is_forced_to_enrol(client, setup_done):
     assert response["Location"] == reverse("mfa_activate_totp")
 
 
+@override_settings(PFM_REQUIRE_ADMIN_MFA=True)
 def test_space_admin_without_mfa_is_forced_to_enrol(client, setup_done):
     m = MembershipFactory(role=Role.ADMIN)
     client.force_login(m.user)
@@ -51,6 +54,7 @@ def test_login_page_renders(client, setup_done):
     assert b"btn-primary" in response.content
 
 
+@override_settings(PFM_REQUIRE_ADMIN_MFA=True)
 def test_promotion_to_admin_is_caught_after_recheck_window(client, setup_done, monkeypatch):
     import time
 
@@ -68,3 +72,13 @@ def test_promotion_to_admin_is_caught_after_recheck_window(client, setup_done, m
     now = time.time() + middleware.RECHECK_SECONDS + 1
     monkeypatch.setattr(middleware.time, "time", lambda: now)
     assert client.get(url)["Location"] == reverse("mfa_activate_totp")
+
+
+def test_admin_mfa_is_optional_by_default(client, setup_done):
+    root = UserFactory(is_superuser=True, is_staff=True)
+    client.force_login(root)
+    response = client.get(reverse("core:home"))
+    assert response.get("Location") != reverse("mfa_activate_totp")
+    m = MembershipFactory(role=Role.ADMIN)
+    client.force_login(m.user)
+    assert client.get(reverse("core:space_dashboard", args=[m.space.slug])).status_code == 200
