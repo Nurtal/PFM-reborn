@@ -4,7 +4,7 @@
 > Objectif : **mêmes fonctionnalités, stack moderne, rapide, jolie et sécurisée**, et surtout **ultra simple à déployer et très sobre** : un seul conteneur, un seul volume, aucune dépendance externe obligatoire.
 >
 > ```bash
-> docker run -d -p 8000:8000 -v pfm-data:/data ghcr.io/<org>/pfm-ng
+> curl -fsSL https://raw.githubusercontent.com/Nurtal/PFM-reborn/main/install.sh | sh
 > ```
 
 *(Le nom « PFM-NG » est provisoire.)*
@@ -312,33 +312,42 @@ Ces règles ne sont pas négociables.
 
 ## 10. Démarrage rapide
 
-### Installer (production) en 30 secondes
+### Installer (production) en une commande
+
+Sur n'importe quelle machine Linux (Docker est installé automatiquement s'il manque) :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Nurtal/PFM-reborn/main/install.sh | sh
+```
+
+Le script ne pose aucune question. Il :
+- détecte l'adresse IP de la machine ;
+- écrit `compose.yaml` et `.env` dans `/opt/pfm` (ou `~/pfm` sans root) ;
+- télécharge l'image et démarre l'application ;
+- attend qu'elle soit prête, puis affiche **l'URL et le jeton d'installation**.
+
+Avec un nom de domaine public, HTTPS est automatique (Caddy, Let's Encrypt, ports 80/443) :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Nurtal/PFM-reborn/main/install.sh | PFM_DOMAIN=pfm.mon-labo.fr sh
+```
+
+Autres options (variables d'environnement) : `PFM_URL` (adresse saisie par les utilisateurs, si la détection se trompe), `PFM_PORT` (8000 par défaut), `PFM_DIR`, `PFM_VERSION` (tag d'image). **Relancer le script met à jour l'installation**, en gardant les données et les réglages de `.env`. Le dossier d'installation contient un raccourci `./pfm` : `./pfm update`, `./pfm logs`, `./pfm backup`, `./pfm createadmin`…
+
+Ouvrir l'URL : l'**assistant de premier démarrage** demande d'abord le **jeton d'installation** (affiché par le script, ou par `docker logs pfm`). Ce jeton empêche quiconque d'autre de s'approprier une instance fraîche. L'assistant demande ensuite le compte admin, le nom de la première plateforme et le serveur SMTP (avec un bouton de test). C'est tout.
+
+Sans le script, un simple `docker run` suffit :
 
 ```bash
 docker run -d --name pfm --restart unless-stopped \
   -p 8000:8000 -v pfm-data:/data \
-  -e PFM_URL=https://pfm.mon-labo.fr \
-  ghcr.io/<org>/pfm-ng:latest
+  -e PFM_URL=http://<ip-ou-nom-de-la-machine>:8000 \
+  ghcr.io/nurtal/pfm-ng:latest
 ```
 
-Ouvrir l'URL : l'**assistant de premier démarrage** demande d'abord le **jeton d'installation** affiché par `docker logs pfm` (il empêche quiconque d'autre de s'approprier une instance fraîche), puis le compte admin, le nom de la première plateforme et le serveur SMTP (avec un bouton de test). C'est tout.
+`PFM_URL` doit être l'adresse que tapent les utilisateurs : les autres noms d'hôte sont refusés (protection contre l'usurpation d'en-tête Host). Le `compose.yaml` du dépôt propose aussi les profils `tls` (Caddy) et `postgres`.
 
-Ou bien avec `compose.yaml` (un seul service) :
-
-```yaml
-services:
-  pfm:
-    image: ghcr.io/<org>/pfm-ng:latest
-    restart: unless-stopped
-    ports: ["8000:8000"]
-    volumes: ["pfm-data:/data"]
-    environment:
-      PFM_URL: https://pfm.mon-labo.fr
-volumes:
-  pfm-data:
-```
-
-Options : `docker compose --profile tls up -d` ajoute Caddy (HTTPS automatique), `--profile postgres` ajoute un PostgreSQL pour les grosses instances.
+> **Docker installé via snap** (proposé par l'installeur d'Ubuntu Server) : cette version de Docker ne peut démarrer aucun conteneur avec l'option de durcissement `no-new-privileges`. L'installeur le détecte et la désactive automatiquement. Avec compose, mettre `PFM_NO_NEW_PRIVILEGES=false`.
 
 ### Configuration
 
@@ -377,7 +386,7 @@ Pour les mails en dev : `docker compose -f compose.dev.yaml up mailpit`, puis ht
 
 ## 11. Déploiement
 
-- **Mise à jour** : `docker pull ghcr.io/<org>/pfm-ng:latest && docker restart pfm` (ou `docker compose pull && docker compose up -d`). Les migrations s'appliquent au démarrage. Une **sauvegarde automatique de la base** est faite dans `/data/backups/` avant chaque migration.
+- **Mise à jour** : relancer le script d'installation, ou `./pfm update` dans le dossier d'installation (ou `docker compose pull && docker compose up -d`). Les migrations s'appliquent au démarrage. Une **sauvegarde automatique de la base** est faite dans `/data/backups/` avant chaque migration.
 - **Sauvegardes** : une tâche Huey planifiée fait chaque nuit un snapshot cohérent (`sqlite3 .backup`) dans `/data/backups/`, avec rotation sur 14 jours. Pour une copie externe, il suffit de synchroniser `/data/backups/` (rsync, restic, sauvegarde du serveur). Option : **Litestream** pour une réplication continue vers S3/MinIO. **Tester la restauration** (`pfm restore <fichier>`).
 - **TLS** : derrière le reverse proxy de l'établissement (`PFM_BEHIND_PROXY=true`), ou avec le profil `tls` (Caddy). Un exemple nginx est dans `docker/nginx.example.conf`.
 - **Healthcheck** intégré à l'image (`/healthz`). `docker ps` montre directement l'état.

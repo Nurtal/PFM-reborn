@@ -5,7 +5,7 @@
 #     built with --build-arg PFM_EXTRAS="--extra postgres")
 services:
   pfm:
-    image: ghcr.io/OWNER/pfm-ng:latest
+    image: ghcr.io/nurtal/pfm-ng:latest
     build: { context: ., dockerfile: docker/Dockerfile }
     restart: unless-stopped
     ports: ["8000:8000"]
@@ -17,7 +17,8 @@ services:
     read_only: true
     tmpfs: ["/tmp"]
     cap_drop: [ALL]
-    security_opt: ["no-new-privileges:true"]
+    # Snap-packaged Docker cannot start containers with it: PFM_NO_NEW_PRIVILEGES=false
+    security_opt: ["no-new-privileges:${PFM_NO_NEW_PRIVILEGES:-true}"]
     mem_limit: 384m
     cpus: 1
 
